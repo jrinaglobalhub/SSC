@@ -1,0 +1,57 @@
+{
+  "expo": {
+    "name": "SmartShopper",
+    "slug": "smartshopper-consumer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "scheme": "smartshopper",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "online.jrina.smartshopper.consumer",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "SmartShopper needs your location to find nearby stores and exclusive local deals within your chosen radius."
+      }
+    },
+    "android": {
+      "package": "online.jrina.smartshopper.consumer",
+      "googleServicesFile": "./google-services.json",
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "backgroundColor": "#1E293B",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "POST_NOTIFICATIONS"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#EA580C"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
+  }
+}

@@ -1,0 +1,195 @@
+================================================================================
+                    TERMS AND CONDITIONS OF USE
+           SmartShopper Consumer (SSC) & SmartShopper Merchant (SSM)
+                        Operated by JRINA Private Limited
+================================================================================
+Last Updated: October 24, 2026
+Effective Date: October 24, 2026
+
+Official Domain: https://jrina.online
+Consumer App ID: online.jrina.smartshopper.consumer
+Merchant App ID: online.jrina.smartshopper.merchant
+
+--------------------------------------------------------------------------------
+1. ACCEPTANCE OF TERMS
+--------------------------------------------------------------------------------
+These Terms and Conditions of Use ("Terms") constitute a legally binding agreement
+between you ("User", "you", or "your"), whether personally or on behalf of an
+entity, and JRINA Private Limited ("Company", "we", "us", or "our"), concerning
+your access to and use of:
+  a) SmartShopper Consumer ("SSC") mobile application;
+  b) SmartShopper Merchant ("SSM") mobile application & POS workstation;
+  c) The official website https://jrina.online and related digital services.
+
+BY DOWNLOADING, INSTALLING, REGISTERING WITH, OR USING THE SSC OR SSM APPLICATIONS,
+YOU EXPRESSLY AGREE TO BE BOUND BY THESE TERMS AND OUR PRIVACY POLICY. IF YOU DO
+NOT AGREE TO ALL OF THESE TERMS, YOU MUST IMMEDIATELY DISCONTINUE USE AND UNINSTALL
+THE APPLICATIONS.
+
+--------------------------------------------------------------------------------
+2. ELIGIBILITY & ACCOUNT REGISTRATION
+--------------------------------------------------------------------------------
+2.1. Age Requirement: You must be at least eighteen (18) years of age and
+legally capable of entering into binding contracts under the Indian Contract Act,
+1872.
+
+2.2. Account Security: You are solely responsible for maintaining the confidentiality
+of your account credentials (OTP, passwords, pin codes). You accept responsibility
+for all activities that occur under your account. You agree to notify JRINA Private
+Limited immediately of any unauthorized use of your account.
+
+2.3. Accurate Information: You agree to provide true, accurate, current, and complete
+information during registration and to promptly update such information whenever
+changes occur.
+
+--------------------------------------------------------------------------------
+3. PROVISIONS SPECIFIC TO MERCHANTS (SSM APP)
+--------------------------------------------------------------------------------
+3.1. Business Verification: Merchants registering on SSM warrant that they operate
+a bona fide retail business and possess all necessary trade licenses, tax
+registrations (including GST where applicable), and legal permissions to sell
+their products or services.
+
+3.2. Product Pricing & Stock Accuracy: Merchants are exclusively responsible for
+the accuracy of product descriptions, listed prices, stock availability toggles,
+and discount deals broadcasted to shoppers.
+
+3.3. Deal & Voucher Fulfillment: When a merchant broadcasts a deal or generates
+vouchers via the SSM radar engine, the merchant is legally obligated to honor
+the discount, deal terms, and valid voucher redemptions presented by consumers
+during the valid promotion period.
+
+3.4. Invoicing & Taxation: Merchants using SSM Mobile POS Billing are solely
+responsible for the accurate collection and remittance of statutory taxes (such as
+GST) to the appropriate government authorities. The app provides calculation
+tools (e.g., standard GST invoice calculations), but the merchant remains the legal
+taxpayer.
+
+3.5. Prohibited Items: Merchants shall not list, advertise, or sell any illegal,
+counterfeit, hazardous, prescription-only pharmaceuticals (without requisite
+permits), obscene, or legally banned products under Indian law.
+
+--------------------------------------------------------------------------------
+4. PROVISIONS SPECIFIC TO CONSUMERS (SSC APP)
+--------------------------------------------------------------------------------
+4.1. Deal Discovery: Deals and discounts displayed in the SSC app are provided by
+independent merchant partners. While JRINA Private Limited endeavors to maintain
+an active and reliable merchant network, merchants are solely responsible for the
+quality, safety, and fulfillment of the goods or services purchased.
+
+4.2. Fair Voucher Redemption: Consumers agree to use vouchers and coupons in
+accordance with their stated terms (one voucher per bill, valid date window, etc.).
+Attempting to forge, manipulate, or repeatedly claim single-use QR codes constitutes
+fraud and will result in immediate account termination.
+
+4.3. Reviews & Communications: In-app chat inquiries and reviews submitted by
+consumers must be truthful, courteous, and free of defamatory, abusive, obscene,
+or unlawful content.
+
+--------------------------------------------------------------------------------
+5. GEOFENCE RADAR & LOCATION-BASED SERVICES
+--------------------------------------------------------------------------------
+5.1. Accuracy Disclaimer: Deal discovery and radar radius tools rely on GPS,
+Wi-Fi, and cellular network signals. JRINA Private Limited does not guarantee
+continuous, 100% pinpoint location accuracy due to hardware and environmental
+factors beyond our control.
+
+5.2. Battery & Data Usage: Continued use of GPS location services in the foreground
+or background may impact device battery life and mobile network data allowances.
+
+--------------------------------------------------------------------------------
+6. PAYMENTS & FINANCIAL TRANSACTIONS
+--------------------------------------------------------------------------------
+6.1. In-Store Transactions: Direct counter payments made at retail stores (cash,
+UPI, or card) are transactions solely between the customer and the merchant.
+
+6.2. In-App Payments: Any digital subscriptions or online payments processed
+through the app are handled by third-party payment gateways (e.g., Cashfree
+Payments). JRINA Private Limited does not store or process sensitive banking card
+credentials.
+
+6.3. Refunds: Refund policies for retail purchases are determined by the individual
+merchant's store policy, unless an explicit fault in the SmartShopper billing
+engine is demonstrated.
+
+--------------------------------------------------------------------------------
+7. INTELLECTUAL PROPERTY RIGHTS
+--------------------------------------------------------------------------------
+7.1. Ownership: The SmartShopper software, UI designs, codebases, logos,
+trademarks ("SmartShopper", "SSM", "SSC", "JRINA"), radar engine algorithms, and
+branding are the exclusive intellectual property of JRINA Private Limited.
+
+7.2. Limited License: Users are granted a limited, non-exclusive, non-transferable,
+revocable license to download and run the mobile application on compatible Android
+devices strictly for personal (SSC) or legitimate business (SSM) use.
+
+7.3. Restrictions: You agree not to decompile, reverse-engineer, modify, reproduce,
+duplicate, distribute, sell, or exploit any portion of the apps without prior
+written authorization from JRINA Private Limited.
+
+--------------------------------------------------------------------------------
+8. USER CONDUCT & PROHIBITED ACTIVITIES
+--------------------------------------------------------------------------------
+You agree not to:
+  a) Violate any national, state, or local laws or regulations.
+  b) Interfere with, breach, or disable the security features of the apps or
+     Supabase backend infrastructure.
+  c) Transmit any malware, spyware, corrupted files, or unauthorized scripts.
+  d) Harass, threaten, defame, or abuse merchants, shoppers, or support staff.
+  e) Use automated tools, scrapers, or bots to extract platform data or deals.
+
+--------------------------------------------------------------------------------
+9. DISCLAIMER OF WARRANTIES
+--------------------------------------------------------------------------------
+THE SMARTSHOPPER APPS (SSC AND SSM) AND ALL ASSOCIATED SERVICES ARE PROVIDED ON AN
+"AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
+
+WE DO NOT WARRANT THAT THE SERVICE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, OR
+FREE FROM VIRUSES OR DEFECTS.
+
+--------------------------------------------------------------------------------
+10. LIMITATION OF LIABILITY
+--------------------------------------------------------------------------------
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL JRINA PRIVATE
+LIMITED, ITS DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT,
+CONSEQUENTIAL, INCIDENTAL, SPECIAL, OR PUNITIVE DAMAGES (INCLUDING LOSS OF PROFITS,
+DATA, OR BUSINESS REPUTATION) ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF OR
+INABILITY TO USE THE SERVICES, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+--------------------------------------------------------------------------------
+11. INDEMNIFICATION
+--------------------------------------------------------------------------------
+You agree to defend, indemnify, and hold harmless JRINA Private Limited and its
+officers, directors, and employees from and against any claims, liabilities,
+damages, losses, and expenses (including reasonable legal fees) arising out of or
+in any way connected with your breach of these Terms or misuse of the applications.
+
+--------------------------------------------------------------------------------
+12. TERMINATION
+--------------------------------------------------------------------------------
+JRINA Private Limited reserves the right to suspend or terminate your account or
+access to the applications at its sole discretion, without prior notice, for conduct
+that violates these Terms, harms other users or merchants, or harms the business
+interests of the Company.
+
+--------------------------------------------------------------------------------
+13. GOVERNING LAW & JURISDICTION
+--------------------------------------------------------------------------------
+These Terms shall be governed by, construed, and enforced in accordance with the
+laws of the Republic of India. Any disputes arising out of or related to these
+Terms or the use of SSC/SSM shall be subject to the exclusive jurisdiction of the
+competent courts located in Kerala, India.
+
+--------------------------------------------------------------------------------
+14. CONTACT US
+--------------------------------------------------------------------------------
+If you have any questions, grievances, or feedback concerning these Terms and
+Conditions, please reach out to:
+
+  JRINA Private Limited
+  Official Website: https://jrina.online
+  Support Email: support@jrina.online
+  Grievance Email: grievance@jrina.online
+================================================================================

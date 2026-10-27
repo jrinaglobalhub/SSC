@@ -1,0 +1,155 @@
+================================================================================
+SMARTSHOPPER CONSUMER (SSC) മൊബൈൽ ആപ്പ് - ഡെവലപ്പർ & സിസ്റ്റം വിവരങ്ങൾ
+================================================================================
+തയ്യാറാക്കിയത്: Antigravity AI (Pair Programming with Muhammad J R)
+തീയതി: 22 ഒക്ടോബർ 2026
+ആപ്ലിക്കേഷൻ പേര്: SmartShopper Consumer (SSC)
+കമ്പനി: JRINA Private Limited (Operating SmartShopper)
+വെബ്സൈറ്റ്/പോർട്ടൽ: https://ssc.jrina.online
+വർഷൻ: 1.0.0 (Expo SDK 57 / React Native 0.86)
+ഡോക്യുമെന്റ് തരം: Developer Architecture & Technical Specification (Read-Only)
+
+--------------------------------------------------------------------------------
+1. പ്രോജക്റ്റിന്റെ പ്രധാന വിവരണം (PROJECT OVERVIEW)
+--------------------------------------------------------------------------------
+SmartShopper Consumer (SSC) എന്നത് കേരളത്തിലെ ഉപഭോക്താക്കൾക്കായി പ്രാദേശിക കടകളിലെ 
+തത്സമയ ഓഫറുകളും (Hyperlocal Live Offers), ഡിസ്കൗണ്ടുകളും, ഡിജിറ്റൽ ഇൻ-സ്റ്റോർ 
+വൗച്ചറുകളും, ഇ-ബില്ലുകളും നേരിട്ട് ലഭ്യമാക്കുന്ന ഒരു അത്യാധുനിക മൊബൈൽ ആപ്ലിക്കേഷനാണ്.
+
+പ്രധാന സവിശേഷതകൾ:
+- GPS അധിഷ്ഠിത റഡാർ ജിയോഫെൻസിംഗ് (500m മുതൽ കേരളം മുഴുവൻ).
+- തത്സമയ ഡീൽ ഡിസ്കവറിയും മാപ്പ് നാവിഗേഷനും (Interactive Map View).
+- ഇൻ-ആപ്പ് മലയാളം/മംഗ്ലീഷ് AI ഷോപ്പിംഗ് അസിസ്റ്റന്റ് (Google Gemini AI).
+- ക്ലെയിം ചെയ്യാവുന്ന ഡിജിറ്റൽ വൗച്ചറുകളും QR കോഡ് റിഡംപ്ഷനും.
+- കസ്റ്റമർ ഡിജിറ്റൽ ലോയൽറ്റി കാർഡും അക്കൗണ്ട് പ്രൊഫൈലും.
+- ഡെലിവറി അഡ്രസ് മാനേജ്‌മെന്റും കാർട്ട്/ഓർഡറിംഗ് സംവിധാനവും.
+
+--------------------------------------------------------------------------------
+2. സാങ്കേതിക വിവരങ്ങൾ (TECH STACK & DEPENDENCIES)
+--------------------------------------------------------------------------------
+- Framework: React Native (v0.86.3) with Expo (SDK ~57.0.30)
+- Programming Language: TypeScript (v6.0.3)
+- Navigation: React Navigation v7 (Bottom Tabs & Native Stack)
+  * @react-navigation/native (v7.0.14)
+  * @react-navigation/bottom-tabs (v7.2.0)
+  * @react-navigation/native-stack (v7.2.0)
+- Backend & Database: Supabase (PostgreSQL with Realtime WebSockets)
+  * @supabase/supabase-js (v2.45.4)
+- Local Cache & Storage: @react-native-async-storage/async-storage (v2.2.0)
+- AI Engine: Google Gemini 1.5 Flash (Generative Language API)
+- Icons: Lucide React Native (lucide-react-native v1.59.0)
+- QR Code Generation: react-native-qrcode-svg (v6.3.12) & react-native-svg
+- Location & Geofencing: expo-location (~57.0.14)
+- Web Views: react-native-webview (13.16.1)
+- Android Build Engine: Gradle 9.3.1 / Android SDK 35 (Android 15 & 16 Ready)
+
+--------------------------------------------------------------------------------
+3. ബാക്കെൻഡ് കോൺഫിഗറേഷനുകൾ (BACKEND & API KEYS)
+--------------------------------------------------------------------------------
+[കുറിപ്പ്: ഈ വിവരങ്ങൾ ക്ലയന്റ്-സൈഡ് ആക്സസിനായി കോൺഫിഗർ ചെയ്തവയാണ്]
+
+A. Supabase പ്രോജക്റ്റ് വിവരങ്ങൾ:
+   - Supabase URL: https://tpcrwtxtqvvdghtfckea.supabase.co
+   - Public Anon Key: sb_publishable_duE4gQ7TYTYpO7sRjeKcXQ_1mf2F-d3
+   - ഡാറ്റാബേസ് ടേബിളുകൾ (Tables):
+     * offers (ലൈവ് ഓഫറുകൾ, കിഴിവുകൾ, കാലാവധി)
+     * stores (പാർട്ണർ കടകളുടെ വിവരങ്ങൾ, ലൊക്കേഷൻ കോർഡിനേറ്റ്സ്, ഫോൺ)
+     * vouchers / claims (ഉപഭോക്താക്കൾ ക്ലെയിം ചെയ്ത വൗച്ചറുകൾ)
+     * customer_profiles / accounts (ഉപഭോക്തൃ വിവരങ്ങൾ, അഡ്രസുകൾ)
+     * bills / receipts (ഡിജിറ്റൽ ഇ-ബില്ലുകൾ)
+     * catalog_items (കടകളിലെ ഉൽപ്പന്നങ്ങളുടെ കാറ്റലോഗ്)
+
+B. Gemini AI ഇന്റഗ്രേഷൻ:
+   - Model: gemini-1.5-flash
+   - എപിഐ ഫങ്ക്ഷൻ: src/api/gemini.ts (askShopperAI)
+   - പ്രാദേശിക ഓഫറുകളുടെ ലിസ്റ്റ് AI-ക്ക് കോൺടെക്സ്റ്റായി നൽകി, ഉപയോക്താവ് മലയാളത്തിലോ 
+     മംഗ്ലീഷിലോ ചോദിക്കുന്ന ചോദ്യങ്ങൾക്ക് (ഉദാ: "അടുത്തുള്ള നല്ല ഹോട്ടൽ എവിടെ?") 
+     തത്സമയം മറുപടി നൽകുന്നു.
+
+--------------------------------------------------------------------------------
+4. ഫോൾഡർ ഘടനയും പ്രധാന ഫയലുകളും (PROJECT STRUCTURE)
+--------------------------------------------------------------------------------
+c:\Users\Muhammad J R\Documents\JRINA\SSC App\
+│
+├── App.tsx                     - പ്രധാന റൂട്ട് ഫയൽ (Providers, Splash, Navigation)
+├── app.json                    - Expo & Android build കോൺഫിഗറേഷൻ
+├── package.json                - പ്രോജക്റ്റ് ലൈബ്രറികളും ഡിപൻഡൻസികളും
+│
+├── src/
+│   ├── api/
+│   │   ├── supabase.ts         - Supabase client, Realtime listeners, Auth, Data queries
+│   │   └── gemini.ts           - Google Gemini AI integration logic
+│   │
+│   ├── context/
+│   │   └── AppContext.tsx      - കേന്ദ്രീകൃത സ്റ്റേറ്റ് (Location, Radius, User, Cart, Deals)
+│   │
+│   ├── navigation/
+│   │   └── RootNavigator.tsx   - Bottom Tabs (Home, Map, Deals, Vouchers, Account)
+│   │
+│   ├── screens/
+│   │   ├── HomeScreen.tsx      - ഡീൽ കാറ്റഗറികൾ, AI ബാനർ, ട്രെൻഡിംഗ് ഓഫറുകൾ
+│   │   ├── MapScreen.tsx       - ഇന്ററാക്ടീവ് മാപ്പും കടകളുടെ ലൊക്കേഷൻ മാർക്കറുകളും
+│   │   ├── DealsScreen.tsx     - ഫിൽട്ടറിംഗും സെർച്ചും ഉള്ള എല്ലാ ഓഫറുകളും
+│   │   ├── VouchersScreen.tsx  - ക്ലെയിം ചെയ്ത വൗച്ചറുകളും QR കോഡ് റിഡംപ്ഷനും
+│   │   ├── CartScreen.tsx      - കാർട്ടും ഡെലിവറി അഡ്രസ് മാനേജ്‌മെന്റും
+│   │   ├── AccountScreen.tsx   - ലോയൽറ്റി പാസ്, ബില്ലുകൾ, ഡെലിവറി അഡ്രസ്, പ്രൊഫൈൽ
+│   │   ├── PrivacyPolicyScreen.tsx - പ്രൈവസി പോളിസി വ്യൂവർ
+│   │   └── TermsOfServiceScreen.tsx - ടേംസ് ഓഫ് സർവീസ് വ്യൂവർ
+│   │
+│   ├── components/
+│   │   ├── SplashScreen.tsx    - ബ്രാൻഡഡ് ആനിമേഷൻ സ്പ്ലാഷ് സ്ക്രീൻ ("from JRINA")
+│   │   ├── Header.tsx          - ലൊക്കേഷൻ സെലക്ടറും കസ്റ്റമർ കോഡ് ബട്ടണും
+│   │   ├── DealCard.tsx        - വ്യക്തിഗത ഓഫർ കാർഡ് ഘടകം
+│   │   ├── AiAssistantModal.tsx- ജെമിനി AI ഷോപ്പർ ചാറ്റ് മോഡൽ
+│   │   ├── GeofenceRadiusModal.tsx - റഡാർ ദൂരം മാറ്റാനുള്ള മോഡൽ (500m - All Kerala)
+│   │   ├── StoreDetailsModal.tsx   - കടയുടെ വിവരങ്ങളും ഡയറക്ട് കോൾ/മാപ്സ് ലിങ്കും
+│   │   ├── CustomerCodeModal.tsx   - ഉപഭോക്താവിന്റെ ഡിജിറ്റൽ ബാർകോഡ്/QR പാസ്
+│   │   ├── VoucherRedeemModal.tsx  - വൗച്ചർ ഇൻ-സ്റ്റോർ QR റിഡംപ്ഷൻ
+│   │   ├── AuthModal.tsx       - യൂസർ ലോഗിൻ / രജിസ്ട്രേഷൻ മോഡൽ
+│   │   └── EditProfileModal.tsx- ഉപഭോക്തൃ വിവരങ്ങൾ എഡിറ്റ് ചെയ്യാനുള്ള വിൻഡോ
+│   │
+│   ├── utils/
+│   │   └── geo.ts              - Haversine ഡിസ്റ്റൻസ് കണക്കുകൂട്ടലുകളും ജിയോ യൂട്ടിലിറ്റികളും
+│   └── types/
+│       └── index.ts            - TypeScript ടൈപ്പ് ഇന്റർഫേസുകൾ (Store, Offer, Voucher etc.)
+│
+├── android/                    - Android Native പ്രോജക്റ്റ് (Gradle, Manifest, Resources)
+└── SmartShopper-v1.0.0.apk     - കമ്പൈൽ ചെയ്ത റിലീസ് ഇൻസ്റ്റാളേഷൻ പാക്കേജ് (88.1 MB)
+
+--------------------------------------------------------------------------------
+5. സ്പ്ലാഷ് സ്ക്രീൻ സിസ്റ്റം (SPLASH SCREEN IMPLEMENTATION)
+--------------------------------------------------------------------------------
+Android 12 മുതൽ Android 16 വരെയുള്ള വേർഷനുകളിലെ ആപ്പ് ലോഞ്ച് കൃത്യമാക്കുന്നതിനായി 
+ഇരുതല സ്പ്ലാഷ് സിസ്റ്റം നടപ്പിലാക്കിയിരിക്കുന്നു:
+1. Native Android 12+ Splash (API 31+):
+   - ഫയൽ: android/app/src/main/res/values-v31/styles.xml
+   - സിസ്റ്റം ലോഞ്ചിൽ ഡിഫോൾട്ട് ആക്റ്റീവ് ലോഗോയും വെള്ള (#FFFFFF) ബാക്ക്ഗ്രൗണ്ടും കാണിക്കുന്നു.
+2. React Native Branded Splash:
+   - ഫയൽ: src/components/SplashScreen.tsx
+   - സ്മാർട്ട്ഷോപ്പർ ലോഗോയോടൊപ്പം താഴെ ഔദ്യോഗിക "from JRINA" ലോഗോയോടെയുള്ള 
+     ആനിമേറ്റഡ് ട്രാൻസിഷൻ.
+
+--------------------------------------------------------------------------------
+6. ആപ്പ് റൺ ചെയ്യാനും ബിൽഡ് ചെയ്യാനുമുള്ള കമാൻഡുകൾ (RUN & BUILD COMMANDS)
+--------------------------------------------------------------------------------
+1. ഡെവലപ്‌മെന്റ് സെർവർ പ്രവർത്തിപ്പിക്കാൻ:
+   npx expo start
+
+2. ടൈപ്പ് സ്ക്രിപ്റ്റ് പരിശോധന (Lint/Typecheck):
+   npx tsc --noEmit
+
+3. ആൻഡ്രോയിഡ് റിലീസ് എപികെ (APK) ബിൽഡ് ചെയ്യാൻ:
+   cmd.exe /c "set ANDROID_HOME=C:\Android\sdk&& set GRADLE_USER_HOME=D:\gradle_user_home&& gradlew.bat assembleRelease"
+   (കുറിപ്പ്: C ഡ്രൈവിലെ സ്പേസ് സംരക്ഷിക്കാൻ ഗ്രാഡിൽ കാഷെ D ഡ്രൈവിലാണ് സജ്ജീകരിച്ചിരിക്കുന്നത്)
+
+--------------------------------------------------------------------------------
+7. കമ്പനി & ലീഗൽ വിവരങ്ങൾ (COMPANY & OWNERSHIP)
+--------------------------------------------------------------------------------
+- കമ്പനി നാമം: JRINA Private Limited
+- ആപ്ലിക്കേഷൻ ട്രേഡ്‌മാർക്ക്: SmartShopper™
+- ബ്രാൻഡ് വർണ്ണങ്ങൾ:
+  * പ്രൈമറി ഓറഞ്ച്: #EA580C / #F97316
+  * ഡാർക്ക് സ്ലാറ്റ്: #0F172A
+  * ലൈറ്റ് ബാക്ക്ഗ്രൗണ്ട്: #FFFFFF / #F8FAFC
+- കോപ്പിറൈറ്റ്: © 2026 JRINA Private Limited. All rights reserved.
+================================================================================
