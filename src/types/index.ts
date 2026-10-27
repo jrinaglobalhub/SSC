@@ -184,5 +184,6 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PrivacyPolicy: undefined;
   TermsOfService: undefined;
+  Vouchers: undefined;
 };
 

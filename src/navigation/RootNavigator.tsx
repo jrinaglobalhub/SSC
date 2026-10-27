@@ -11,6 +11,7 @@ import { CartScreen } from "../screens/CartScreen";
 import { AccountScreen } from "../screens/AccountScreen";
 import { PrivacyPolicyScreen } from "../screens/PrivacyPolicyScreen";
 import { TermsOfServiceScreen } from "../screens/TermsOfServiceScreen";
+import { VouchersScreen } from "../screens/VouchersScreen";
 
 import { GeofenceRadiusModal } from "../components/GeofenceRadiusModal";
 import { StoreDetailsModal } from "../components/StoreDetailsModal";
@@ -28,6 +29,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PrivacyPolicy: undefined;
   TermsOfService: undefined;
+  Vouchers: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -177,6 +179,7 @@ export const RootNavigator: React.FC = () => {
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+      <Stack.Screen name="Vouchers" component={VouchersScreen} />
     </Stack.Navigator>
   );
 };

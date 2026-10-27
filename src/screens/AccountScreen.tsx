@@ -23,7 +23,8 @@ import {
   Store,
   Edit3,
   UserCog,
-  MapPin
+  MapPin,
+  Ticket
 } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -42,7 +43,7 @@ import { registerDevicePushToken, deactivateDevicePushToken } from "../services/
 
 export const AccountScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user, logout, openAuthModal, setShowCustomerCode, stores, deliveryAddress, location, isGPS } = useApp();
+  const { user, logout, openAuthModal, setShowCustomerCode, stores, vouchers, deliveryAddress, location, isGPS } = useApp();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loadingBills, setLoadingBills] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -190,6 +191,35 @@ export const AccountScreen: React.FC = () => {
             <Text style={styles.statLabel}>AI Radar</Text>
           </View>
         </View>
+
+        {/* Claimed Vouchers Access Banner */}
+        <TouchableOpacity
+          style={styles.voucherBanner}
+          onPress={() => navigation.navigate("Vouchers")}
+          activeOpacity={0.85}
+        >
+          <View style={styles.voucherBannerLeft}>
+            <View style={styles.voucherIconCircle}>
+              <Ticket size={20} color="#EA580C" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.voucherBannerTitle}>My Claimed Vouchers</Text>
+              <Text style={styles.voucherBannerSub} numberOfLines={1}>
+                {vouchers.length > 0
+                  ? `${vouchers.length} discount ${vouchers.length === 1 ? "voucher" : "vouchers"} ready to redeem`
+                  : "View active discount codes & in-store QR passes"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.voucherBannerRight}>
+            {vouchers.length > 0 && (
+              <View style={styles.voucherCountBadge}>
+                <Text style={styles.voucherCountText}>{vouchers.length}</Text>
+              </View>
+            )}
+            <ChevronRight size={18} color="#94A3B8" />
+          </View>
+        </TouchableOpacity>
 
         {/* Digital E-Bills Section */}
         <View style={styles.section}>
@@ -527,6 +557,65 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: "#64748B",
     marginTop: 2
+  },
+  voucherBanner: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2
+  },
+  voucherBannerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+    marginRight: 8
+  },
+  voucherIconCircle: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#FFF7ED",
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  voucherBannerTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: "#0F172A"
+  },
+  voucherBannerSub: {
+    fontSize: 11,
+    color: "#64748B",
+    marginTop: 2
+  },
+  voucherBannerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6
+  },
+  voucherCountBadge: {
+    backgroundColor: "#EA580C",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10
+  },
+  voucherCountText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "800"
   },
   section: {
     backgroundColor: "#FFFFFF",
