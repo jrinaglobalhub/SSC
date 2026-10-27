@@ -28,7 +28,7 @@ import {
   Heart,
   Check
 } from "lucide-react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { useApp } from "../context/AppContext";
 import { DealCard } from "../components/DealCard";
 import { Header } from "../components/Header";
@@ -59,13 +59,14 @@ const RADIUS_PRESETS = [
  * Single Row Marquee Scroller for Live Deals on Home Screen
  */
 const DealMarqueeRow: React.FC<{ deals: OfferItem[] }> = ({ deals }) => {
+  const isFocused = useIsFocused();
   const scrollRef = React.useRef<ScrollView>(null);
   const scrollPosRef = React.useRef(0);
   const isInteractingRef = React.useRef(false);
 
-  // Auto-scroll marquee effect
+  // Auto-scroll marquee effect (pauses when screen is unfocused to conserve battery and CPU)
   React.useEffect(() => {
-    if (deals.length <= 1) return;
+    if (!isFocused || deals.length <= 1) return;
 
     const interval = setInterval(() => {
       if (isInteractingRef.current || !scrollRef.current) return;
@@ -83,7 +84,7 @@ const DealMarqueeRow: React.FC<{ deals: OfferItem[] }> = ({ deals }) => {
     }, 35); // 35ms for smooth 30-60fps glide
 
     return () => clearInterval(interval);
-  }, [deals.length]);
+  }, [deals.length, isFocused]);
 
   return (
     <ScrollView

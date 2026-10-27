@@ -11,7 +11,7 @@ interface DealCardProps {
   cardWidth?: number;
 }
 
-export const DealCard: React.FC<DealCardProps> = ({ offer, onPressStore, cardWidth }) => {
+const DealCardComponent: React.FC<DealCardProps> = ({ offer, onPressStore, cardWidth }) => {
   const { setSelectedOfferForVoucher, setSelectedStore, stores } = useApp();
 
   // Live countdown ticker
@@ -118,6 +118,8 @@ export const DealCard: React.FC<DealCardProps> = ({ offer, onPressStore, cardWid
     </TouchableOpacity>
   );
 };
+
+export const DealCard = React.memo(DealCardComponent);
 
 const styles = StyleSheet.create({
   card: {
