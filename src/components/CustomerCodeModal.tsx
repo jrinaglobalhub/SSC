@@ -15,11 +15,11 @@ import { useApp } from "../context/AppContext";
 export const CustomerCodeModal: React.FC = () => {
   const { showCustomerCode, setShowCustomerCode, user } = useApp();
 
-  if (!showCustomerCode) return null;
+  if (!showCustomerCode || !user) return null;
 
-  const customerId = user?.customerId || "SSC-84920";
-  const customerName = user?.name || "Smart Consumer";
-  const customerPhone = user?.phone || "+91 98765 43210";
+  const customerId = user.customerId || `SSC-${(user.id || "").slice(0, 6).toUpperCase()}`;
+  const customerName = user.name || "Smart Shopper";
+  const customerPhone = user.phone || "";
 
   return (
     <Modal
@@ -57,10 +57,12 @@ export const CustomerCodeModal: React.FC = () => {
               <User size={15} color="#94A3B8" />
               <Text style={styles.userName}>{customerName}</Text>
             </View>
-            <View style={styles.userRow}>
-              <Phone size={15} color="#94A3B8" />
-              <Text style={styles.userPhone}>{customerPhone}</Text>
-            </View>
+            {Boolean(customerPhone) && (
+              <View style={styles.userRow}>
+                <Phone size={15} color="#94A3B8" />
+                <Text style={styles.userPhone}>{customerPhone}</Text>
+              </View>
+            )}
           </View>
 
           {/* QR Code Container */}

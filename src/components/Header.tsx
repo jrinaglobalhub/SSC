@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
-import { Bell, RefreshCw, ChevronDown, ShoppingCart } from "lucide-react-native";
+import { Bell, RefreshCw, ChevronDown, ShoppingCart, LogIn } from "lucide-react-native";
 import { useApp } from "../context/AppContext";
 import { formatDistance } from "../utils/geo";
 
@@ -70,20 +70,33 @@ export const Header: React.FC = () => {
             {unreadNotificationsCount > 0 && <View style={styles.unreadDot} />}
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.profilePill}
-            onPress={() => setShowCustomerCode(true)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarInitials}>
-                {user?.name?.slice(0, 2).toUpperCase() || "SC"}
+          {user ? (
+            <TouchableOpacity
+              style={styles.profilePill}
+              onPress={() => setShowCustomerCode(true)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.avatarCircle}>
+                <Text style={styles.avatarInitials}>
+                  {user.avatarInitials || user.name?.slice(0, 2).toUpperCase() || "SC"}
+                </Text>
+              </View>
+              <Text style={styles.profileName} numberOfLines={1}>
+                {user.name?.split(" ")[0] || "Account"}
               </Text>
-            </View>
-            <Text style={styles.profileName} numberOfLines={1}>
-              {user?.name?.split(" ")[0] || "Account"}
-            </Text>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.loginPill}
+              onPress={() =>
+                openAuthModal("Sign in to access your shopper QR pass, exclusive store deals, and rewards.")
+              }
+              activeOpacity={0.8}
+            >
+              <LogIn size={15} color="#EA580C" />
+              <Text style={styles.loginText}>Login</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -233,6 +246,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     gap: 6
+  },
+  loginPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF7ED",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#FED7AA",
+    gap: 5
+  },
+  loginText: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: "#EA580C"
   },
   avatarCircle: {
     width: 24,
