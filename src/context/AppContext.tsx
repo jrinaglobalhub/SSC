@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Coordinates, OfferItem, StoreProfile, VoucherDetails, UserSession, DealNotification, CatalogItem, CartItem, DeliveryAddress } from "../types";
@@ -139,6 +139,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const userRef = useRef<UserSession | null>(null);
   const processedOfferIdsRef = useRef<Set<string>>(new Set());
   const processedCustomerChatIdsRef = useRef<Set<string>>(new Set());
+  const selectedStoreRef = useRef<StoreProfile | null>(selectedStore);
+  const storeModalTabRef = useRef<"overview" | "hours" | "chat" | "catalog" | "reviews">(storeModalTab);
+  const refreshDataRef = useRef<() => Promise<void>>(() => Promise.resolve());
+
+  useEffect(() => {
+    selectedStoreRef.current = selectedStore;
+  }, [selectedStore]);
+
+  useEffect(() => {
+    storeModalTabRef.current = storeModalTab;
+  }, [storeModalTab]);
 
   useEffect(() => {
     isGPSRef.current = isGPS;
@@ -227,12 +238,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     restoreSessionAndNotifications();
   }, []);
 
-  const saveCart = (newCart: CartItem[]) => {
+  const saveCart = useCallback((newCart: CartItem[]) => {
     setCart(newCart);
     AsyncStorage.setItem("smartshopper_user_cart", JSON.stringify(newCart)).catch(() => {});
-  };
+  }, []);
 
-  const addToCart = (product: CatalogItem) => {
+  const addToCart = useCallback((product: CatalogItem) => {
     setCart((prev) => {
       const idx = prev.findIndex((item) => item.product.id === product.id);
       let updated: CartItem[];
@@ -246,17 +257,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveCart(updated);
       return updated;
     });
-  };
+  }, [saveCart]);
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setCart((prev) => {
       const updated = prev.filter((item) => item.product.id !== productId);
       saveCart(updated);
       return updated;
     });
-  };
+  }, [saveCart]);
 
-  const updateCartQuantity = (productId: string, quantity: number) => {
+  const updateCartQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
       return;
@@ -268,55 +279,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       saveCart(updated);
       return updated;
     });
-  };
+  }, [removeFromCart, saveCart]);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
     AsyncStorage.removeItem("smartshopper_user_cart").catch(() => {});
-  };
+  }, []);
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
 
-  const markAllNotificationsRead = async () => {
+  const markAllNotificationsRead = useCallback(async () => {
     setNotifications((prev) => {
       const updated = prev.map((n) => ({ ...n, isRead: true }));
       AsyncStorage.setItem("smartshopper_saved_notifications", JSON.stringify(updated)).catch(() => {});
       return updated;
     });
-  };
+  }, []);
 
-  const clearNotifications = async () => {
+  const clearNotifications = useCallback(async () => {
     setNotifications([]);
     try {
       await AsyncStorage.removeItem("smartshopper_saved_notifications");
     } catch {}
-  };
+  }, []);
 
-  const unreadNotificationsCount = notifications.filter((n) => !n.isRead).length;
+  const unreadNotificationsCount = useMemo(() => notifications.filter((n) => !n.isRead).length, [notifications]);
 
-  const openAuthModal = (reason?: string) => {
+  const openAuthModal = useCallback((reason?: string) => {
     setAuthPromptReason(reason);
     setShowAuthModal(true);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await deactivateDevicePushToken().catch(() => {});
       await AsyncStorage.removeItem("smartshopper_active_user");
       setUser(null);
     } catch {}
-  };
+  }, []);
 
-  const updateUserProfile = async (updates: { fullName: string; username?: string }) => {
+  const updateUserProfile = useCallback(async (updates: { fullName: string; username?: string }) => {
     if (!user) return { success: false, message: "No active user session." };
     const res = await apiUpdateUserProfile(user.id, updates);
     if (res.success && res.user) {
       setUser(res.user);
     }
     return { success: res.success, message: res.message };
-  };
+  }, [user]);
 
-  const saveDeliveryAddress = async (addr: DeliveryAddress | null) => {
+  const saveDeliveryAddress = useCallback(async (addr: DeliveryAddress | null) => {
     setDeliveryAddress(addr);
     deliveryAddressRef.current = addr;
 
@@ -355,7 +366,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     return { success: true };
-  };
+  }, [user]);
 
 
   // Request GPS Location fast (prefer last known or quick fix with timeout)
@@ -408,11 +419,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const refreshData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [liveOffers, liveStores, savedVouchers] = await Promise.all([
-        fetchLiveOffers(location),
+      const [liveStores, savedVouchers] = await Promise.all([
         fetchStores(location),
         getClaimedVouchers()
       ]);
+      const liveOffers = await fetchLiveOffers(location, liveStores);
       setAllOffers(liveOffers);
       setStores(liveStores);
       storesRef.current = liveStores;
@@ -428,6 +439,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [location]);
 
+  useEffect(() => {
+    refreshDataRef.current = refreshData;
+  }, [refreshData]);
+
   // Initial setup
   useEffect(() => {
     let isMounted = true;
@@ -441,6 +456,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   }, [requestGPS]);
 
+  // Refresh data when location changes
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -448,10 +464,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await refreshData();
       }
     })();
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshData]);
 
+  // Persistent realtime deal subscription (independent of location drifts)
+  useEffect(() => {
     const unsubscribe = subscribeToRealtimeDeals(
       () => {
-        refreshData();
+        refreshDataRef.current();
       },
       (newOffer: any) => {
         if (!newOffer || !newOffer.id) return;
@@ -597,10 +619,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     );
 
     return () => {
-      isMounted = false;
       unsubscribe();
     };
-  }, [refreshData, user, deliveryAddress, location]);
+  }, []);
 
   // Open store modal directly to chat tab
   const openStoreChat = useCallback(
@@ -727,13 +748,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         // 2. Suppress native notification if consumer is actively viewing this exact conversation
         const isActivelyViewingThisChat =
-          selectedStore?.id === incomingMsg.storeId && storeModalTab === "chat";
+          selectedStoreRef.current?.id === incomingMsg.storeId && storeModalTabRef.current === "chat";
 
         if (!isActivelyViewingThisChat) {
           sendStoreMessageNotification(
             incomingMsg.storeName,
             incomingMsg.text,
-            user.name || user.username || "Shopper",
+            userRef.current?.name || userRef.current?.username || "Shopper",
             incomingMsg.storeId
           ).catch((err) => {
             console.warn("[AppContext] Customer chat notification scheduling error:", err);
@@ -764,16 +785,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => {
       unsubscribeChat();
     };
-  }, [user, selectedStore?.id, storeModalTab]);
+  }, [user?.id, user?.phone]);
+
+  const isInsideKerala = useMemo(() => isLocationInsideKerala(location), [location]);
 
   // Filter offers by geofence radius
-  const filteredOffers = allOffers.filter((o) => {
-    if (geofenceRadius >= 999999) return true;
-    const dist = calculateDistanceInMeters(location, { latitude: o.lat, longitude: o.lng });
-    return dist <= geofenceRadius;
-  });
+  const filteredOffers = useMemo(() => {
+    if (geofenceRadius >= 999999) return allOffers;
+    return allOffers.filter((o) => {
+      const dist = calculateDistanceInMeters(location, { latitude: o.lat, longitude: o.lng });
+      return dist <= geofenceRadius;
+    });
+  }, [allOffers, geofenceRadius, location]);
 
-  const claimVoucher = async (offer: OfferItem) => {
+  const claimVoucher = useCallback(async (offer: OfferItem) => {
     if (!user) {
       openAuthModal("Sign in to unlock and claim this exclusive discount voucher!");
       throw new Error("AUTH_REQUIRED");
@@ -781,74 +806,121 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const v = await claimOfferVoucher(offer, user.name, user.phone);
     setVouchers((prev) => [v, ...prev]);
     return v;
-  };
+  }, [openAuthModal, user]);
 
-  const setManualLocation = (coords: Coordinates, name: string) => {
+  const setManualLocation = useCallback((coords: Coordinates, name: string) => {
     setLocation(coords);
     setLocationName(name);
     setIsGPS(false);
-  };
+  }, []);
+
+  const contextValue = useMemo<AppContextType>(
+    () => ({
+      location,
+      locationName,
+      isGPS,
+      isInsideKerala,
+      geofenceRadius,
+      setGeofenceRadius,
+      setManualLocation,
+      resetToGPSLocation: requestGPS,
+      offers: filteredOffers,
+      allOffers,
+      stores,
+      nearbyProducts,
+      vouchers,
+      isLoading,
+      refreshData,
+      claimVoucher,
+      user,
+      setUser,
+      updateUserProfile,
+      logout,
+      showAuthModal,
+      setShowAuthModal,
+      authPromptReason,
+      openAuthModal,
+      selectedStore,
+      setSelectedStore,
+      storeModalTab,
+      setStoreModalTab,
+      openStoreChat,
+      selectedOfferForVoucher,
+      setSelectedOfferForVoucher,
+      showCustomerCode,
+      setShowCustomerCode,
+      showAiAssistant,
+      setShowAiAssistant,
+      showRadiusModal,
+      setShowRadiusModal,
+      notifications,
+      unreadNotificationsCount,
+      showNotificationsModal,
+      setShowNotificationsModal,
+      markAllNotificationsRead,
+      clearNotifications,
+      cart,
+      addToCart,
+      removeFromCart,
+      updateCartQuantity,
+      clearCart,
+      cartCount,
+      showCartModal,
+      setShowCartModal,
+      buyNowProduct,
+      setBuyNowProduct,
+      deliveryAddress,
+      saveDeliveryAddress
+    }),
+    [
+      location,
+      locationName,
+      isGPS,
+      isInsideKerala,
+      geofenceRadius,
+      setManualLocation,
+      requestGPS,
+      filteredOffers,
+      allOffers,
+      stores,
+      nearbyProducts,
+      vouchers,
+      isLoading,
+      refreshData,
+      claimVoucher,
+      user,
+      updateUserProfile,
+      logout,
+      showAuthModal,
+      authPromptReason,
+      openAuthModal,
+      selectedStore,
+      storeModalTab,
+      openStoreChat,
+      selectedOfferForVoucher,
+      showCustomerCode,
+      showAiAssistant,
+      showRadiusModal,
+      notifications,
+      unreadNotificationsCount,
+      showNotificationsModal,
+      markAllNotificationsRead,
+      clearNotifications,
+      cart,
+      addToCart,
+      removeFromCart,
+      updateCartQuantity,
+      clearCart,
+      cartCount,
+      showCartModal,
+      buyNowProduct,
+      deliveryAddress,
+      saveDeliveryAddress
+    ]
+  );
 
   return (
-    <AppContext.Provider
-      value={{
-        location,
-        locationName,
-        isGPS,
-        isInsideKerala: isLocationInsideKerala(location),
-        geofenceRadius,
-        setGeofenceRadius,
-        setManualLocation,
-        resetToGPSLocation: requestGPS,
-        offers: filteredOffers,
-        allOffers,
-        stores,
-        nearbyProducts,
-        vouchers,
-        isLoading,
-        refreshData,
-        claimVoucher,
-        user,
-        setUser,
-        updateUserProfile,
-        logout,
-        showAuthModal,
-        setShowAuthModal,
-        authPromptReason,
-        openAuthModal,
-        selectedStore,
-        setSelectedStore,
-        storeModalTab,
-        setStoreModalTab,
-        openStoreChat,
-        selectedOfferForVoucher,
-        setSelectedOfferForVoucher,
-        showCustomerCode,
-        setShowCustomerCode,
-        showAiAssistant,
-        setShowAiAssistant,
-        showRadiusModal,
-        setShowRadiusModal,
-        notifications,
-        unreadNotificationsCount,
-        showNotificationsModal,
-        setShowNotificationsModal,
-        markAllNotificationsRead,
-        clearNotifications,
-        cart,
-        addToCart,
-        removeFromCart,
-        updateCartQuantity,
-        clearCart,
-        cartCount,
-        showCartModal,
-        setShowCartModal,
-        buyNowProduct,
-        setBuyNowProduct,
-        deliveryAddress,
-        saveDeliveryAddress
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

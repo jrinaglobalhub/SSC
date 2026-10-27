@@ -20,7 +20,10 @@ const DEFAULT_IMG = "https://images.unsplash.com/photo-1542838132-92c53300491e?a
 /**
  * Fetches all live active offers and joins store metadata
  */
-export async function fetchLiveOffers(userCoords: Coordinates = DEFAULT_LOCATION): Promise<OfferItem[]> {
+export async function fetchLiveOffers(
+  userCoords: Coordinates = DEFAULT_LOCATION,
+  preloadedStores?: StoreProfile[]
+): Promise<OfferItem[]> {
   try {
     const { data: offersData, error: offersError } = await supabase
       .from("offers")
@@ -32,13 +35,20 @@ export async function fetchLiveOffers(userCoords: Coordinates = DEFAULT_LOCATION
       return [];
     }
 
-    const { data: storesData } = await supabase.from("stores").select("*");
     const storesMap = new Map<string, any>();
-    if (storesData && Array.isArray(storesData)) {
-      storesData.forEach((s) => {
+    if (preloadedStores && Array.isArray(preloadedStores) && preloadedStores.length > 0) {
+      preloadedStores.forEach((s) => {
         if (s.id) storesMap.set(s.id, s);
         if (s.name) storesMap.set(s.name.toLowerCase().trim(), s);
       });
+    } else {
+      const { data: storesData } = await supabase.from("stores").select("*");
+      if (storesData && Array.isArray(storesData)) {
+        storesData.forEach((s) => {
+          if (s.id) storesMap.set(s.id, s);
+          if (s.name) storesMap.set(s.name.toLowerCase().trim(), s);
+        });
+      }
     }
 
     const now = Date.now();
