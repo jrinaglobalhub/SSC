@@ -25,17 +25,20 @@ Run lint and typecheck before declaring any task done.
 
 ## Navigation & Routing
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+- This application uses **React Navigation v7** (Bottom Tabs + Native Stack).
+- Root navigator is configured in `src/navigation/RootNavigator.tsx`.
+- Screens live in `src/screens/` (e.g. `HomeScreen.tsx`, `MapScreen.tsx`, `DealsScreen.tsx`, `CartScreen.tsx`, `AccountScreen.tsx`, `VouchersScreen.tsx`).
+- Modals and reusable UI elements live in `src/components/`.
+- Do NOT introduce `expo-router` or create a `src/app/` file-based routing tree, as navigation is centrally orchestrated via `RootNavigator.tsx`.
 
-## Building with EAS
+## Building with EAS & Native Android
 
-Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.
-Docs: https://docs.expo.dev/eas/index.md
+- Native Android configuration lives in `android/` with Gradle 9.3.1, compileSdk 35, and React Native New Architecture (`newArchEnabled=true`, Hermes engine).
+- Release APKs can be built locally or with EAS (`eas build --profile preview|production`). Run EAS CLI as `npx eas-cli@latest <command>`.
+- Docs: https://docs.expo.dev/eas/index.md
 
 ## Rules
 
-- If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
-- Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
-- Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+- Preserve React Navigation v7 structure and central state in `src/context/AppContext.tsx`.
+- When adding libraries with native code, note that New Architecture is enabled (`newArchEnabled=true` in `android/gradle.properties`).
+- Always run `npx tsc --noEmit` and verification test suites in `tests/` before declaring work done.

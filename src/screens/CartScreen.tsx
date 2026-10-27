@@ -30,8 +30,6 @@ import {
   Phone,
   Navigation2,
   Check,
-  ShieldCheck,
-  Zap,
   Truck,
   X,
   Navigation,
