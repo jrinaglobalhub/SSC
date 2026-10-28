@@ -60,7 +60,7 @@ const RADIUS_PRESETS = [
  */
 const DealMarqueeRow: React.FC<{ deals: OfferItem[] }> = ({ deals }) => {
   const isFocused = useIsFocused();
-  const scrollRef = React.useRef<ScrollView>(null);
+  const scrollRef = React.useRef<React.ElementRef<typeof ScrollView>>(null);
   const scrollPosRef = React.useRef(0);
   const isInteractingRef = React.useRef(false);
 

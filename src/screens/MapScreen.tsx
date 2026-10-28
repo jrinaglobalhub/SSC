@@ -48,7 +48,7 @@ export const MapScreen: React.FC = () => {
     setSelectedOfferForVoucher
   } = useApp();
 
-  const webViewRef = useRef<WebView>(null);
+  const webViewRef = useRef<React.ElementRef<typeof WebView>>(null);
   const [isHeatmapActive, setIsHeatmapActive] = useState<boolean>(false);
   const [mapSearchQuery, setMapSearchQuery] = useState<string>("");
   const [isSearching, setIsSearching] = useState<boolean>(false);

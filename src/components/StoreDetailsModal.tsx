@@ -84,7 +84,7 @@ export const StoreDetailsModal: React.FC = () => {
   const [chatInput, setChatInput] = useState<string>("");
   const [isSending, setIsSending] = useState<boolean>(false);
   const [rateLimitWarning, setRateLimitWarning] = useState<string | null>(null);
-  const chatScrollRef = useRef<ScrollView>(null);
+  const chatScrollRef = useRef<React.ElementRef<typeof ScrollView>>(null);
 
   // Catalog State
   const [catalogItems, setCatalogItems] = useState<CatalogItem[]>([]);
