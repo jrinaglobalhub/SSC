@@ -14,6 +14,7 @@ import {
   Keyboard
 } from "react-native";
 import { WebView } from "react-native-webview";
+import * as Location from "expo-location";
 import {
   Search,
   X,
@@ -40,6 +41,7 @@ export const MapScreen: React.FC = () => {
     setGeofenceRadius,
     setManualLocation,
     resetToGPSLocation,
+    setShowLocationModal,
     stores,
     offers,
     setSelectedStore,
@@ -359,6 +361,17 @@ export const MapScreen: React.FC = () => {
       // Render Stores
       renderMarkers();
 
+      // Tap on map to set manual location
+      map.on('click', function(e) {
+        if (window.ReactNativeWebView && e && e.latlng) {
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'MAP_TAP_LOCATION',
+            lat: e.latlng.lat,
+            lng: e.latlng.lng
+          }));
+        }
+      });
+
       // Signal ready to React Native
       if (window.ReactNativeWebView) {
         window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'MAP_READY' }));
@@ -494,6 +507,25 @@ export const MapScreen: React.FC = () => {
         if (deal) setSelectedOfferForVoucher(deal);
       } else if (data.type === "NAVIGATE") {
         openExternalMap(data.lat, data.lng, data.name);
+      } else if (data.type === "MAP_TAP_LOCATION") {
+        const tapLat = Number(data.lat.toFixed(6));
+        const tapLng = Number(data.lng.toFixed(6));
+        Location.reverseGeocodeAsync({ latitude: tapLat, longitude: tapLng })
+          .then(([geo]) => {
+            const label = geo
+              ? [geo.name || geo.street, geo.district || geo.city, geo.region].filter(Boolean).join(", ")
+              : `Point (${tapLat.toFixed(3)}, ${tapLng.toFixed(3)})`;
+            setManualLocation({ latitude: tapLat, longitude: tapLng }, label);
+          })
+          .catch(() => {
+            setManualLocation(
+              { latitude: tapLat, longitude: tapLng },
+              `Custom Pin (${tapLat.toFixed(3)}, ${tapLng.toFixed(3)})`
+            );
+          });
+        webViewRef.current?.injectJavaScript(
+          `if(window.updateUserLocation) { window.updateUserLocation(${tapLat}, ${tapLng}, ${geofenceRadius}); } true;`
+        );
       }
     } catch (err) {
       console.warn("[MapScreen] WebView message parse error:", err);
@@ -711,6 +743,15 @@ export const MapScreen: React.FC = () => {
             {/* Quick Action Buttons */}
             <View style={styles.actionButtonsRow}>
               <TouchableOpacity
+                onPress={() => setShowLocationModal(true)}
+                style={styles.quickActionBtn}
+                activeOpacity={0.8}
+              >
+                <MapPin size={14} color="#EA580C" />
+                <Text style={styles.quickActionBtnText}>Choose Area</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
                 onPress={handleRecenter}
                 style={styles.quickActionBtn}
                 activeOpacity={0.8}
@@ -732,6 +773,16 @@ export const MapScreen: React.FC = () => {
             </View>
           </View>
         </View>
+
+        {/* Floating Tap to Pin Location Hint when no store selected */}
+        {!selectedStoreItem && (
+          <View style={styles.mapTapTipContainer} pointerEvents="none">
+            <View style={styles.mapTapTip}>
+              <MapPin size={12} color="#EA580C" />
+              <Text style={styles.mapTapTipText}>Tap anywhere on map to set your location</Text>
+            </View>
+          </View>
+        )}
 
         {/* Bottom Store Details Floating Card matching PWA */}
         {selectedStoreItem && (
@@ -1027,6 +1078,30 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
     color: "#F1F5F9"
+  },
+  mapTapTipContainer: {
+    position: "absolute",
+    bottom: 14,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 10
+  },
+  mapTapTip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(15, 23, 42, 0.88)",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#334155",
+    gap: 6
+  },
+  mapTapTipText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#F8FAFC"
   },
   bottomCardContainer: {
     position: "absolute",

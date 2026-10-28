@@ -43,7 +43,7 @@ import { registerDevicePushToken, deactivateDevicePushToken } from "../services/
 
 export const AccountScreen: React.FC = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { user, logout, openAuthModal, setShowCustomerCode, stores, vouchers, deliveryAddress, location, isGPS } = useApp();
+  const { user, logout, openAuthModal, setShowCustomerCode, stores, vouchers, deliveryAddress, location, isGPS, locationName, setShowLocationModal } = useApp();
   const [bills, setBills] = useState<Bill[]>([]);
   const [loadingBills, setLoadingBills] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -282,6 +282,22 @@ export const AccountScreen: React.FC = () => {
               thumbColor={notificationsEnabled ? "#EA580C" : "#94A3B8"}
             />
           </View>
+
+          {/* Active Location & Radar Preference */}
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => setShowLocationModal(true)}
+            activeOpacity={0.7}
+          >
+            <MapPin size={18} color="#EA580C" />
+            <View style={{ flex: 1, paddingRight: 8 }}>
+              <Text style={styles.menuTitle}>Active Location & Radar</Text>
+              <Text style={styles.settingDesc} numberOfLines={1}>
+                {locationName} • {isGPS ? "Live GPS Active" : "Manual Area"}
+              </Text>
+            </View>
+            <ChevronRight size={16} color="#94A3B8" />
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.menuItem}

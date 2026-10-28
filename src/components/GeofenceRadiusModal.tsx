@@ -8,7 +8,7 @@ import {
   StyleSheet,
   Pressable
 } from "react-native";
-import { Navigation, X, Check } from "lucide-react-native";
+import { Navigation, X, Check, MapPin, ChevronRight } from "lucide-react-native";
 import { useApp } from "../context/AppContext";
 
 const RADII = [
@@ -26,6 +26,7 @@ export const GeofenceRadiusModal: React.FC = () => {
   const {
     showRadiusModal,
     setShowRadiusModal,
+    setShowLocationModal,
     geofenceRadius,
     setGeofenceRadius,
     resetToGPSLocation,
@@ -57,6 +58,34 @@ export const GeofenceRadiusModal: React.FC = () => {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false} style={styles.scroll}>
+            {/* Active Location Info & Manual Selection Button */}
+            <View style={styles.locationCard}>
+              <View style={styles.locationCardLeft}>
+                <View style={[styles.locationIconWrap, isGPS ? styles.locGpsActive : styles.locAreaActive]}>
+                  <MapPin size={18} color={isGPS ? "#16A34A" : "#EA580C"} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.locationCardLabel}>
+                    TARGET LOCATION ({isGPS ? "LIVE GPS" : "MANUAL AREA"})
+                  </Text>
+                  <Text style={styles.locationCardName} numberOfLines={1}>
+                    {locationName}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                style={styles.changeLocationBtn}
+                onPress={() => {
+                  setShowRadiusModal(false);
+                  setShowLocationModal(true);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.changeLocationBtnText}>Change</Text>
+                <ChevronRight size={14} color="#EA580C" />
+              </TouchableOpacity>
+            </View>
+
             {/* Live GPS Button */}
             <TouchableOpacity
               style={[styles.gpsButton, isGPS && styles.gpsActive]}
@@ -144,6 +173,64 @@ const styles = StyleSheet.create({
   },
   scroll: {
     marginTop: 14
+  },
+  locationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#F8FAFC",
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    marginBottom: 12
+  },
+  locationCardLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1
+  },
+  locationIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  locGpsActive: {
+    backgroundColor: "#DCFCE7"
+  },
+  locAreaActive: {
+    backgroundColor: "#FFEDD5"
+  },
+  locationCardLabel: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "#64748B",
+    letterSpacing: 0.5
+  },
+  locationCardName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F172A",
+    marginTop: 1
+  },
+  changeLocationBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF7ED",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#FDBA74",
+    gap: 2,
+    marginLeft: 8
+  },
+  changeLocationBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#EA580C"
   },
   gpsButton: {
     flexDirection: "row",

@@ -14,6 +14,7 @@ import { TermsOfServiceScreen } from "../screens/TermsOfServiceScreen";
 import { VouchersScreen } from "../screens/VouchersScreen";
 
 import { GeofenceRadiusModal } from "../components/GeofenceRadiusModal";
+import { LocationPickerModal } from "../components/LocationPickerModal";
 import { StoreDetailsModal } from "../components/StoreDetailsModal";
 import { VoucherRedeemModal } from "../components/VoucherRedeemModal";
 import { CustomerCodeModal } from "../components/CustomerCodeModal";
@@ -147,6 +148,7 @@ const MainTabs: React.FC = () => {
 
       {/* Global Modals */}
       <GeofenceRadiusModal />
+      <LocationPickerModal />
       <StoreDetailsModal />
       <VoucherRedeemModal />
       <CustomerCodeModal />

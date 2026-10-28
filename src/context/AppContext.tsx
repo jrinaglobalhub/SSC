@@ -77,6 +77,8 @@ interface AppContextType {
   setShowAiAssistant: (show: boolean) => void;
   showRadiusModal: boolean;
   setShowRadiusModal: (show: boolean) => void;
+  showLocationModal: boolean;
+  setShowLocationModal: (show: boolean) => void;
   notifications: DealNotification[];
   unreadNotificationsCount: number;
   showNotificationsModal: boolean;
@@ -117,6 +119,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [showCustomerCode, setShowCustomerCode] = useState<boolean>(false);
   const [showAiAssistant, setShowAiAssistant] = useState<boolean>(false);
   const [showRadiusModal, setShowRadiusModal] = useState<boolean>(false);
+  const [showLocationModal, setShowLocationModal] = useState<boolean>(false);
 
   // Auth State
   const [user, setUser] = useState<UserSession | null>(null);
@@ -443,10 +446,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshDataRef.current = refreshData;
   }, [refreshData]);
 
-  // Initial setup
+  // Initial setup: check for saved manual location before requesting GPS
   useEffect(() => {
     let isMounted = true;
     (async () => {
+      try {
+        const savedManual = await AsyncStorage.getItem("@smartshopper_manual_location");
+        if (savedManual) {
+          const parsed = JSON.parse(savedManual);
+          if (
+            parsed?.coords &&
+            typeof parsed.coords.latitude === "number" &&
+            typeof parsed.coords.longitude === "number"
+          ) {
+            if (isMounted) {
+              setLocation(parsed.coords);
+              locationRef.current = parsed.coords;
+              if (parsed.name) setLocationName(parsed.name);
+              setIsGPS(false);
+              isGPSRef.current = false;
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("[AppContext] Error reading saved manual location:", err);
+      }
       if (isMounted) {
         await requestGPS();
       }
@@ -810,9 +835,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setManualLocation = useCallback((coords: Coordinates, name: string) => {
     setLocation(coords);
+    locationRef.current = coords;
     setLocationName(name);
     setIsGPS(false);
+    isGPSRef.current = false;
+    AsyncStorage.setItem(
+      "@smartshopper_manual_location",
+      JSON.stringify({ coords, name })
+    ).catch(() => {});
+    syncLocationWithPushToken(coords, "saved_address").catch(() => {});
   }, []);
+
+  const resetToGPSLocation = useCallback(async () => {
+    await AsyncStorage.removeItem("@smartshopper_manual_location").catch(() => {});
+    await requestGPS();
+  }, [requestGPS]);
 
   const contextValue = useMemo<AppContextType>(
     () => ({
@@ -823,7 +860,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       geofenceRadius,
       setGeofenceRadius,
       setManualLocation,
-      resetToGPSLocation: requestGPS,
+      resetToGPSLocation,
       offers: filteredOffers,
       allOffers,
       stores,
@@ -853,6 +890,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setShowAiAssistant,
       showRadiusModal,
       setShowRadiusModal,
+      showLocationModal,
+      setShowLocationModal,
       notifications,
       unreadNotificationsCount,
       showNotificationsModal,
@@ -879,7 +918,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       isInsideKerala,
       geofenceRadius,
       setManualLocation,
-      requestGPS,
+      resetToGPSLocation,
       filteredOffers,
       allOffers,
       stores,
@@ -901,6 +940,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showCustomerCode,
       showAiAssistant,
       showRadiusModal,
+      showLocationModal,
       notifications,
       unreadNotificationsCount,
       showNotificationsModal,

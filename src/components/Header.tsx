@@ -9,6 +9,7 @@ export const Header: React.FC = () => {
     locationName,
     geofenceRadius,
     setShowRadiusModal,
+    setShowLocationModal,
     setShowCustomerCode,
     setShowNotificationsModal,
     unreadNotificationsCount,
@@ -104,7 +105,7 @@ export const Header: React.FC = () => {
       <View style={styles.subRow}>
         <TouchableOpacity
           style={styles.locationPill}
-          onPress={() => setShowRadiusModal(true)}
+          onPress={() => setShowLocationModal(true)}
           activeOpacity={0.8}
         >
           <View style={[styles.gpsDot, isGPS ? styles.gpsActive : styles.gpsFallback]} />
