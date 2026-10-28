@@ -20,7 +20,6 @@ import {
   Check,
   ChevronRight,
   Map as MapIcon,
-  Sparkles,
   Home,
   SlidersHorizontal
 } from "lucide-react-native";
@@ -29,107 +28,17 @@ import { useApp } from "../context/AppContext";
 import { Coordinates } from "../types";
 import { formatDistance } from "../utils/geo";
 
-interface PopularLocation {
-  id: string;
-  city: string;
-  area: string;
-  coords: Coordinates;
-  tag: string;
-}
-
-const POPULAR_KERALA_LOCATIONS: PopularLocation[] = [
-  {
-    id: "kochi_kakkanad",
-    city: "Kochi",
-    area: "Kakkanad & InfoPark",
-    coords: { latitude: 10.0159, longitude: 76.3419 },
-    tag: "IT & Commercial Hub"
+const PALODE_LOCATION = {
+  id: "palode",
+  name: "Palode",
+  fullName: "Palode, Thiruvananthapuram",
+  subtitle: "Nedumangad, Thiruvananthapuram (695562)",
+  coords: {
+    latitude: 8.723257,
+    longitude: 77.028392
   },
-  {
-    id: "kochi_edappally",
-    city: "Kochi",
-    area: "Edappally & Lulu Mall",
-    coords: { latitude: 10.0261, longitude: 76.3086 },
-    tag: "Retail Capital"
-  },
-  {
-    id: "kochi_mgroad",
-    city: "Kochi",
-    area: "MG Road & Marine Drive",
-    coords: { latitude: 9.9816, longitude: 76.2799 },
-    tag: "City Center"
-  },
-  {
-    id: "kochi_fortkochi",
-    city: "Kochi",
-    area: "Fort Kochi & Mattancherry",
-    coords: { latitude: 9.9658, longitude: 76.2421 },
-    tag: "Heritage Zone"
-  },
-  {
-    id: "calicut_city",
-    city: "Kozhikode",
-    area: "Calicut City & SM Street",
-    coords: { latitude: 11.2588, longitude: 75.7804 },
-    tag: "Malabar Hub"
-  },
-  {
-    id: "trivandrum_city",
-    city: "Thiruvananthapuram",
-    area: "East Fort & Statue",
-    coords: { latitude: 8.4875, longitude: 76.9525 },
-    tag: "Capital City"
-  },
-  {
-    id: "thrissur_round",
-    city: "Thrissur",
-    area: "Swaraj Round & Center",
-    coords: { latitude: 10.5276, longitude: 76.2144 },
-    tag: "Cultural Capital"
-  },
-  {
-    id: "alappuzha_town",
-    city: "Alappuzha",
-    area: "Alleppey Town & Beach",
-    coords: { latitude: 9.4981, longitude: 76.3388 },
-    tag: "Coastal Town"
-  },
-  {
-    id: "kottayam_town",
-    city: "Kottayam",
-    area: "Kottayam Town & Baker Jct",
-    coords: { latitude: 9.5916, longitude: 76.5222 },
-    tag: "Central Kerala"
-  },
-  {
-    id: "palakkad_town",
-    city: "Palakkad",
-    area: "Palakkad Town & Fort",
-    coords: { latitude: 10.7867, longitude: 76.6548 },
-    tag: "Gateway Hub"
-  },
-  {
-    id: "kannur_city",
-    city: "Kannur",
-    area: "Kannur City & Thavakkara",
-    coords: { latitude: 11.8745, longitude: 75.3704 },
-    tag: "North Kerala"
-  },
-  {
-    id: "malappuram_town",
-    city: "Malappuram",
-    area: "Malappuram Town & Down Hill",
-    coords: { latitude: 11.0732, longitude: 76.074 },
-    tag: "District Center"
-  },
-  {
-    id: "kollam_city",
-    city: "Kollam",
-    area: "Chinnakada & Clock Tower",
-    coords: { latitude: 8.8932, longitude: 76.6141 },
-    tag: "Port City"
-  }
-];
+  tag: "Local Area"
+};
 
 interface SearchResultItem {
   id: string;
@@ -275,6 +184,12 @@ export const LocationPickerModal: React.FC = () => {
     setShowLocationModal(false);
     setShowRadiusModal(true);
   };
+
+  const isPalodeActive =
+    !isGPS &&
+    (locationName.toLowerCase().includes("palode") ||
+      (Math.abs(location.latitude - PALODE_LOCATION.coords.latitude) < 0.015 &&
+        Math.abs(location.longitude - PALODE_LOCATION.coords.longitude) < 0.015));
 
   const radiusLabel = geofenceRadius >= 999999 ? "Unlimited" : formatDistance(geofenceRadius);
 
@@ -455,56 +370,49 @@ export const LocationPickerModal: React.FC = () => {
               <ChevronRight size={18} color="#94A3B8" />
             </TouchableOpacity>
 
-            {/* Popular Kerala Locations Grid */}
+            {/* Quick 1-Tap Location: Palode */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeaderRow}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  <Sparkles size={14} color="#EA580C" />
-                  <Text style={styles.sectionTitle}>POPULAR KERALA CITIES & HUBS</Text>
+                  <MapPin size={14} color="#EA580C" />
+                  <Text style={styles.sectionTitle}>QUICK LOCATION</Text>
                 </View>
                 <Text style={styles.sectionHint}>1-Tap Selection</Text>
               </View>
 
-              <View style={styles.popularGrid}>
-                {POPULAR_KERALA_LOCATIONS.map((item) => {
-                  const isCurrent =
-                    !isGPS &&
-                    (locationName.toLowerCase().includes(item.city.toLowerCase()) ||
-                      locationName.toLowerCase().includes(item.area.toLowerCase().split(" ")[0]));
-                  return (
-                    <TouchableOpacity
-                      key={item.id}
-                      style={[styles.popularCard, isCurrent && styles.popularCardActive]}
-                      onPress={() =>
-                        handleSelectLocation(
-                          item.coords,
-                          `${item.city}, ${item.area.split("&")[0].trim()}`
-                        )
-                      }
-                      activeOpacity={0.75}
-                    >
-                      <View style={styles.popularCardTop}>
-                        <Text style={[styles.popularCity, isCurrent && styles.popularCityActive]}>
-                          {item.city}
-                        </Text>
-                        {isCurrent ? (
-                          <View style={styles.activeCheckPill}>
-                            <Check size={12} color="#FFFFFF" />
-                          </View>
-                        ) : (
-                          <Text style={styles.popularTag}>{item.tag}</Text>
-                        )}
+              <TouchableOpacity
+                style={[styles.palodeCard, isPalodeActive && styles.palodeCardActive]}
+                onPress={() =>
+                  handleSelectLocation(PALODE_LOCATION.coords, PALODE_LOCATION.fullName)
+                }
+                activeOpacity={0.8}
+              >
+                <View style={[styles.palodeIconBox, isPalodeActive && styles.palodeIconBoxActive]}>
+                  <MapPin size={20} color="#EA580C" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <View style={styles.actionTitleRow}>
+                    <Text style={[styles.palodeTitle, isPalodeActive && styles.palodeTitleActive]}>
+                      {PALODE_LOCATION.name}
+                    </Text>
+                    {isPalodeActive ? (
+                      <View style={styles.activeLocationBadge}>
+                        <Text style={styles.activeLocationBadgeText}>Selected</Text>
                       </View>
-                      <Text
-                        style={[styles.popularArea, isCurrent && styles.popularAreaActive]}
-                        numberOfLines={1}
-                      >
-                        {item.area}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
+                    ) : (
+                      <Text style={styles.palodeTag}>{PALODE_LOCATION.tag}</Text>
+                    )}
+                  </View>
+                  <Text style={styles.palodeSubtitle} numberOfLines={1}>
+                    {PALODE_LOCATION.subtitle}
+                  </Text>
+                </View>
+                {isPalodeActive ? (
+                  <Check size={18} color="#EA580C" />
+                ) : (
+                  <ChevronRight size={18} color="#94A3B8" />
+                )}
+              </TouchableOpacity>
             </View>
 
             {/* Proximity Radius Shortcut */}
@@ -711,56 +619,63 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textTransform: "uppercase"
   },
-  popularGrid: {
+  palodeCard: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8
-  },
-  popularCard: {
-    width: "48.5%",
+    alignItems: "center",
     backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#E2E8F0"
+    padding: 13,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    gap: 12
   },
-  popularCardActive: {
+  palodeCardActive: {
     backgroundColor: "#FFF7ED",
     borderColor: "#EA580C"
   },
-  popularCardTop: {
-    flexDirection: "row",
+  palodeIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "#FFF7ED",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 2
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#FED7AA"
   },
-  popularCity: {
-    fontSize: 13,
+  palodeIconBoxActive: {
+    backgroundColor: "#FFEDD5",
+    borderColor: "#FDBA74"
+  },
+  palodeTitle: {
+    fontSize: 15,
     fontWeight: "800",
     color: "#0F172A"
   },
-  popularCityActive: {
+  palodeTitleActive: {
     color: "#EA580C"
   },
-  popularTag: {
-    fontSize: 9,
+  palodeSubtitle: {
+    fontSize: 12,
+    color: "#64748B",
+    marginTop: 2
+  },
+  palodeTag: {
+    fontSize: 10,
     fontWeight: "600",
     color: "#94A3B8"
   },
-  popularArea: {
-    fontSize: 11,
-    color: "#64748B"
-  },
-  popularAreaActive: {
-    color: "#9A3412"
-  },
-  activeCheckPill: {
+  activeLocationBadge: {
     backgroundColor: "#EA580C",
-    borderRadius: 9999,
-    width: 16,
-    height: 16,
-    alignItems: "center",
-    justifyContent: "center"
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999
+  },
+  activeLocationBadgeText: {
+    fontSize: 9,
+    fontWeight: "800",
+    color: "#FFFFFF",
+    textTransform: "uppercase"
   },
   radiusShortcutCard: {
     flexDirection: "row",
