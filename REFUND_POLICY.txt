@@ -1,145 +1,108 @@
-================================================================================
-              REFUND AND CANCELLATION POLICY FOR SMARTSHOPPER
-         SmartShopper Consumer (SSC) & SmartShopper Merchant (SSM)
-                     Operated by JRINA Private Limited
-================================================================================
-Last Updated: October 2026
-Effective Date: October 2026
+# SmartShopper Consumer — Refund & Cancellation Policy
 
-Official Domain: https://jrina.online / https://ssc.jrina.online
-Consumer App ID: online.jrina.smartshopper.consumer
-Merchant App ID: online.jrina.smartshopper.merchant
-Registered Entity: JRINA Private Limited
-Registered Office: Peringammala, Palode, Nedumangad, Thiruvananthapuram,
-                   Kerala, India - 695562
-Support Desk: support@jrina.online | Grievance Desk: grievance@jrina.online
+**Operated by:** JRINA Private Limited  
+**Website:** https://ssc.jrina.online  
+**Effective Date:** 28 October 2026  
+**Last Updated:** 28 October 2026  
 
---------------------------------------------------------------------------------
-1. INTRODUCTION & PLATFORM ROLE
---------------------------------------------------------------------------------
-This Refund & Cancellation Policy outlines the guidelines, terms, and procedures
-governing cancellations, returns, refunds, and financial disputes across the
-SmartShopper platform, comprising SmartShopper Consumer ("SSC") and SmartShopper
-Merchant ("SSM"), operated by JRINA Private Limited ("Company", "we", "us", or "our").
+## 1. Scope
 
-JRINA Private Limited operates SmartShopper strictly as an intermediary technology
-and digital discovery platform under Section 79 of the Information Technology Act,
-2000. SmartShopper facilitates hyper-local deal discovery, proximity radar alerts,
-digital voucher issuance, and customer-merchant direct communication.
+SmartShopper Consumer (“SSC”) provides merchant and deal discovery outside Kerala and supports purchasing functionality in Kerala where enabled.
 
-JRINA Private Limited is NOT a seller, retailer, distributor, or manufacturer of
-goods, groceries, or services listed by independent merchant partners.
+This policy explains the ordinary treatment of cancellations, platform fees, delivery charges, and refund requests involving SSC-related transactions.
 
---------------------------------------------------------------------------------
-2. CONSUMER RETAIL PURCHASES (SSC)
---------------------------------------------------------------------------------
-2.1. Transaction Settlement Method:
-All retail transactions initiated through or facilitated by SmartShopper Consumer
-(including counter purchases, click-and-collect, or merchant delivery orders) are
-settled directly between the consumer and the independent merchant partner using:
-  a) Cash on Delivery / Counter Cash (COD), or
-  b) Direct Peer-to-Merchant Unified Payments Interface (UPI) transfer.
+All refund decisions remain subject to applicable law and mandatory consumer rights.
 
-SmartShopper Consumer DOES NOT collect, process, hold, or route consumer purchase
-funds through an escrow, wallet, or payment intermediary account.
+## 2. Regional Availability
 
-2.2. Merchant Responsibility & Return Policies:
-Each independent merchant partner establishes, maintains, and enforces their own
-return, replacement, cancellation, and refund policies in accordance with applicable
-consumer protection standards.
-  a) Perishable Items (e.g., fresh groceries, vegetables, milk, meat, bakery items):
-     Typically non-returnable once accepted at counter delivery, unless demonstrably
-     spoiled or defective at the point of receipt.
-  b) Non-Perishable Goods: Subject to individual merchant store return windows,
-     provided items are returned in original packaging with physical invoices.
-  c) Order Cancellations: Consumers may cancel a pending order directly with the
-     merchant before dispatch or fulfillment by contacting the merchant via the
-     in-app chat or phone number provided on the store profile.
+### Kerala
+Eligible users may access purchasing functionality where enabled in SSC. The applicable checkout conditions, payment arrangements, delivery service, and refund terms will depend on the transaction.
 
-2.3. Processing of Consumer Refunds:
-Because consumer purchase payments are made directly to the merchant (via cash or
-direct UPI), any approved return or refund must be reimbursed directly by the
-respective merchant to the consumer. JRINA Private Limited does not possess consumer
-retail funds and cannot execute automated financial chargebacks for retail goods.
+### Outside Kerala
+SSC is limited to deal and merchant discovery. Purchasing functionality through SSC is not available in these locations under the current model.
 
---------------------------------------------------------------------------------
-3. DIGITAL VOUCHERS & PROMOTIONAL OFFERS
---------------------------------------------------------------------------------
-3.1. Promotional Instrument Nature:
-Digital vouchers, flash deals, and promotional coupons claimed within the SSC app
-are non-monetary, single-use promotional instruments intended to grant discounts
-at participating partner stores.
+## 3. Platform Fee — ₹1
 
-3.2. No Cash Value:
-Vouchers possess no independent cash face value, cannot be redeemed for legal tender,
-cannot be transferred to third-party bank accounts, and cannot be refunded or exchanged
-for currency under any circumstances.
+Where applicable, a platform fee of ₹1 may be charged for an eligible transaction. The fee must be disclosed before the transaction is confirmed.
 
-3.3. Merchant Honoring & Expiry:
-Vouchers must be redeemed at the merchant counter prior to the stated expiration date
-and subject to specific offer criteria (e.g., minimum purchase threshold). Expired,
-previously redeemed, or invalidated vouchers cannot be reissued or refunded.
+The platform fee is ordinarily non-refundable once the relevant platform service has been provided or the transaction has been processed.
 
---------------------------------------------------------------------------------
-4. MERCHANT SAAS SUBSCRIPTION CHARGES (SSM)
---------------------------------------------------------------------------------
-4.1. Nature of Merchant Charges:
-Charges levied by JRINA Private Limited on the SmartShopper Merchant ("SSM")
-application represent recurring business-to-business (B2B) software-as-a-service
-(SaaS) platform subscription and technology licensing fees, processed through
-RBI-authorized payment aggregators (such as Cashfree Payments India Pvt. Ltd.).
+However, a refund may be considered or required where the fee was charged incorrectly, charged more than once, the relevant service was not provided, or applicable law otherwise requires a refund.
 
-4.2. Cancellation of Merchant Subscriptions:
-Merchants may cancel their platform subscription renewal at any time via the SSM
-dashboard or by notifying merchant support at support@jrina.online. Cancellation takes
-effect at the conclusion of the currently active paid billing cycle.
+## 4. Delivery Charges
 
-4.3. Subscription Refund Eligibility:
-  a) Initial Activation Window: A merchant may request a full refund of platform fees
-     within seven (7) calendar days of initial account onboarding if the software or
-     radar broadcast engine demonstrably fails to activate due to verifiable technical
-     defects on JRINA's infrastructure.
-  b) Post-Activation Period: Subscription fees are non-refundable once the platform
-     tools, store profile, and radar broadcast systems have been operational during
-     the billing cycle.
+Delivery charges, where applicable, will be disclosed before order confirmation.
 
---------------------------------------------------------------------------------
-5. FAILED, DUPLICATE, OR DISPUTED TRANSACTIONS
---------------------------------------------------------------------------------
-5.1. Technical Duplicate Charges:
-In the event of duplicate billing or debits occurring on JRINA's merchant SaaS
-subscription gateway, verified duplicate amounts will be reversed to the original
-payment source within 5 to 7 business days following merchant notification.
+Delivery charges are ordinarily non-refundable once the delivery service has been completed.
 
-5.2. Consumer-Merchant Dispute Mediation:
-While JRINA Private Limited is not a party to retail consumer transactions, we are
-committed to maintaining a trustworthy marketplace. If a consumer experiences an
-unresolved dispute regarding defective goods, unhonored valid vouchers, or incorrect
-billing by a listed partner merchant:
-  a) The consumer may submit details (including merchant name, bill photo, date,
-     and description of issue) to support@jrina.online.
-  b) JRINA will facilitate communication with the merchant to seek an amicable
-     resolution. Repeated merchant non-compliance will result in suspension or
-     permanent removal from the SmartShopper platform.
+Where delivery has not been performed, an order is cancelled before the service is provided, delivery fails, or another circumstance gives rise to a legally required refund, the request will be assessed based on the facts and applicable law.
 
---------------------------------------------------------------------------------
-6. GRIEVANCE ESCALATION & CONTACT
---------------------------------------------------------------------------------
-For questions, return grievances, or clarification regarding this Refund and
-Cancellation Policy, please contact our support desk:
+This policy does not exclude refunds or other remedies that are legally required.
 
-  JRINA Private Limited
-  Attn: Support & Grievance Desk
-  Address: Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala - 695562
-  General Support: support@jrina.online
-  Grievance Inquiries: grievance@jrina.online
-  Website: https://ssc.jrina.online/policies / https://jrina.online
+## 5. Order Cancellation
 
---------------------------------------------------------------------------------
-7. GOVERNING LAW & JURISDICTION
---------------------------------------------------------------------------------
-This Policy is governed by and construed in accordance with the laws of the Republic
-of India. Any legal dispute or proceeding arising from this Policy shall be subject
-to the exclusive jurisdiction of the competent courts in Thiruvananthapuram, Kerala,
-India.
-================================================================================
+A cancellation request should be submitted as early as possible through the available order or support channel.
+
+Whether an order can be cancelled depends on its status, whether fulfilment or delivery has begun, the relevant transaction terms, and applicable law.
+
+Any applicable cancellation fee or other deduction must be disclosed where required and must comply with applicable law.
+
+No cancellation request will override a mandatory legal right to a refund or other remedy.
+
+## 6. Refund Eligibility
+
+Refund requests are assessed individually, considering:
+
+- The nature and status of the transaction.
+- Whether the relevant product or service was provided.
+- The reason for cancellation or the refund request.
+- Whether a payment was duplicated or incorrectly collected.
+- The role of JRINA, the merchant, and the payment provider.
+- The applicable transaction terms and mandatory legal requirements.
+
+The platform fee and delivery charges are ordinarily non-refundable as described above, subject to legally required refunds and other applicable consumer rights.
+
+## 7. Refund Processing
+
+Where JRINA is responsible for processing a refund, the applicable process and expected timeline will be communicated according to the transaction terms and payment-provider arrangements.
+
+Where the merchant or an external payment provider is responsible for a transaction, users may need to contact that party.
+
+SSC does not promise a universal refund-processing period. Any legally prescribed deadline takes precedence over an internal review process.
+
+## 8. How to Request Assistance
+
+For cancellation, refund, or transaction-related assistance, contact:
+
+**Email:** info@jrina.online  
+**Phone:** 6238624428  
+
+Please provide, where available:
+
+- Your name or SSC account identifier.
+- The order or transaction reference.
+- The merchant's details.
+- The date of the transaction.
+- A short explanation of the issue.
+
+Never share your password, PIN, card CVV, or other unnecessary sensitive payment credentials.
+
+## 9. Consumer Rights
+
+Nothing in this policy excludes or restricts rights or remedies available under applicable Indian law, including remedies for misleading representations, unfair trade practices, deficient services, or other legally recognised grounds.
+
+Where JRINA, a merchant, or another service provider is legally responsible for a refund or other remedy, the applicable obligation remains in force.
+
+## 10. Policy Changes
+
+JRINA may update this policy to reflect changes to SSC, its transaction arrangements, or applicable law. The latest version will be published on the SSC website with its effective or last-updated date.
+
+## 11. Contact Information
+
+**JRINA Private Limited**  
+Website: https://jrina.online  
+SmartShopper Consumer: https://ssc.jrina.online  
+Email: info@jrina.online  
+Phone: 6238624428  
+
+This policy must be read with the SSC Privacy Policy and Terms & Conditions.

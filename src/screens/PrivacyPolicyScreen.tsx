@@ -18,29 +18,29 @@ import {
   Mail,
   Phone,
   CheckCircle2,
-  Lock,
   FileText,
   ExternalLink,
-  Trash2,
-  RotateCcw
+  RotateCcw,
+  MapPin,
+  ShoppingBag
 } from "lucide-react-native";
 
 export const PrivacyPolicyScreen: React.FC = () => {
   const navigation = useNavigation<any>();
 
-  const handleOpenEmail = (subject?: string, body?: string) => {
+  const handleOpenEmail = (subject?: string) => {
     const url = `mailto:info@jrina.online?subject=${encodeURIComponent(
       subject || "Privacy Inquiry - SmartShopper"
-    )}&body=${encodeURIComponent(body || "")}`;
+    )}`;
     Linking.openURL(url).catch(() => {});
   };
 
   const handleOpenPhone = () => {
-    Linking.openURL("tel:+916238624428").catch(() => {});
+    Linking.openURL("tel:6238624428").catch(() => {});
   };
 
   const handleOpenWebsite = () => {
-    Linking.openURL("https://www.jrina.online").catch(() => {});
+    Linking.openURL("https://ssc.jrina.online").catch(() => {});
   };
 
   return (
@@ -69,7 +69,7 @@ export const PrivacyPolicyScreen: React.FC = () => {
         <View style={styles.tabBarWrapper}>
           <TouchableOpacity style={[styles.tabItem, styles.tabItemActive]} activeOpacity={1}>
             <ShieldCheck size={13} color="#EA580C" />
-            <Text style={[styles.tabText, styles.tabTextActive]}>Privacy Policy</Text>
+            <Text style={[styles.tabText, styles.tabTextActive]}>Privacy</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -78,7 +78,7 @@ export const PrivacyPolicyScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <FileText size={13} color="#94A3B8" />
-            <Text style={styles.tabText}>Terms of Service</Text>
+            <Text style={styles.tabText}>Terms</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -104,343 +104,464 @@ export const PrivacyPolicyScreen: React.FC = () => {
                   <ShieldCheck size={22} color="#EA580C" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.cardMainTitle}>Consumer Privacy Policy</Text>
-                  <Text style={styles.entitySub}>
-                    Entity: <Text style={styles.bold}>JRINA Private Limited</Text> (Operating SmartShopper)
-                  </Text>
+                  <Text style={styles.cardMainTitle}>SmartShopper Consumer</Text>
+                  <Text style={styles.entitySub}>Privacy Policy</Text>
                 </View>
               </View>
 
-              <View style={styles.effectiveBadge}>
-                <Calendar size={13} color="#EA580C" />
-                <Text style={styles.effectiveText}>Effective Date: October 2026 | Last Updated: October 2026</Text>
+              <View style={styles.metaRow}>
+                <View style={styles.effectiveBadge}>
+                  <Calendar size={13} color="#EA580C" />
+                  <Text style={styles.effectiveText}>Effective & Last Updated: 28 October 2026</Text>
+                </View>
               </View>
             </View>
 
-            {/* Intro Alert Box */}
-            <View style={styles.introBox}>
-              <Text style={styles.introText}>
-                At <Text style={styles.bold}>SmartShopper</Text>, owned and operated by{" "}
-                <Text style={styles.bold}>JRINA Private Limited</Text> (&quot;Company&quot;, &quot;we&quot;,
-                &quot;our&quot;, or &quot;us&quot;), we take your privacy and personal data protection
-                seriously. This Privacy Policy details the exact categories of data we collect, why we need
-                it, how it is safeguarded under Indian law, and how you can exercise your privacy and account deletion rights.
-              </Text>
+            {/* Quick Meta Card */}
+            <View style={styles.companyPill}>
+              <View style={styles.companyPillRow}>
+                <Building2 size={15} color="#0F172A" />
+                <Text style={styles.companyPillText}>
+                  Operated by: <Text style={styles.bold}>JRINA Private Limited</Text>
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.companyPillRow}
+                onPress={handleOpenWebsite}
+                activeOpacity={0.7}
+              >
+                <Globe size={15} color="#EA580C" />
+                <Text style={[styles.companyPillText, styles.linkText]}>https://ssc.jrina.online</Text>
+                <ExternalLink size={12} color="#EA580C" />
+              </TouchableOpacity>
             </View>
 
-            {/* Section 1 */}
+            {/* Section 1: Introduction */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>1</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Information We Actually Collect</Text>
+                <Text style={styles.sectionHeading}>Introduction</Text>
               </View>
-
-              <View style={styles.bulletList}>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Account Credentials:</Text> Full name, username, verified
-                    email address, mobile phone number, and encrypted password hash (managed securely via
-                    Supabase Auth).
-                  </Text>
-                </View>
-
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Consented Geolocation & Saved Hubs:</Text> Foreground GPS coordinates
-                    (latitude/longitude) or user-selected geographic locations (e.g., Palode, Kerala). Your last
-                    consented coordinates and source (&apos;gps&apos; or &apos;saved_address&apos;) are saved in our secure
-                    push token database strictly to filter and deliver hyper-local deal alerts within a 5,000-metre
-                    radius. We do not track continuous background movement or store historical location trails.
-                  </Text>
-                </View>
-
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Delivery Addresses:</Text> House/flat details, street area, city,
-                    district, postal code, and delivery coordinates stored locally and synced to your profile for
-                    order fulfillment.
-                  </Text>
-                </View>
-
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Vouchers & Transaction Records:</Text> Promotional voucher
-                    claim codes, in-store redemption timestamps, unique Customer ID barcode passes (e.g., SS-CUS-xxxx),
-                    and itemized digital E-Bills issued by partner merchants.
-                  </Text>
-                </View>
-
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>In-App Communications & Reviews:</Text> Direct customer-to-merchant
-                    chat messages stored in our database for order inquiries, and consumer store ratings or reviews.
-                  </Text>
-                </View>
-
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Device & Push Tokens:</Text> Expo Push Notification tokens, Firebase
-                    Cloud Messaging (FCM) tokens, device operating system, and diagnostic logs to ensure reliable
-                    notification delivery.
-                  </Text>
-                </View>
-              </View>
+              <Text style={styles.bodyText}>
+                JRINA Private Limited (&ldquo;JRINA&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;)
+                operates SmartShopper Consumer (&ldquo;SSC&rdquo;), a platform that helps users discover
+                local merchants, explore deals, and access purchasing functionality where available.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                This Privacy Policy explains how information may be collected, used, stored, and shared
+                when you use SSC.
+              </Text>
             </View>
 
-            {/* Section 2: Data We Do NOT Collect */}
+            {/* Section 2: Regional Availability */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>2</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Data We Do NOT Collect or Store</Text>
+                <Text style={styles.sectionHeading}>Regional Availability</Text>
               </View>
-              <View style={styles.noticeBox}>
-                <Lock size={16} color="#10B981" style={{ marginTop: 2, flexShrink: 0 }} />
-                <Text style={styles.noticeText}>
-                  <Text style={styles.bold}>No Banking Credentials Stored:</Text> We do not collect or store
-                  sensitive financial data such as credit/debit card numbers, CVVs, expiry dates, or NetBanking
-                  passwords on our servers. Consumer purchases from partner stores are fulfilled via Cash on Delivery
-                  (COD) or direct UPI transfer to the merchant.
-                </Text>
+              <Text style={styles.bodyText}>
+                SSC provides different functionality depending on the user&apos;s location.
+              </Text>
+
+              <View style={styles.regionalGrid}>
+                <View style={[styles.regionalCard, styles.keralaCard]}>
+                  <View style={styles.regionalHeader}>
+                    <ShoppingBag size={16} color="#047857" />
+                    <Text style={styles.keralaTitle}>Kerala, India</Text>
+                  </View>
+                  <Text style={styles.regionalDesc}>
+                    Eligible users may access available purchasing functionality, subject to merchant
+                    participation, serviceability, and checkout conditions.
+                  </Text>
+                </View>
+
+                <View style={[styles.regionalCard, styles.outsideCard]}>
+                  <View style={styles.regionalHeader}>
+                    <MapPin size={16} color="#64748B" />
+                    <Text style={styles.outsideTitle}>Outside Kerala</Text>
+                  </View>
+                  <Text style={styles.regionalDesc}>
+                    SSC is limited to merchant and deal discovery. Purchase functionality through SSC is
+                    not available in these locations unless JRINA expressly introduces it.
+                  </Text>
+                </View>
               </View>
-              <Text style={[styles.sectionLead, { marginTop: 8 }]}>
-                We do not sell, rent, monetize, or lease your personal data or location coordinates to third-party
-                advertising networks, brokers, or data aggregators.
+
+              <Text style={[styles.subnote, styles.topGap]}>
+                The information processed may vary depending on the features you use.
               </Text>
             </View>
 
-            {/* Section 3: Purpose of Processing */}
+            {/* Section 3: Information We May Collect */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>3</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Purpose of Collection & Processing</Text>
+                <Text style={styles.sectionHeading}>Information We May Collect</Text>
               </View>
 
-              <View style={styles.listContainer}>
-                {[
-                  "To generate and maintain your permanent Customer ID and Digital Loyalty Pass.",
-                  "To compute real-time proximity to partner stores and display accurate store distances on the interactive map.",
-                  "To deliver 5,000-metre geofenced deal notifications for active offers nearby.",
-                  "To verify single-use discount vouchers upon scanning at merchant counters.",
-                  "To facilitate direct in-app chat communication with partner store owners regarding orders and availability.",
-                  "To deliver itemized digital E-Bills issued by merchants upon checkout.",
-                  "To prevent fraudulent claims, duplicated vouchers, and automated bot access."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
+              <View style={styles.subItem}>
+                <Text style={styles.subItemTitle}>3.1 Account information</Text>
+                <Text style={styles.bodyText}>
+                  Depending on the registration and authentication features you use, SSC may process
+                  your name, email address, phone number, account identifier, and authentication-related
+                  information.
+                </Text>
+              </View>
+
+              <View style={styles.subItem}>
+                <Text style={styles.subItemTitle}>3.2 Location information</Text>
+                <Text style={styles.bodyText}>
+                  SSC may request GPS location permission to identify nearby merchants and display
+                  location-relevant deals.
+                </Text>
+                <Text style={[styles.bodyText, styles.topGap]}>
+                  You can deny or revoke location permission through your device settings. Some
+                  location-dependent features may then become unavailable or less accurate.
+                </Text>
+                <View style={styles.verifiedBox}>
+                  <CheckCircle2 size={15} color="#0284C7" />
+                  <Text style={styles.verifiedText}>
+                    Background location collection, continuous tracking, and precise-location storage
+                    will not be represented as practices unless verified in the deployed application.
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.subItem}>
+                <Text style={styles.subItemTitle}>3.3 Order and transaction information</Text>
+                <Text style={styles.bodyText}>
+                  Where purchasing functionality is available in Kerala, SSC may process information
+                  necessary to support an order, such as order references, merchant details, selected
+                  products or services, delivery information, transaction status, and refund requests,
+                  to the extent those features are implemented.
+                </Text>
+                <Text style={[styles.bodyText, styles.topGap]}>
+                  Payment credentials should be handled by the applicable payment provider where its
+                  integration is used. The precise data flow must be verified against the production
+                  implementation.
+                </Text>
+              </View>
+
+              <View style={styles.subItem}>
+                <Text style={styles.subItemTitle}>3.4 Technical information</Text>
+                <Text style={styles.bodyText}>
+                  Depending on enabled functionality, technical information may include device and
+                  application identifiers, notification tokens, operating-system information, crash
+                  reports, and diagnostic events.
+                </Text>
+              </View>
+
+              <View style={styles.subItem}>
+                <Text style={styles.subItemTitle}>3.5 Support communications</Text>
+                <Text style={styles.bodyText}>
+                  If you contact us, we may process your contact details and the information you
+                  provide to respond to your enquiry, investigate a complaint, or address a refund request.
+                </Text>
               </View>
             </View>
 
-            {/* Section 4: Authorized Third-Party Processors */}
+            {/* Section 4: How We Use Information */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>4</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Verified Third-Party Processors</Text>
+                <Text style={styles.sectionHeading}>How We Use Information</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                We partner with established cloud and infrastructure providers operating under strict security obligations:
-              </Text>
-
-              <View style={styles.listContainer}>
+              <Text style={styles.bodyText}>Information may be used, where applicable, to:</Text>
+              <View style={styles.bulletList}>
                 {[
-                  {
-                    title: "Supabase Inc.",
-                    desc: "Cloud database storage (PostgreSQL), secure user authentication, and encrypted Realtime WebSocket synchronization."
-                  },
-                  {
-                    title: "Expo & Google Firebase (FCM)",
-                    desc: "Device push notification routing for real-time deal alerts, merchant replies, and order updates."
-                  },
-                  {
-                    title: "OpenStreetMap & Leaflet",
-                    desc: "Open-source map tiles and geocoding services. No personal identity is transmitted to map servers."
-                  },
-                  {
-                    title: "Google Gemini AI (Google LLC)",
-                    desc: "Opt-in shopping assistant. Queries are processed with local offer context to provide natural language recommendations."
-                  },
-                  {
-                    title: "Cashfree Payments India",
-                    desc: "PCI-DSS certified payment aggregator utilized for platform subscriptions on merchant workstation services."
-                  }
+                  "Create and maintain user accounts.",
+                  "Display nearby merchants and deals.",
+                  "Support purchasing and order fulfilment in eligible locations.",
+                  "Coordinate order and delivery-related information.",
+                  "Process or investigate transaction and refund requests.",
+                  "Provide customer support and grievance handling.",
+                  "Maintain application security and reliability.",
+                  "Meet applicable legal and regulatory obligations."
                 ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>
-                      <Text style={styles.bold}>{item.title}</Text> — {item.desc}
-                    </Text>
+                  <View key={idx} style={styles.bulletItem}>
+                    <CheckCircle2 size={15} color="#EA580C" style={styles.bulletIcon} />
+                    <Text style={styles.bulletText}>{item}</Text>
                   </View>
                 ))}
               </View>
+              <Text style={[styles.subnote, styles.topGap]}>
+                We will not claim that a particular feature collects information unless that collection
+                is supported by the actual implementation.
+              </Text>
             </View>
 
-            {/* Section 5: Security & Row-Level Security */}
+            {/* Section 5: Location Permission */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>5</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Data Protection & Security Controls</Text>
+                <Text style={styles.sectionHeading}>Location Permission</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                We implement industry-standard technical safeguards, including HTTPS/TLS encryption in transit,
-                Row-Level Security (RLS) policies on our PostgreSQL databases ensuring users only access authorized
-                data, encrypted password hashing, and least-privilege service-role API boundaries.
+              <Text style={styles.bodyText}>
+                Location permission is requested to support location-dependent functionality.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                You may disable location access through your device settings. This may affect nearby
+                merchant discovery and related features.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The exact frequency of GPS access, location precision, retention period, and whether
+                coordinates are stored on a server depend on the deployed application and must be
+                verified before publication.
               </Text>
             </View>
 
-            {/* Section 6: Indian DPDP Act & Privacy Rights */}
+            {/* Section 6: Sharing of Information */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>6</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Your Rights under Indian Privacy Laws</Text>
+                <Text style={styles.sectionHeading}>Sharing of Information</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                Under the Information Technology Act, 2000, the Information Technology (Reasonable Security Practices
-                and Procedures and Sensitive Personal Data or Information) Rules, 2011, and the Digital Personal Data
-                Protection (DPDP) Act, 2023, you hold the following rights:
+              <Text style={styles.bodyText}>
+                Information may be shared with relevant parties when necessary to provide the service,
+                subject to applicable law. These may include:
               </Text>
-
-              <View style={styles.listContainer}>
+              <View style={styles.bulletList}>
                 {[
-                  "Right to Access: Request a summary of your personal data processed by SmartShopper.",
-                  "Right to Correction: Update inaccurate profile details directly in the Account tab.",
-                  "Right to Withdraw Consent: Turn off location permissions or notification toggles at any time via device settings.",
-                  "Right to Erasure / Account Deletion: Permanently delete your user profile, voucher claims, and associated records."
+                  "Participating merchants involved in an order or customer enquiry.",
+                  "Delivery partners, where delivery functionality is used.",
+                  "Payment providers handling an eligible transaction.",
+                  "Hosting, database, authentication, mapping, and notification providers actually used by SSC.",
+                  "Authorities where disclosure is required by law."
                 ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
+                  <View key={idx} style={styles.bulletItem}>
+                    <CheckCircle2 size={15} color="#0284C7" style={styles.bulletIcon} />
+                    <Text style={styles.bulletText}>{item}</Text>
                   </View>
                 ))}
               </View>
-
-              {/* Deletion Card */}
-              <View style={styles.deletionCard}>
-                <View style={{ flex: 1, marginRight: 10 }}>
-                  <Text style={styles.deletionTitle}>Request Complete Data & Account Deletion</Text>
-                  <Text style={styles.deletionDesc}>
-                    Email our privacy desk at info@jrina.online to permanently erase your profile, voucher claims,
-                    and stored addresses within 30 days.
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  style={styles.deletionBtn}
-                  onPress={() =>
-                    handleOpenEmail(
-                      "Account Deletion Request - SmartShopper",
-                      "Dear JRINA Privacy Team,\n\nPlease permanently delete my SmartShopper Consumer account and associated personal data.\n\nMy Registered Phone: \nMy Registered Name: \n\nThank you."
-                    )
-                  }
-                  activeOpacity={0.8}
-                >
-                  <Trash2 size={14} color="#FFFFFF" />
-                  <Text style={styles.deletionBtnText}>Submit Request</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The information shared will depend on the transaction and the role of each party. We will
+                not claim that all listed providers are active integrations without verifying the
+                production configuration.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                For purchases completed directly with a merchant outside SSC, the merchant&apos;s own
+                privacy and payment arrangements may apply.
+              </Text>
             </View>
 
-            {/* Section 7: Grievance Officer & Contact */}
-            <View style={[styles.sectionBlock, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+            {/* Section 7: Platform Fees and Delivery Information */}
+            <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>7</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Grievance Officer & Corporate Contact</Text>
+                <Text style={styles.sectionHeading}>Platform Fees and Delivery Information</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                In accordance with Rule 5(9) of the IT (Reasonable Security Practices) Rules, 2011, and the DPDP Act, 2023,
-                inquiries, consent revocations, or grievances should be directed to our designated Grievance Desk:
+              <Text style={styles.bodyText}>
+                Where applicable, SSC may process information concerning the platform fee, delivery
+                charge, order status, and related refund requests.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The current fee and refund terms are described in the Refund & Cancellation Policy. The
+                actual amounts and terms applicable to a transaction will be disclosed where required
+                before confirmation.
+              </Text>
+            </View>
+
+            {/* Section 8: Data Retention */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>8</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Data Retention</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                We retain information for as long as reasonably necessary for the relevant service,
+                support, security, accounting, and legal purposes, subject to applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Retention periods may vary by data category. Information may need to be retained where
+                legally required, including for legitimate transaction records or dispute resolution.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Specific retention and deletion timelines must be confirmed against the actual
+                database, backup, and account-deletion processes.
+              </Text>
+            </View>
+
+            {/* Section 9: Account Deletion and Data Requests */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>9</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Account Deletion and Data Requests</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                To request account deletion or ask about personal information, contact:
               </Text>
 
-              <View style={styles.contactGrid}>
-                {/* Office */}
-                <View style={styles.contactItem}>
-                  <Building2 size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>COMPANY & REGISTERED OFFICE</Text>
-                    <Text style={styles.contactTitle}>JRINA Private Limited</Text>
-                    <Text style={styles.contactDesc}>
-                      Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala, India - 695562
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Email */}
+              <View style={styles.contactCard}>
                 <TouchableOpacity
                   style={styles.contactItem}
-                  onPress={() => handleOpenEmail("Privacy Inquiry & Grievance - SmartShopper")}
+                  onPress={() => handleOpenEmail("Account Deletion Request")}
                   activeOpacity={0.7}
                 >
-                  <Mail size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>GRIEVANCE & PRIVACY OFFICER</Text>
-                    <Text style={[styles.contactTitle, styles.accentColor]}>info@jrina.online</Text>
-                    <Text style={styles.contactDesc}>Redressal timeline: Acknowledgement within 24 hours, resolution within 15 days</Text>
-                  </View>
+                  <Mail size={16} color="#EA580C" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Email:</Text> info@jrina.online
+                  </Text>
                 </TouchableOpacity>
 
-                {/* Phone */}
                 <TouchableOpacity
                   style={styles.contactItem}
                   onPress={handleOpenPhone}
                   activeOpacity={0.7}
                 >
-                  <Phone size={20} color="#10B981" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>SUPPORT HELPLINE / WHATSAPP</Text>
-                    <Text style={[styles.contactTitle, { color: "#10B981" }]}>+91 6238624428</Text>
-                    <Text style={styles.contactDesc}>Mon - Sat: 9:00 AM - 7:00 PM IST</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* Website */}
-                <TouchableOpacity
-                  style={styles.contactItem}
-                  onPress={handleOpenWebsite}
-                  activeOpacity={0.7}
-                >
-                  <Globe size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>OFFICIAL CORPORATE PORTAL</Text>
-                    <View style={styles.linkRow}>
-                      <Text style={[styles.contactTitle, styles.accentColor]}>
-                        https://www.jrina.online
-                      </Text>
-                      <ExternalLink size={12} color="#EA580C" />
-                    </View>
-                  </View>
+                  <Phone size={16} color="#059669" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Phone:</Text> 6238624428
+                  </Text>
                 </TouchableOpacity>
               </View>
+
+              <Text style={[styles.bodyText, styles.topGap]}>
+                We may request reasonable verification before processing a request.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Requests will be handled in accordance with applicable law. Certain information may need
+                to be retained where legally required.
+              </Text>
+            </View>
+
+            {/* Section 10: Security */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>10</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Security</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                JRINA takes reasonable measures appropriate to the service to protect information
+                against unauthorised access, loss, misuse, and disclosure.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                No online service can guarantee absolute security. Specific claims about encryption,
+                security audits, certifications, or database access controls will be made only when
+                verified.
+              </Text>
+            </View>
+
+            {/* Section 11: Children's Privacy */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>11</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Children&apos;s Privacy</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                SSC must be used in accordance with applicable age-related laws and safeguards. Where
+                applicable law requires parental consent or additional protections for children, those
+                requirements must be followed.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The relevant age threshold and consent process must be reviewed against the actual
+                registration flow and applicable Indian law before publication.
+              </Text>
+            </View>
+
+            {/* Section 12: Your Privacy Rights */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>12</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Your Privacy Rights</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                Subject to applicable law and its effective provisions, you may have rights concerning
+                access, correction, updating, deletion, withdrawal of consent, and grievance
+                redressal.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Contact us to raise a privacy concern or exercise a right. Withdrawing a permission may
+                make a related feature unavailable but does not automatically invalidate processing
+                lawfully carried out before withdrawal.
+              </Text>
+            </View>
+
+            {/* Section 13: Changes to This Policy */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>13</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Changes to This Policy</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                We may update this policy to reflect changes to SSC, our data practices, or applicable
+                law. The latest version will be published on the SSC website with its effective or
+                last-updated date.
+              </Text>
+            </View>
+
+            {/* Section 14: Contact Information */}
+            <View style={[styles.sectionBlock, styles.noBorder]}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>14</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Contact Information</Text>
+              </View>
+
+              <View style={styles.finalContactBox}>
+                <Text style={styles.finalContactTitle}>JRINA Private Limited</Text>
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => Linking.openURL("https://jrina.online")}>
+                    <Text style={styles.finalLinkText}>Website: https://jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={handleOpenWebsite}>
+                    <Text style={styles.finalLinkText}>SmartShopper: https://ssc.jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Mail size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => handleOpenEmail("Privacy Policy Inquiry")}>
+                    <Text style={styles.finalLinkText}>Email: info@jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Phone size={15} color="#059669" />
+                  <TouchableOpacity onPress={handleOpenPhone}>
+                    <Text style={styles.finalLinkText}>Phone: 6238624428</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <Text style={[styles.subnote, styles.topGap]}>
+                This policy must be verified against actual production data flows and reviewed for
+                applicable legal requirements before publication.
+              </Text>
             </View>
           </View>
-
-          {/* Bottom Accept Button */}
-          <TouchableOpacity
-            style={styles.doneBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.doneBtnText}>Back to Account</Text>
-          </TouchableOpacity>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -450,96 +571,102 @@ export const PrivacyPolicyScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#0F172A"
   },
   container: {
     flex: 1,
-    backgroundColor: "#0F172A"
+    backgroundColor: "#F8FAFC"
   },
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#0F172A",
     borderBottomWidth: 1,
-    borderBottomColor: "#1E293B"
+    borderBottomColor: "#E2E8F0"
   },
   backButton: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: "#1E293B"
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12
   },
   headerTitleWrap: {
-    flex: 1,
-    alignItems: "center"
+    flex: 1
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#0F172A"
   },
   headerSubtitle: {
-    fontSize: 11,
-    color: "#94A3B8",
-    marginTop: 1
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "500"
   },
   headerIconWrap: {
-    padding: 6
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFF7ED",
+    alignItems: "center",
+    justifyContent: "center"
   },
   tabBarWrapper: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1E293B",
-    paddingHorizontal: 12,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#334155"
+    borderBottomColor: "#F1F5F9"
   },
   tabItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0F172A",
+    gap: 6,
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#334155",
-    gap: 5
+    borderColor: "#E2E8F0"
   },
   tabItemActive: {
     backgroundColor: "#FFF7ED",
-    borderColor: "#EA580C"
+    borderColor: "#FDBA74"
   },
   tabText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#94A3B8"
+    color: "#64748B"
   },
   tabTextActive: {
     color: "#EA580C",
-    fontWeight: "800"
+    fontWeight: "700"
   },
   scroll: {
     flex: 1
   },
   scrollContent: {
-    padding: 14,
-    paddingBottom: 36
+    padding: 16,
+    paddingBottom: 40
   },
   mainCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#1E293B",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2
   },
   cardHeader: {
     paddingBottom: 14,
@@ -549,112 +676,187 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: 12,
+    marginBottom: 10
   },
   titleIconBadge: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     backgroundColor: "#FFF7ED",
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
     alignItems: "center",
     justifyContent: "center"
   },
   cardMainTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "800",
     color: "#0F172A"
   },
   entitySub: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#64748B",
-    marginTop: 2
+    marginTop: 1
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center"
   },
   effectiveBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#FFF7ED",
+    paddingVertical: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-    marginTop: 12
+    borderRadius: 6,
+    gap: 6
   },
   effectiveText: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#64748B"
+    color: "#C2410C",
+    fontWeight: "600"
   },
-  introBox: {
-    backgroundColor: "#FFF7ED",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
+  companyPill: {
+    backgroundColor: "#F8FAFC",
     padding: 12,
-    marginTop: 14
+    borderRadius: 10,
+    marginTop: 14,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 6
   },
-  introText: {
-    fontSize: 12,
-    color: "#7C2D12",
-    lineHeight: 18
+  companyPillRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+  companyPillText: {
+    fontSize: 13,
+    color: "#334155"
+  },
+  linkText: {
+    color: "#EA580C",
+    fontWeight: "600"
   },
   sectionBlock: {
-    marginTop: 18,
-    paddingBottom: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9"
+  },
+  noBorder: {
+    borderBottomWidth: 0,
+    paddingBottom: 6
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 8
+    marginBottom: 10
   },
   sectionNumber: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#EA580C",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center"
   },
   sectionNumberText: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700"
   },
   sectionHeading: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A"
-  },
-  sectionLead: {
-    fontSize: 12,
-    color: "#475569",
-    lineHeight: 18
-  },
-  noticeBox: {
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: "#F0FDF4",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
-    padding: 10,
-    marginTop: 10
-  },
-  noticeText: {
-    fontSize: 11,
-    color: "#166534",
-    lineHeight: 16,
+    fontWeight: "700",
+    color: "#0F172A",
     flex: 1
   },
-  bulletList: {
+  bodyText: {
+    fontSize: 13.5,
+    color: "#334155",
+    lineHeight: 20
+  },
+  topGap: {
+    marginTop: 8
+  },
+  bold: {
+    fontWeight: "700",
+    color: "#0F172A"
+  },
+  regionalGrid: {
+    marginTop: 10,
+    gap: 10
+  },
+  regionalCard: {
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1
+  },
+  keralaCard: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0"
+  },
+  outsideCard: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0"
+  },
+  regionalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4
+  },
+  keralaTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#047857"
+  },
+  outsideTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569"
+  },
+  regionalDesc: {
+    fontSize: 12.5,
+    color: "#334155",
+    lineHeight: 18
+  },
+  subnote: {
+    fontSize: 12,
+    color: "#64748B",
+    fontStyle: "italic",
+    lineHeight: 17
+  },
+  subItem: {
+    marginTop: 12,
+    paddingLeft: 4
+  },
+  subItemTitle: {
+    fontSize: 13.5,
+    fontWeight: "700",
+    color: "#0F172A",
+    marginBottom: 4
+  },
+  verifiedBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#F0F9FF",
+    borderColor: "#BAE6FD",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
     marginTop: 8,
+    gap: 8
+  },
+  verifiedText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#0369A1",
+    lineHeight: 17
+  },
+  bulletList: {
+    marginTop: 10,
     gap: 8
   },
   bulletItem: {
@@ -663,136 +865,55 @@ const styles = StyleSheet.create({
     gap: 8
   },
   bulletIcon: {
-    marginTop: 2,
-    flexShrink: 0
+    marginTop: 2
   },
-  bulletContent: {
-    fontSize: 12,
+  bulletText: {
+    flex: 1,
+    fontSize: 13,
     color: "#334155",
-    lineHeight: 18,
-    flex: 1
+    lineHeight: 19
   },
-  listContainer: {
-    marginTop: 6,
-    gap: 6
-  },
-  dotItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8
-  },
-  dot: {
-    color: "#EA580C",
-    fontSize: 14,
-    lineHeight: 18
-  },
-  dotText: {
-    fontSize: 12,
-    color: "#334155",
-    lineHeight: 18,
-    flex: 1
-  },
-  bold: {
-    fontWeight: "700"
-  },
-  linkText: {
-    color: "#EA580C",
-    textDecorationLine: "underline"
-  },
-  deletionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#FEF2F2",
-    borderRadius: 12,
+  contactCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#FECACA",
+    borderColor: "#E2E8F0",
     padding: 12,
-    marginTop: 14
-  },
-  deletionTitle: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "#991B1B"
-  },
-  deletionDesc: {
-    fontSize: 11,
-    color: "#7F1D1D",
-    marginTop: 2,
-    lineHeight: 15
-  },
-  deletionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#DC2626",
-    paddingVertical: 7,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    gap: 4
-  },
-  deletionBtnText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF"
-  },
-  contactGrid: {
-    marginTop: 12,
+    marginTop: 10,
     gap: 10
   },
   contactItem: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    alignItems: "center",
     gap: 10
   },
-  contactIcon: {
-    marginTop: 2
-  },
-  contactSmall: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#94A3B8",
-    letterSpacing: 0.5
-  },
-  contactTitle: {
+  contactItemText: {
     fontSize: 13,
-    fontWeight: "800",
+    color: "#334155"
+  },
+  finalContactBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 14,
+    marginTop: 8,
+    gap: 8
+  },
+  finalContactTitle: {
+    fontSize: 14,
+    fontWeight: "700",
     color: "#0F172A",
-    marginTop: 1
+    marginBottom: 2
   },
-  contactDesc: {
-    fontSize: 11,
-    color: "#64748B",
-    marginTop: 2,
-    lineHeight: 15
-  },
-  accentColor: {
-    color: "#EA580C"
-  },
-  linkRow: {
+  finalContactRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4
+    gap: 8
   },
-  doneBtn: {
-    marginTop: 16,
-    backgroundColor: "#EA580C",
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    shadowColor: "#EA580C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4
-  },
-  doneBtnText: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF"
+  finalLinkText: {
+    fontSize: 13,
+    color: "#0F172A",
+    fontWeight: "500"
   }
 });

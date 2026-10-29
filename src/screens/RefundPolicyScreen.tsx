@@ -21,25 +21,29 @@ import {
   AlertTriangle,
   FileText,
   ShieldCheck,
-  ExternalLink
+  ExternalLink,
+  MapPin,
+  ShoppingBag,
+  Coins,
+  Truck
 } from "lucide-react-native";
 
 export const RefundPolicyScreen: React.FC = () => {
   const navigation = useNavigation<any>();
 
-  const handleOpenEmail = (subject?: string, body?: string) => {
+  const handleOpenEmail = (subject?: string) => {
     const url = `mailto:info@jrina.online?subject=${encodeURIComponent(
-      subject || "Inquiry - SmartShopper Refunds"
-    )}&body=${encodeURIComponent(body || "")}`;
+      subject || "Refund & Cancellation Inquiry - SmartShopper"
+    )}`;
     Linking.openURL(url).catch(() => {});
   };
 
   const handleOpenPhone = () => {
-    Linking.openURL("tel:+916238624428").catch(() => {});
+    Linking.openURL("tel:6238624428").catch(() => {});
   };
 
   const handleOpenWebsite = () => {
-    Linking.openURL("https://www.jrina.online").catch(() => {});
+    Linking.openURL("https://ssc.jrina.online").catch(() => {});
   };
 
   return (
@@ -64,7 +68,7 @@ export const RefundPolicyScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Legal Policies Tab Bar for seamless switching */}
+        {/* Legal Policies Tab Bar */}
         <View style={styles.tabBarWrapper}>
           <TouchableOpacity
             style={styles.tabItem}
@@ -72,7 +76,7 @@ export const RefundPolicyScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <ShieldCheck size={13} color="#94A3B8" />
-            <Text style={styles.tabText}>Privacy Policy</Text>
+            <Text style={styles.tabText}>Privacy</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -81,7 +85,7 @@ export const RefundPolicyScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <FileText size={13} color="#94A3B8" />
-            <Text style={styles.tabText}>Terms of Service</Text>
+            <Text style={styles.tabText}>Terms</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.tabItem, styles.tabItemActive]} activeOpacity={1}>
@@ -103,265 +107,371 @@ export const RefundPolicyScreen: React.FC = () => {
                   <RotateCcw size={22} color="#EA580C" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.cardMainTitle}>Refund & Cancellation Policy</Text>
-                  <Text style={styles.entitySub}>
-                    Operating Entity: <Text style={styles.bold}>JRINA Private Limited</Text> (SmartShopper Operator)
-                  </Text>
+                  <Text style={styles.cardMainTitle}>SmartShopper Consumer</Text>
+                  <Text style={styles.entitySub}>Refund & Cancellation Policy</Text>
                 </View>
               </View>
 
-              <View style={styles.effectiveBadge}>
-                <Calendar size={13} color="#EA580C" />
-                <Text style={styles.effectiveText}>Effective Date: October 2026 | Last Updated: October 2026</Text>
+              <View style={styles.metaRow}>
+                <View style={styles.effectiveBadge}>
+                  <Calendar size={13} color="#EA580C" />
+                  <Text style={styles.effectiveText}>Effective & Last Updated: 28 October 2026</Text>
+                </View>
               </View>
             </View>
 
-            {/* Intro Alert Box */}
-            <View style={styles.introBox}>
-              <Text style={styles.introText}>
-                This Refund and Cancellation Policy governs consumer transactions, in-store redemptions,
-                and digital orders placed via the <Text style={styles.bold}>SmartShopper Consumer (SSC)</Text> application
-                and website (<Text style={styles.linkText} onPress={() => Linking.openURL("https://ssc.jrina.online")}>ssc.jrina.online</Text>),
-                operated by <Text style={styles.bold}>JRINA Private Limited</Text> (&quot;Company&quot;, &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;).
-                Please review this policy to understand our platform role, order cancellation procedures, and refund mechanisms.
-              </Text>
+            {/* Quick Meta Card */}
+            <View style={styles.companyPill}>
+              <View style={styles.companyPillRow}>
+                <Building2 size={15} color="#0F172A" />
+                <Text style={styles.companyPillText}>
+                  Operated by: <Text style={styles.bold}>JRINA Private Limited</Text>
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.companyPillRow}
+                onPress={handleOpenWebsite}
+                activeOpacity={0.7}
+              >
+                <Globe size={15} color="#EA580C" />
+                <Text style={[styles.companyPillText, styles.linkText]}>https://ssc.jrina.online</Text>
+                <ExternalLink size={12} color="#EA580C" />
+              </TouchableOpacity>
             </View>
 
-            {/* Section 1: Platform Role & Transaction Model */}
+            {/* Section 1: Scope */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>1</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Platform Role & Transaction Structure</Text>
+                <Text style={styles.sectionHeading}>Scope</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                SmartShopper operates exclusively as an online hyper-local technology intermediary connecting consumers with independent retail stores, supermarkets, restaurants, and service outlets (&quot;Partner Merchants&quot;).
+              <Text style={styles.bodyText}>
+                SmartShopper Consumer (&ldquo;SSC&rdquo;) provides merchant and deal discovery outside
+                Kerala and supports purchasing functionality in Kerala where enabled.
               </Text>
-              <View style={styles.noticeBox}>
-                <AlertTriangle size={16} color="#FB923C" style={{ marginTop: 2, flexShrink: 0 }} />
-                <Text style={styles.noticeText}>
-                  <Text style={styles.bold}>Important Commercial Distinction:</Text> JRINA Private Limited is <Text style={styles.bold}>not</Text> the seller, manufacturer, packer, or distributor of consumer merchandise displayed in merchant store catalogs. Contractual sales of physical goods occur directly between the purchasing consumer and the designated independent Partner Merchant.
-                </Text>
-              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                This policy explains the ordinary treatment of cancellations, platform fees, delivery
+                charges, and refund requests involving SSC-related transactions.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                All refund decisions remain subject to applicable law and mandatory consumer rights.
+              </Text>
             </View>
 
-            {/* Section 2: Consumer Purchases & Payment Methods */}
+            {/* Section 2: Regional Availability */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>2</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Consumer Purchases & Payment Methods</Text>
+                <Text style={styles.sectionHeading}>Regional Availability</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                Orders placed via the SmartShopper consumer cart or direct Buy Now workflow support the following fulfillment and payment arrangements:
-              </Text>
-              <View style={styles.bulletList}>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Cash on Delivery (COD):</Text> Payment is collected in cash or store UPI by the merchant&apos;s delivery staff or at the merchant&apos;s checkout counter upon physical handover and inspection of goods.
+
+              <View style={styles.regionalGrid}>
+                <View style={[styles.regionalCard, styles.keralaCard]}>
+                  <View style={styles.regionalHeader}>
+                    <ShoppingBag size={16} color="#047857" />
+                    <Text style={styles.keralaTitle}>Kerala</Text>
+                  </View>
+                  <Text style={styles.regionalDesc}>
+                    Eligible users may access purchasing functionality where enabled in SSC. The
+                    applicable checkout conditions, payment arrangements, delivery service, and refund
+                    terms will depend on the transaction.
                   </Text>
                 </View>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Direct Merchant UPI / QR:</Text> Payments made via UPI QR codes are transferred directly from the customer&apos;s banking app to the merchant&apos;s registered UPI VPA. No funds are held in escrow or settled by JRINA Private Limited for retail merchandise purchases.
-                  </Text>
-                </View>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>In-Store Counter Purchases:</Text> Direct point-of-sale transactions where discounts are applied by scanning the shopper&apos;s Digital ID Pass are settled directly at the counter.
+
+                <View style={[styles.regionalCard, styles.outsideCard]}>
+                  <View style={styles.regionalHeader}>
+                    <MapPin size={16} color="#64748B" />
+                    <Text style={styles.outsideTitle}>Outside Kerala</Text>
+                  </View>
+                  <Text style={styles.regionalDesc}>
+                    SSC is limited to deal and merchant discovery. Purchasing functionality through SSC is
+                    not available in these locations under the current model.
                   </Text>
                 </View>
               </View>
             </View>
 
-            {/* Section 3: Consumer Order Cancellation */}
+            {/* Section 3: Platform Fee — ₹1 */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>3</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Order Cancellation by Consumer</Text>
+                <Text style={styles.sectionHeading}>Platform Fee — ₹1</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "Cancellation Prior to Merchant Dispatch: You may cancel an order free of charge before the merchant packs, prepares (for perishable/food items), or dispatches the order by messaging the store via In-App Store Chat or contacting their listed phone number.",
-                  "Cancellation After Dispatch: Once an order has been dispatched for delivery by the merchant's staff, cancellation is subject to the individual merchant's store return policy.",
-                  "Perishable & Custom Goods: Fresh food, groceries, perishable dairy, or customized items cannot be cancelled once preparation has commenced.",
-                  "Zero Advance Deduction: Because retail purchases on SmartShopper are fulfilled via COD or direct merchant payment, consumers face no automatic card deductions upon order placement."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
+
+              <View style={styles.feeHighlightBox}>
+                <Coins size={18} color="#EA580C" />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.feeTitle}>Nominal Platform Fee: ₹1</Text>
+                  <Text style={styles.feeDesc}>
+                    Where applicable, a platform fee of ₹1 may be charged for an eligible transaction.
+                    The fee must be disclosed before the transaction is confirmed.
+                  </Text>
+                </View>
               </View>
+
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The platform fee is ordinarily non-refundable once the relevant platform service has been
+                provided or the transaction has been processed.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                However, a refund may be considered or required where the fee was charged incorrectly,
+                charged more than once, the relevant service was not provided, or applicable law
+                otherwise requires a refund.
+              </Text>
             </View>
 
-            {/* Section 4: Damaged, Defective, or Incorrect Items */}
+            {/* Section 4: Delivery Charges */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>4</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Damaged, Missing, or Defective Products</Text>
+                <Text style={styles.sectionHeading}>Delivery Charges</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                Consumers have full statutory protection under the Consumer Protection Act, 2019, and the Consumer Protection (E-Commerce) Rules, 2020. In the event of:
+              <View style={styles.deliveryPill}>
+                <Truck size={16} color="#0284C7" />
+                <Text style={styles.deliveryPillText}>
+                  Delivery charges, where applicable, will be disclosed before order confirmation.
+                </Text>
+              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Delivery charges are ordinarily non-refundable once the delivery service has been completed.
               </Text>
-              <View style={styles.listContainer}>
-                {[
-                  "Damaged, tampered, or broken merchandise received upon delivery.",
-                  "Incorrect items or missing quantities compared to the order summary.",
-                  "Expired products or goods failing stated merchant specifications."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
-              <Text style={[styles.sectionLead, { marginTop: 8 }]}>
-                Consumers should immediately decline delivery for COD packages or notify the merchant via In-App Chat within 24 hours of receipt. Partner Merchants are legally obligated to replace defective goods or issue an immediate refund through the original payment channel.
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Where delivery has not been performed, an order is cancelled before the service is
+                provided, delivery fails, or another circumstance gives rise to a legally required
+                refund, the request will be assessed based on the facts and applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                This policy does not exclude refunds or other remedies that are legally required.
               </Text>
             </View>
 
-            {/* Section 5: Promotional Vouchers & Discount Claims */}
+            {/* Section 5: Order Cancellation */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>5</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Promotional Vouchers & Claimed Deals</Text>
+                <Text style={styles.sectionHeading}>Order Cancellation</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "Vouchers and coupons claimed within SmartShopper are promotional discounts and have no monetary or cash redemption value.",
-                  "Claiming a voucher is completely free for consumers and does not incur any charge.",
-                  "Expired or unredeemed vouchers cannot be refunded or exchanged for cash.",
-                  "If a partner merchant wrongfully refuses to honor an active, validly claimed voucher within its stated expiration window, please report the incident to our Grievance Desk at info@jrina.online for immediate merchant compliance review."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.bodyText}>
+                A cancellation request should be submitted as early as possible through the available
+                order or support channel.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Whether an order can be cancelled depends on its status, whether fulfilment or delivery has
+                begun, the relevant transaction terms, and applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Any applicable cancellation fee or other deduction must be disclosed where required and
+                must comply with applicable law.
+              </Text>
+              <Text style={[styles.subnote, styles.topGap]}>
+                No cancellation request will override a mandatory legal right to a refund or other remedy.
+              </Text>
             </View>
 
-            {/* Section 6: Platform Subscriptions & Merchant SaaS Billing */}
+            {/* Section 6: Refund Eligibility */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>6</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Platform Fees & Merchant Subscriptions</Text>
+                <Text style={styles.sectionHeading}>Refund Eligibility</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                While the SmartShopper Consumer app is 100% free for shoppers, JRINA Private Limited provides optional paid SaaS subscriptions and workstation tools to Partner Merchants (via the SSM platform) processed via certified payment aggregators (Cashfree Payments):
-              </Text>
+              <Text style={styles.bodyText}>Refund requests are assessed individually, considering:</Text>
               <View style={styles.bulletList}>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Duplicate or Failed Billing:</Text> Any inadvertent duplicate debit or failed transaction where funds were deducted is automatically initiated for refund within 48 hours and credited within 5-7 business days.
-                  </Text>
-                </View>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Billing Disputes:</Text> Paid service subscribers may dispute charges within 7 business days of billing by emailing info@jrina.online.
-                  </Text>
-                </View>
+                {[
+                  "The nature and status of the transaction.",
+                  "Whether the relevant product or service was provided.",
+                  "The reason for cancellation or the refund request.",
+                  "Whether a payment was duplicated or incorrectly collected.",
+                  "The role of JRINA, the merchant, and the payment provider.",
+                  "The applicable transaction terms and mandatory legal requirements."
+                ].map((item, idx) => (
+                  <View key={idx} style={styles.bulletItem}>
+                    <CheckCircle2 size={15} color="#059669" style={styles.bulletIcon} />
+                    <Text style={styles.bulletText}>{item}</Text>
+                  </View>
+                ))}
               </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The platform fee and delivery charges are ordinarily non-refundable as described above,
+                subject to legally required refunds and other applicable consumer rights.
+              </Text>
             </View>
 
-            {/* Section 7: Grievance Escalation & Contact */}
-            <View style={[styles.sectionBlock, { borderBottomWidth: 0, paddingBottom: 0 }]}>
+            {/* Section 7: Refund Processing */}
+            <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>7</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Grievance Redressal & Support Desk</Text>
+                <Text style={styles.sectionHeading}>Refund Processing</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                If you encounter any unresolved merchant dispute, incorrect billing record, or fulfillment concern, our consumer support team is here to help mediate:
+              <Text style={styles.bodyText}>
+                Where JRINA is responsible for processing a refund, the applicable process and expected
+                timeline will be communicated according to the transaction terms and payment-provider
+                arrangements.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Where the merchant or an external payment provider is responsible for a transaction,
+                users may need to contact that party.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                SSC does not promise a universal refund-processing period. Any legally prescribed
+                deadline takes precedence over an internal review process.
+              </Text>
+            </View>
+
+            {/* Section 8: How to Request Assistance */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>8</Text>
+                </View>
+                <Text style={styles.sectionHeading}>How to Request Assistance</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                For cancellation, refund, or transaction-related assistance, contact:
               </Text>
 
-              <View style={styles.contactGrid}>
-                {/* Office */}
-                <View style={styles.contactItem}>
-                  <Building2 size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>OPERATING COMPANY & REGISTERED OFFICE</Text>
-                    <Text style={styles.contactTitle}>JRINA Private Limited</Text>
-                    <Text style={styles.contactDesc}>
-                      Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala, India - 695562
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Email */}
+              <View style={styles.contactCard}>
                 <TouchableOpacity
                   style={styles.contactItem}
-                  onPress={() => handleOpenEmail("Refund & Order Dispute - SmartShopper")}
+                  onPress={() => handleOpenEmail("Refund Request Assistance")}
                   activeOpacity={0.7}
                 >
-                  <Mail size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>REFUNDS & GRIEVANCES</Text>
-                    <Text style={[styles.contactTitle, styles.accentColor]}>info@jrina.online</Text>
-                    <Text style={styles.contactDesc}>Average response within 24-48 business hours</Text>
-                  </View>
+                  <Mail size={16} color="#EA580C" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Email:</Text> info@jrina.online
+                  </Text>
                 </TouchableOpacity>
 
-                {/* Helpline */}
                 <TouchableOpacity
                   style={styles.contactItem}
                   onPress={handleOpenPhone}
                   activeOpacity={0.7}
                 >
-                  <Phone size={20} color="#10B981" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>CUSTOMER SUPPORT HELPLINE / WHATSAPP</Text>
-                    <Text style={[styles.contactTitle, { color: "#10B981" }]}>+91 6238624428</Text>
-                    <Text style={styles.contactDesc}>Mon - Sat: 9:00 AM - 7:00 PM IST</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* Website */}
-                <TouchableOpacity
-                  style={styles.contactItem}
-                  onPress={handleOpenWebsite}
-                  activeOpacity={0.7}
-                >
-                  <Globe size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>OFFICIAL CORPORATE PORTAL</Text>
-                    <View style={styles.linkRow}>
-                      <Text style={[styles.contactTitle, styles.accentColor]}>
-                        https://www.jrina.online
-                      </Text>
-                      <ExternalLink size={12} color="#EA580C" />
-                    </View>
-                  </View>
+                  <Phone size={16} color="#059669" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Phone:</Text> 6238624428
+                  </Text>
                 </TouchableOpacity>
               </View>
+
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Please provide, where available:
+              </Text>
+              <View style={styles.bulletList}>
+                {[
+                  "Your name or SSC account identifier.",
+                  "The order or transaction reference.",
+                  "The merchant's details.",
+                  "The date of the transaction.",
+                  "A short explanation of the issue."
+                ].map((item, idx) => (
+                  <View key={idx} style={styles.bulletItem}>
+                    <CheckCircle2 size={14} color="#64748B" style={styles.bulletIcon} />
+                    <Text style={styles.bulletText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.securityWarningBox}>
+                <AlertTriangle size={16} color="#D97706" />
+                <Text style={styles.securityWarningText}>
+                  Never share your password, PIN, card CVV, or other unnecessary sensitive payment credentials.
+                </Text>
+              </View>
+            </View>
+
+            {/* Section 9: Consumer Rights */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>9</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Consumer Rights</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                Nothing in this policy excludes or restricts rights or remedies available under
+                applicable Indian law, including remedies for misleading representations, unfair trade
+                practices, deficient services, or other legally recognised grounds.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Where JRINA, a merchant, or another service provider is legally responsible for a refund
+                or other remedy, the applicable obligation remains in force.
+              </Text>
+            </View>
+
+            {/* Section 10: Policy Changes */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>10</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Policy Changes</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                JRINA may update this policy to reflect changes to SSC, its transaction arrangements, or
+                applicable law. The latest version will be published on the SSC website with its effective
+                or last-updated date.
+              </Text>
+            </View>
+
+            {/* Section 11: Contact Information */}
+            <View style={[styles.sectionBlock, styles.noBorder]}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>11</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Contact Information</Text>
+              </View>
+
+              <View style={styles.finalContactBox}>
+                <Text style={styles.finalContactTitle}>JRINA Private Limited</Text>
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => Linking.openURL("https://jrina.online")}>
+                    <Text style={styles.finalLinkText}>Website: https://jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={handleOpenWebsite}>
+                    <Text style={styles.finalLinkText}>SmartShopper: https://ssc.jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Mail size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => handleOpenEmail("Refund Policy Inquiry")}>
+                    <Text style={styles.finalLinkText}>Email: info@jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Phone size={15} color="#059669" />
+                  <TouchableOpacity onPress={handleOpenPhone}>
+                    <Text style={styles.finalLinkText}>Phone: 6238624428</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <Text style={[styles.subnote, styles.topGap]}>
+                This policy must be read with the SSC Privacy Policy and Terms & Conditions.
+              </Text>
             </View>
           </View>
-
-          {/* Bottom Back Button */}
-          <TouchableOpacity
-            style={styles.doneBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.doneBtnText}>Back to Account</Text>
-          </TouchableOpacity>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -371,96 +481,102 @@ export const RefundPolicyScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#0F172A"
   },
   container: {
     flex: 1,
-    backgroundColor: "#0F172A"
+    backgroundColor: "#F8FAFC"
   },
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#0F172A",
     borderBottomWidth: 1,
-    borderBottomColor: "#1E293B"
+    borderBottomColor: "#E2E8F0"
   },
   backButton: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: "#1E293B"
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12
   },
   headerTitleWrap: {
-    flex: 1,
-    alignItems: "center"
+    flex: 1
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#0F172A"
   },
   headerSubtitle: {
-    fontSize: 11,
-    color: "#94A3B8",
-    marginTop: 1
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "500"
   },
   headerIconWrap: {
-    padding: 6
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFF7ED",
+    alignItems: "center",
+    justifyContent: "center"
   },
   tabBarWrapper: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1E293B",
-    paddingHorizontal: 12,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#334155"
+    borderBottomColor: "#F1F5F9"
   },
   tabItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0F172A",
+    gap: 6,
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#334155",
-    gap: 5
+    borderColor: "#E2E8F0"
   },
   tabItemActive: {
     backgroundColor: "#FFF7ED",
-    borderColor: "#EA580C"
+    borderColor: "#FDBA74"
   },
   tabText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#94A3B8"
+    color: "#64748B"
   },
   tabTextActive: {
     color: "#EA580C",
-    fontWeight: "800"
+    fontWeight: "700"
   },
   scroll: {
     flex: 1
   },
   scrollContent: {
-    padding: 14,
-    paddingBottom: 36
+    padding: 16,
+    paddingBottom: 40
   },
   mainCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#1E293B",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2
   },
   cardHeader: {
     paddingBottom: 14,
@@ -470,112 +586,199 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: 12,
+    marginBottom: 10
   },
   titleIconBadge: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     backgroundColor: "#FFF7ED",
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
     alignItems: "center",
     justifyContent: "center"
   },
   cardMainTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "800",
     color: "#0F172A"
   },
   entitySub: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#64748B",
-    marginTop: 2
+    marginTop: 1
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center"
   },
   effectiveBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#FFF7ED",
+    paddingVertical: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-    marginTop: 12
+    borderRadius: 6,
+    gap: 6
   },
   effectiveText: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#64748B"
+    color: "#C2410C",
+    fontWeight: "600"
   },
-  introBox: {
-    backgroundColor: "#FFF7ED",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
+  companyPill: {
+    backgroundColor: "#F8FAFC",
     padding: 12,
-    marginTop: 14
+    borderRadius: 10,
+    marginTop: 14,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 6
   },
-  introText: {
-    fontSize: 12,
-    color: "#7C2D12",
-    lineHeight: 18
+  companyPillRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+  companyPillText: {
+    fontSize: 13,
+    color: "#334155"
+  },
+  linkText: {
+    color: "#EA580C",
+    fontWeight: "600"
   },
   sectionBlock: {
-    marginTop: 18,
-    paddingBottom: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9"
+  },
+  noBorder: {
+    borderBottomWidth: 0,
+    paddingBottom: 6
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 8
+    marginBottom: 10
   },
   sectionNumber: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#EA580C",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center"
   },
   sectionNumberText: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700"
   },
   sectionHeading: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A"
-  },
-  sectionLead: {
-    fontSize: 12,
-    color: "#475569",
-    lineHeight: 18
-  },
-  noticeBox: {
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: "#FFFBEB",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-    padding: 10,
-    marginTop: 10
-  },
-  noticeText: {
-    fontSize: 11,
-    color: "#92400E",
-    lineHeight: 16,
+    fontWeight: "700",
+    color: "#0F172A",
     flex: 1
   },
-  bulletList: {
+  bodyText: {
+    fontSize: 13.5,
+    color: "#334155",
+    lineHeight: 20
+  },
+  topGap: {
+    marginTop: 8
+  },
+  bold: {
+    fontWeight: "700",
+    color: "#0F172A"
+  },
+  regionalGrid: {
+    marginTop: 10,
+    gap: 10
+  },
+  regionalCard: {
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1
+  },
+  keralaCard: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0"
+  },
+  outsideCard: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0"
+  },
+  regionalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4
+  },
+  keralaTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#047857"
+  },
+  outsideTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569"
+  },
+  regionalDesc: {
+    fontSize: 12.5,
+    color: "#334155",
+    lineHeight: 18
+  },
+  feeHighlightBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#FFF7ED",
+    borderColor: "#FFEDD5",
+    borderWidth: 1,
+    padding: 12,
+    borderRadius: 10,
     marginTop: 8,
+    gap: 10
+  },
+  feeTitle: {
+    fontSize: 13.5,
+    fontWeight: "700",
+    color: "#C2410C",
+    marginBottom: 4
+  },
+  feeDesc: {
+    fontSize: 13,
+    color: "#334155",
+    lineHeight: 18
+  },
+  deliveryPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F9FF",
+    borderColor: "#BAE6FD",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 6,
+    gap: 8
+  },
+  deliveryPillText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#0369A1",
+    lineHeight: 18
+  },
+  subnote: {
+    fontSize: 12,
+    color: "#64748B",
+    fontStyle: "italic",
+    lineHeight: 17
+  },
+  bulletList: {
+    marginTop: 10,
     gap: 8
   },
   bulletItem: {
@@ -584,100 +787,72 @@ const styles = StyleSheet.create({
     gap: 8
   },
   bulletIcon: {
-    marginTop: 2,
-    flexShrink: 0
+    marginTop: 2
   },
-  bulletContent: {
-    fontSize: 12,
+  bulletText: {
+    flex: 1,
+    fontSize: 13,
     color: "#334155",
-    lineHeight: 18,
-    flex: 1
+    lineHeight: 19
   },
-  listContainer: {
-    marginTop: 6,
-    gap: 6
-  },
-  dotItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8
-  },
-  dot: {
-    color: "#EA580C",
-    fontSize: 14,
-    lineHeight: 18
-  },
-  dotText: {
-    fontSize: 12,
-    color: "#334155",
-    lineHeight: 18,
-    flex: 1
-  },
-  bold: {
-    fontWeight: "700"
-  },
-  linkText: {
-    color: "#EA580C",
-    textDecorationLine: "underline"
-  },
-  contactGrid: {
-    marginTop: 12,
+  contactCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 12,
+    marginTop: 10,
     gap: 10
   },
   contactItem: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    alignItems: "center",
     gap: 10
   },
-  contactIcon: {
-    marginTop: 2
-  },
-  contactSmall: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#94A3B8",
-    letterSpacing: 0.5
-  },
-  contactTitle: {
+  contactItemText: {
     fontSize: 13,
-    fontWeight: "800",
-    color: "#0F172A",
-    marginTop: 1
+    color: "#334155"
   },
-  contactDesc: {
-    fontSize: 11,
-    color: "#64748B",
-    marginTop: 2,
-    lineHeight: 15
-  },
-  accentColor: {
-    color: "#EA580C"
-  },
-  linkRow: {
+  securityWarningBox: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4
+    backgroundColor: "#FFFBEB",
+    borderColor: "#FDE68A",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 12,
+    gap: 8
   },
-  doneBtn: {
-    marginTop: 16,
-    backgroundColor: "#EA580C",
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    shadowColor: "#EA580C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4
+  securityWarningText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#92400E",
+    lineHeight: 17
   },
-  doneBtnText: {
+  finalContactBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 14,
+    marginTop: 8,
+    gap: 8
+  },
+  finalContactTitle: {
     fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    fontWeight: "700",
+    color: "#0F172A",
+    marginBottom: 2
+  },
+  finalContactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+  finalLinkText: {
+    fontSize: 13,
+    color: "#0F172A",
+    fontWeight: "500"
   }
 });

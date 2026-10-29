@@ -17,29 +17,31 @@ import {
   Globe,
   Mail,
   Phone,
-  ExternalLink,
   AlertTriangle,
   ShieldCheck,
   RotateCcw,
-  CheckCircle2
+  ExternalLink,
+  MapPin,
+  ShoppingBag,
+  Coins
 } from "lucide-react-native";
 
 export const TermsOfServiceScreen: React.FC = () => {
   const navigation = useNavigation<any>();
 
-  const handleOpenEmail = (subject?: string, body?: string) => {
+  const handleOpenEmail = (subject?: string) => {
     const url = `mailto:info@jrina.online?subject=${encodeURIComponent(
-      subject || "Inquiry - SmartShopper Terms"
-    )}&body=${encodeURIComponent(body || "")}`;
+      subject || "Terms Inquiry - SmartShopper"
+    )}`;
     Linking.openURL(url).catch(() => {});
   };
 
   const handleOpenPhone = () => {
-    Linking.openURL("tel:+916238624428").catch(() => {});
+    Linking.openURL("tel:6238624428").catch(() => {});
   };
 
   const handleOpenWebsite = () => {
-    Linking.openURL("https://www.jrina.online").catch(() => {});
+    Linking.openURL("https://ssc.jrina.online").catch(() => {});
   };
 
   return (
@@ -72,12 +74,12 @@ export const TermsOfServiceScreen: React.FC = () => {
             activeOpacity={0.7}
           >
             <ShieldCheck size={13} color="#94A3B8" />
-            <Text style={styles.tabText}>Privacy Policy</Text>
+            <Text style={styles.tabText}>Privacy</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={[styles.tabItem, styles.tabItemActive]} activeOpacity={1}>
             <FileText size={13} color="#EA580C" />
-            <Text style={[styles.tabText, styles.tabTextActive]}>Terms of Service</Text>
+            <Text style={[styles.tabText, styles.tabTextActive]}>Terms</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -103,374 +105,504 @@ export const TermsOfServiceScreen: React.FC = () => {
                   <FileText size={22} color="#EA580C" />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.cardMainTitle}>Consumer Terms & Conditions</Text>
-                  <Text style={styles.entitySub}>
-                    Operating Entity: <Text style={styles.bold}>JRINA Private Limited</Text> (SmartShopper Operator)
-                  </Text>
+                  <Text style={styles.cardMainTitle}>SmartShopper Consumer</Text>
+                  <Text style={styles.entitySub}>Terms & Conditions</Text>
                 </View>
               </View>
 
-              <View style={styles.effectiveBadge}>
-                <Calendar size={13} color="#EA580C" />
-                <Text style={styles.effectiveText}>Effective Date: October 2026 | Last Updated: October 2026</Text>
+              <View style={styles.metaRow}>
+                <View style={styles.effectiveBadge}>
+                  <Calendar size={13} color="#EA580C" />
+                  <Text style={styles.effectiveText}>Effective & Last Updated: 28 October 2026</Text>
+                </View>
               </View>
             </View>
 
-            {/* Intro Alert Box */}
-            <View style={styles.introBox}>
-              <Text style={styles.introText}>
-                Welcome to <Text style={styles.bold}>SmartShopper</Text> (
-                <Text style={styles.linkText} onPress={() => Linking.openURL("https://ssc.jrina.online")}>
-                  ssc.jrina.online
+            {/* Quick Meta Card */}
+            <View style={styles.companyPill}>
+              <View style={styles.companyPillRow}>
+                <Building2 size={15} color="#0F172A" />
+                <Text style={styles.companyPillText}>
+                  Operated by: <Text style={styles.bold}>JRINA Private Limited</Text>
                 </Text>
-                ), operated by <Text style={styles.bold}>JRINA Private Limited</Text> (&quot;Company&quot;,
-                &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). By accessing, registering for, or using
-                our Consumer Mobile Application, Customer Digital Pass, promotional vouchers, or order services,
-                you agree to be bound by these Terms and Conditions and our Privacy Policy.
-              </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.companyPillRow}
+                onPress={handleOpenWebsite}
+                activeOpacity={0.7}
+              >
+                <Globe size={15} color="#EA580C" />
+                <Text style={[styles.companyPillText, styles.linkText]}>https://ssc.jrina.online</Text>
+                <ExternalLink size={12} color="#EA580C" />
+              </TouchableOpacity>
             </View>
 
-            {/* Section 1 */}
+            {/* Section 1: Acceptance of Terms */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>1</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Platform Role & Independent Merchants</Text>
+                <Text style={styles.sectionHeading}>Acceptance of Terms</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                SmartShopper operates exclusively as a technology marketplace connecting consumers with
-                participating offline retail stores, supermarkets, restaurants, and service outlets (&quot;Merchants&quot;).
+              <Text style={styles.bodyText}>
+                These Terms & Conditions govern your use of SmartShopper Consumer (&ldquo;SSC&rdquo;),
+                operated by JRINA Private Limited (&ldquo;JRINA&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;,
+                or &ldquo;our&rdquo;).
               </Text>
-              <View style={styles.noticeBox}>
-                <AlertTriangle size={16} color="#FB923C" style={{ marginTop: 2, flexShrink: 0 }} />
-                <Text style={styles.noticeText}>
-                  <Text style={styles.bold}>Independent Merchant Responsibility:</Text> Merchants independently
-                  determine, publish, price, and fulfill their respective discounts, deals, and products. While
-                  JRINA Private Limited verifies merchant profiles during onboarding, the Merchant remains solely
-                  responsible for product quality, tax invoicing, stock availability, and physical delivery, subject
-                  to mandatory protections under the Consumer Protection Act, 2019.
-                </Text>
-              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                By accessing or using SSC, you agree to these Terms to the extent permitted by applicable
+                law. Nothing in these Terms limits any consumer right that cannot lawfully be excluded.
+              </Text>
             </View>
 
-            {/* Section 2 */}
+            {/* Section 2: Regional Availability */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>2</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Eligibility & Account Security</Text>
+                <Text style={styles.sectionHeading}>Regional Availability</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "You must be at least 18 years of age or possess legal parental/guardian authorization to use the SmartShopper consumer platform.",
-                  "You agree to provide accurate, truthful, and authentic registration details (full name, phone number, and verified email address).",
-                  "You are responsible for safeguarding your login credentials and are responsible for all activities occurring under your account.",
-                  "Guest users may browse nearby stores and deals within an active radar; creating an authenticated profile is required to claim vouchers, save delivery addresses, and place orders."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
+              <Text style={styles.bodyText}>SSC provides region-dependent functionality.</Text>
+
+              <View style={styles.regionalGrid}>
+                <View style={[styles.regionalCard, styles.keralaCard]}>
+                  <View style={styles.regionalHeader}>
+                    <ShoppingBag size={16} color="#047857" />
+                    <Text style={styles.keralaTitle}>Kerala</Text>
                   </View>
-                ))}
+                  <Text style={styles.regionalDesc}>
+                    Eligible users in Kerala may access purchasing functionality enabled in the application,
+                    subject to merchant participation, product availability, serviceability, payment
+                    arrangements, and checkout conditions.
+                  </Text>
+                </View>
+
+                <View style={[styles.regionalCard, styles.outsideCard]}>
+                  <View style={styles.regionalHeader}>
+                    <MapPin size={16} color="#64748B" />
+                    <Text style={styles.outsideTitle}>Outside Kerala</Text>
+                  </View>
+                  <Text style={styles.regionalDesc}>
+                    Outside Kerala, SSC is limited to discovering merchants and viewing deals. Purchase
+                    functionality through SSC is not available in these locations unless expressly
+                    introduced and communicated by JRINA.
+                  </Text>
+                </View>
               </View>
+
+              <Text style={[styles.subnote, styles.topGap]}>
+                The availability of a feature depends on the user&apos;s service location and the
+                functionality actually enabled in the application.
+              </Text>
             </View>
 
-            {/* Section 3 */}
+            {/* Section 3: Nature of the Platform */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>3</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Customer Digital ID & Loyalty Pass</Text>
+                <Text style={styles.sectionHeading}>Nature of the Platform</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                Each registered consumer is issued a unique permanent Customer ID (e.g.,{" "}
-                <Text style={styles.codeText}>SS-CUS-xxxx</Text>) represented via an ISO-compliant QR Code and
-                Code 128 Barcode within the app.
+              <Text style={styles.bodyText}>
+                SSC helps users discover merchants and explore available deals. Where purchasing
+                functionality is enabled, it may also support the applicable order and delivery process.
               </Text>
-              <Text style={[styles.sectionLead, { marginTop: 6 }]}>
-                Presenting your Customer Digital Pass at participating merchant checkouts enables cashiers to link
-                eligible counter discounts and record digital E-Bills. Your Digital Pass is strictly personal to your
-                registered identity and non-transferable.
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The role of JRINA in an individual transaction depends on the actual business
+                arrangement. A participating merchant may remain responsible for the goods or services
+                it sells.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Nothing in these Terms automatically makes JRINA the seller of every product or service
+                displayed on SSC.
               </Text>
             </View>
 
-            {/* Section 4 */}
+            {/* Section 4: User Accounts */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>4</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Voucher Claiming, Expiry & Redemption</Text>
+                <Text style={styles.sectionHeading}>User Accounts</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "Claiming a promotional voucher generates a unique alphanumeric code and verification QR code.",
-                  "Vouchers must be redeemed at the designated store location prior to their countdown expiry time.",
-                  "Vouchers hold no monetary cash value, cannot be converted to cash, and are subject to merchant terms (such as minimum purchase requirements) stated on the offer card.",
-                  "Participating merchants verify voucher authenticity using their merchant scanning workstation before applying discounts at checkout."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.bodyText}>
+                Users must provide accurate information when registering and maintain reasonable account
+                security.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                You must not impersonate another person, submit deliberately false information, misuse
+                another person&apos;s account, or attempt unauthorised access to the service.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                JRINA may take proportionate action against misuse, fraud, security threats, or unlawful
+                activity, subject to applicable law.
+              </Text>
             </View>
 
-            {/* Section 5 */}
+            {/* Section 5: Merchant Listings and Deals */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>5</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Consumer Orders, Delivery & Payments</Text>
+                <Text style={styles.sectionHeading}>Merchant Listings and Deals</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                SmartShopper provides a shopping cart and Buy Now workflow for verified merchant products within a 5 km proximity:
+              <Text style={styles.bodyText}>
+                Merchant information and deals may be provided by participating merchants.
               </Text>
-              <View style={styles.bulletList}>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Fulfillment Options:</Text> Shoppers can select between Store Pickup or Direct Merchant Delivery to their saved address.
-                  </Text>
-                </View>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Direct Consumer Payment:</Text> Payments for retail goods are made directly to the merchant upon delivery/pickup via Cash on Delivery (COD) or store UPI QR. JRINA Private Limited does not collect, hold, or process retail merchandise payments.
-                  </Text>
-                </View>
-                <View style={styles.bulletItem}>
-                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
-                  <Text style={styles.bulletContent}>
-                    <Text style={styles.bold}>Physical Tax Invoices:</Text> The physical tax invoice issued by the merchant at point-of-sale constitutes the statutory proof of purchase for warranties and tax records.
-                  </Text>
-                </View>
-              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Availability, price, stock, validity, eligibility, and redemption conditions may change.
+                Users should review the displayed conditions and confirm material details with the
+                merchant where necessary.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Merchants are responsible for information they supply and for meeting their legal
+                obligations. JRINA will handle reports of misleading or inaccurate listings through an
+                appropriate review process.
+              </Text>
+              <Text style={[styles.subnote, styles.topGap]}>
+                Nothing in this section removes rights that consumers may have under applicable law.
+              </Text>
             </View>
 
-            {/* Section 6 */}
+            {/* Section 6: Purchases and Payments */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>6</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Distinction from JRINA Paid Services</Text>
+                <Text style={styles.sectionHeading}>Purchases and Payments</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                SmartShopper Consumer (SSC) is 100% free for shoppers. Any paid platform subscriptions, workstation
-                licensing fees, or premium merchant services provided by JRINA Private Limited apply strictly to
-                registered business merchants (SSM) and are billed via certified payment aggregators (Cashfree Payments).
+              <Text style={styles.bodyText}>
+                Purchasing functionality is available only in eligible locations where it is enabled.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Before confirming a purchase, review the final payable amount, applicable platform fee,
+                delivery charge, taxes where applicable, delivery information, cancellation terms, and
+                other transaction conditions disclosed at checkout.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Payment arrangements and the role of JRINA, a merchant, or a payment provider depend on
+                the actual transaction flow.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Outside Kerala, SSC is limited to deal discovery and does not provide purchasing
+                functionality through the platform under the current model.
               </Text>
             </View>
 
-            {/* Section 7 */}
+            {/* Section 7: Platform Fee and Delivery Charges */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>7</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Geographic Radar & Location Services</Text>
+                <Text style={styles.sectionHeading}>Platform Fee and Delivery Charges</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                SmartShopper calculates proximity distances to local stores using device GPS coordinates or user-selected
-                localities (e.g., Palode, Kerala). While we compute accurate Haversine distances and utilize OpenStreetMap
-                geocodes, GPS precision may vary depending on device hardware, satellite connectivity, or system permissions.
+              <View style={styles.highlightPill}>
+                <Coins size={16} color="#EA580C" />
+                <Text style={styles.highlightPillText}>
+                  Where applicable, a platform fee of <Text style={styles.bold}>₹1</Text> may be charged for an eligible transaction.
+                </Text>
+              </View>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Applicable fees must be disclosed before the user confirms the transaction.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Delivery charges may apply depending on the service and destination.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The ordinary refund treatment of these charges is explained in the Refund & Cancellation
+                Policy. Mandatory consumer rights and legally required refunds are not excluded.
               </Text>
             </View>
 
-            {/* Section 8 */}
+            {/* Section 8: Cancellation and Refunds */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>8</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Reviews, In-App Chat & Community Guidelines</Text>
+                <Text style={styles.sectionHeading}>Cancellation and Refunds</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "Consumers may post ratings, reviews, and message store owners regarding inventory and order status.",
-                  "All communications must remain truthful, courteous, and lawful.",
-                  "Posting defamatory, obscene, harassing, competitor-sabotaging, or fraudulent reviews is strictly prohibited and grounds for immediate account termination."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.bodyText}>
+                Cancellation and refund requests are assessed according to the transaction, the service
+                provided, the reason for the request, the applicable transaction terms, and applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Where a merchant or external payment provider handles a transaction, the user may need to
+                contact that party. JRINA may assist with complaints where appropriate.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The platform fee and delivery charges are ordinarily non-refundable under the conditions
+                described in the Refund & Cancellation Policy, subject to mandatory legal rights.
+              </Text>
             </View>
 
-            {/* Section 9 */}
+            {/* Section 9: Location and Notifications */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>9</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Prohibited Conduct & Anti-Scraping</Text>
+                <Text style={styles.sectionHeading}>Location and Notifications</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  "Bypassing platform authentication, tampering with single-use voucher QR codes, or creating fake accounts.",
-                  "Employing automated bots, scrapers, or extraction crawlers on our deal feeds or merchant databases.",
-                  "Interfering with the normal operation, network infrastructure, or security of our Supabase backend."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.bodyText}>
+                SSC may request GPS permission for nearby merchant discovery and related
+                location-dependent features.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Users may deny or revoke permission through device settings. Notifications may depend on
+                device settings, connectivity, and the functioning of relevant providers. Delivery of every
+                notification cannot be guaranteed.
+              </Text>
             </View>
 
-            {/* Section 10 */}
+            {/* Section 10: Acceptable Use */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>10</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Intellectual Property Rights</Text>
+                <Text style={styles.sectionHeading}>Acceptable Use</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                All trademarks, logos, brand assets, source code, UI designs, and radar algorithms associated with
-                SmartShopper are the exclusive intellectual property of JRINA Private Limited. Merchant trade names,
-                product trademarks, and logos displayed remain the property of their respective owners.
-              </Text>
+              <Text style={styles.bodyText}>You must not:</Text>
+              <View style={styles.bulletList}>
+                {[
+                  "Use SSC for unlawful, fraudulent, or deceptive activity.",
+                  "Interfere with the security or operation of the service.",
+                  "Attempt to access accounts or data without authorisation.",
+                  "Submit malicious code or abuse platform functionality.",
+                  "Misrepresent merchants, deals, prices, or transactions.",
+                  "Infringe intellectual-property or other legal rights."
+                ].map((item, idx) => (
+                  <View key={idx} style={styles.bulletItem}>
+                    <AlertTriangle size={15} color="#DC2626" style={styles.bulletIcon} />
+                    <Text style={styles.bulletText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
-            {/* Section 11 */}
+            {/* Section 11: Intellectual Property */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>11</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Limitation of Liability & Disclaimers</Text>
+                <Text style={styles.sectionHeading}>Intellectual Property</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                To the fullest extent permitted by applicable law, SmartShopper is provided on an &quot;as-is&quot; and
-                &quot;as-available&quot; basis. JRINA Private Limited shall not be liable for indirect, incidental, or
-                consequential damages resulting from store transactions, merchant fulfillment delays, merchant product
-                defects, or temporary network interruptions, without prejudice to mandatory statutory consumer rights under
-                Indian law.
+              <Text style={styles.bodyText}>
+                SSC&apos;s software, branding, original designs, and JRINA-owned content are protected by
+                applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                You may use the service for lawful personal purposes. Reproduction or commercial
+                exploitation of JRINA-owned material requires permission unless otherwise permitted by law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Merchant logos, images, and other merchant-provided content may belong to their respective
+                owners.
               </Text>
             </View>
 
-            {/* Section 12 */}
+            {/* Section 12: Third-Party Services */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>12</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Account Termination & Data Deletion</Text>
+                <Text style={styles.sectionHeading}>Third-Party Services</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                You may request complete account closure and personal data erasure at any time by emailing{" "}
-                <Text
-                  style={styles.linkText}
-                  onPress={() => handleOpenEmail("Account Deletion Request - SmartShopper")}
-                >
-                  info@jrina.online
-                </Text>
-                . We process verified requests within 30 days in accordance with our Privacy Policy.
+              <Text style={styles.bodyText}>
+                SSC may rely on external services for hosting, authentication, mapping, payments,
+                notifications, or other functionality where implemented.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Third-party services may have their own terms and privacy policies. This section does not
+                exclude obligations imposed on JRINA by applicable law.
               </Text>
             </View>
 
-            {/* Section 13 */}
+            {/* Section 13: Service Availability */}
             <View style={styles.sectionBlock}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>13</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Governing Law & Jurisdiction</Text>
+                <Text style={styles.sectionHeading}>Service Availability</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic
-                of India. Any disputes arising out of or related to these Terms shall be subject to the exclusive jurisdiction
-                of the competent courts in Thiruvananthapuram, Kerala, India.
+              <Text style={styles.bodyText}>
+                We may update, maintain, modify, or discontinue features as reasonably necessary.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                We aim to maintain a reliable service but cannot guarantee uninterrupted or error-free
+                operation. This does not remove obligations that apply under consumer-protection law.
               </Text>
             </View>
 
-            {/* Grievance & Corporate Office */}
-            <View style={[styles.sectionBlock, { borderBottomWidth: 0, paddingBottom: 0 }]}>
-              <Text style={styles.sectionHeading}>Grievance Officer & Registered Office</Text>
-              <Text style={[styles.sectionLead, { marginTop: 6 }]}>
-                For legal inquiries, terms clarification, or platform grievances:
-              </Text>
-
-              <View style={styles.contactGrid}>
-                {/* Office */}
-                <View style={styles.contactItem}>
-                  <Building2 size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>COMPANY & REGISTERED OFFICE</Text>
-                    <Text style={styles.contactTitle}>JRINA Private Limited</Text>
-                    <Text style={styles.contactDesc}>
-                      Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala, India - 695562
-                    </Text>
-                  </View>
+            {/* Section 14: Complaints and Grievances */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>14</Text>
                 </View>
+                <Text style={styles.sectionHeading}>Complaints and Grievances</Text>
+              </View>
+              <Text style={styles.bodyText}>For support, complaints, or grievances, contact:</Text>
 
-                {/* Email */}
+              <View style={styles.contactCard}>
                 <TouchableOpacity
                   style={styles.contactItem}
-                  onPress={() => handleOpenEmail("Terms & Legal Inquiry - SmartShopper")}
+                  onPress={() => handleOpenEmail("SmartShopper Support Inquiry")}
                   activeOpacity={0.7}
                 >
-                  <Mail size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>SUPPORT & GRIEVANCES</Text>
-                    <Text style={[styles.contactTitle, styles.accentColor]}>info@jrina.online</Text>
-                    <Text style={styles.contactDesc}>Response within 24-48 business hours</Text>
-                  </View>
+                  <Mail size={16} color="#EA580C" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Email:</Text> info@jrina.online
+                  </Text>
                 </TouchableOpacity>
 
-                {/* Phone */}
                 <TouchableOpacity
                   style={styles.contactItem}
                   onPress={handleOpenPhone}
                   activeOpacity={0.7}
                 >
-                  <Phone size={20} color="#10B981" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>SUPPORT HELPLINE / WHATSAPP</Text>
-                    <Text style={[styles.contactTitle, { color: "#10B981" }]}>+91 6238624428</Text>
-                    <Text style={styles.contactDesc}>Mon - Sat: 9:00 AM - 7:00 PM IST</Text>
-                  </View>
-                </TouchableOpacity>
-
-                {/* Website */}
-                <TouchableOpacity
-                  style={styles.contactItem}
-                  onPress={handleOpenWebsite}
-                  activeOpacity={0.7}
-                >
-                  <Globe size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>OFFICIAL CORPORATE PORTAL</Text>
-                    <View style={styles.linkRow}>
-                      <Text style={[styles.contactTitle, styles.accentColor]}>
-                        https://www.jrina.online
-                      </Text>
-                      <ExternalLink size={12} color="#EA580C" />
-                    </View>
-                  </View>
+                  <Phone size={16} color="#059669" />
+                  <Text style={styles.contactItemText}>
+                    <Text style={styles.bold}>Phone:</Text> 6238624428
+                  </Text>
                 </TouchableOpacity>
               </View>
+
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Include relevant order or transaction details where available. Do not send passwords,
+                PINs, or card security codes.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Complaints will be handled according to applicable law and the relevant grievance process.
+              </Text>
+            </View>
+
+            {/* Section 15: Limitation of Liability */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>15</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Limitation of Liability</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                To the extent permitted by law, JRINA is not responsible for independent merchant
+                representations or transactions conducted directly between users and merchants where JRINA
+                is not the seller or payment recipient.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                This does not exclude responsibility for JRINA&apos;s own acts or omissions where liability
+                cannot lawfully be excluded, nor does it limit mandatory consumer rights.
+              </Text>
+            </View>
+
+            {/* Section 16: Suspension and Termination */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>16</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Suspension and Termination</Text>
+              </View>
+              <Text style={styles.bodyText}>Users may stop using SSC at any time.</Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                JRINA may restrict or terminate access for legitimate reasons, including serious misuse,
+                fraud, security risks, or legal requirements, subject to applicable law.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Account closure does not automatically remove information that must lawfully be retained.
+              </Text>
+            </View>
+
+            {/* Section 17: Changes to These Terms */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>17</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Changes to These Terms</Text>
+              </View>
+              <Text style={styles.bodyText}>
+                We may update these Terms when SSC, its business model, or applicable law changes.
+              </Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                The latest version will be published on the SSC website. Notice or consent will be
+                provided where required by law.
+              </Text>
+            </View>
+
+            {/* Section 18: Governing Law and Disputes */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>18</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Governing Law and Disputes</Text>
+              </View>
+              <Text style={styles.bodyText}>These Terms are subject to applicable laws of India.</Text>
+              <Text style={[styles.bodyText, styles.topGap]}>
+                Disputes will be handled through legally applicable procedures. Nothing in these Terms
+                prevents a consumer from approaching a competent consumer authority or forum where legally
+                entitled to do so.
+              </Text>
+            </View>
+
+            {/* Section 19: Contact Information */}
+            <View style={[styles.sectionBlock, styles.noBorder]}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>19</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Contact Information</Text>
+              </View>
+
+              <View style={styles.finalContactBox}>
+                <Text style={styles.finalContactTitle}>JRINA Private Limited</Text>
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => Linking.openURL("https://jrina.online")}>
+                    <Text style={styles.finalLinkText}>Website: https://jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Globe size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={handleOpenWebsite}>
+                    <Text style={styles.finalLinkText}>SmartShopper: https://ssc.jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Mail size={15} color="#EA580C" />
+                  <TouchableOpacity onPress={() => handleOpenEmail("Terms Inquiry")}>
+                    <Text style={styles.finalLinkText}>Email: info@jrina.online</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.finalContactRow}>
+                  <Phone size={15} color="#059669" />
+                  <TouchableOpacity onPress={handleOpenPhone}>
+                    <Text style={styles.finalLinkText}>Phone: 6238624428</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <Text style={[styles.subnote, styles.topGap]}>
+                These Terms should be read together with the Privacy Policy and Refund & Cancellation Policy.
+              </Text>
             </View>
           </View>
-
-          {/* Bottom Accept Button */}
-          <TouchableOpacity
-            style={styles.doneBtn}
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.doneBtnText}>Back to Account</Text>
-          </TouchableOpacity>
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -480,96 +612,102 @@ export const TermsOfServiceScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#0F172A"
   },
   container: {
     flex: 1,
-    backgroundColor: "#0F172A"
+    backgroundColor: "#F8FAFC"
   },
   headerBar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "#0F172A",
     borderBottomWidth: 1,
-    borderBottomColor: "#1E293B"
+    borderBottomColor: "#E2E8F0"
   },
   backButton: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: "#1E293B"
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12
   },
   headerTitleWrap: {
-    flex: 1,
-    alignItems: "center"
+    flex: 1
   },
   headerTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#0F172A"
   },
   headerSubtitle: {
-    fontSize: 11,
-    color: "#94A3B8",
-    marginTop: 1
+    fontSize: 12,
+    color: "#64748B",
+    fontWeight: "500"
   },
   headerIconWrap: {
-    padding: 6
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#FFF7ED",
+    alignItems: "center",
+    justifyContent: "center"
   },
   tabBarWrapper: {
     flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1E293B",
-    paddingHorizontal: 12,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#334155"
+    borderBottomColor: "#F1F5F9"
   },
   tabItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0F172A",
+    gap: 6,
     paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#334155",
-    gap: 5
+    borderColor: "#E2E8F0"
   },
   tabItemActive: {
     backgroundColor: "#FFF7ED",
-    borderColor: "#EA580C"
+    borderColor: "#FDBA74"
   },
   tabText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "600",
-    color: "#94A3B8"
+    color: "#64748B"
   },
   tabTextActive: {
     color: "#EA580C",
-    fontWeight: "800"
+    fontWeight: "700"
   },
   scroll: {
     flex: 1
   },
   scrollContent: {
-    padding: 14,
-    paddingBottom: 36
+    padding: 16,
+    paddingBottom: 40
   },
   mainCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
     borderWidth: 1,
-    borderColor: "#1E293B",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2
   },
   cardHeader: {
     paddingBottom: 14,
@@ -579,112 +717,177 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: 12,
+    marginBottom: 10
   },
   titleIconBadge: {
-    width: 44,
-    height: 44,
+    width: 42,
+    height: 42,
     borderRadius: 12,
     backgroundColor: "#FFF7ED",
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
     alignItems: "center",
     justifyContent: "center"
   },
   cardMainTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "800",
     color: "#0F172A"
   },
   entitySub: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#64748B",
-    marginTop: 2
+    marginTop: 1
+  },
+  metaRow: {
+    flexDirection: "row",
+    alignItems: "center"
   },
   effectiveBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "#F8FAFC",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    backgroundColor: "#FFF7ED",
+    paddingVertical: 4,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    alignSelf: "flex-start",
-    marginTop: 12
+    borderRadius: 6,
+    gap: 6
   },
   effectiveText: {
     fontSize: 11,
-    fontWeight: "700",
-    color: "#64748B"
+    color: "#C2410C",
+    fontWeight: "600"
   },
-  introBox: {
-    backgroundColor: "#FFF7ED",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#FFEDD5",
+  companyPill: {
+    backgroundColor: "#F8FAFC",
     padding: 12,
-    marginTop: 14
+    borderRadius: 10,
+    marginTop: 14,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    gap: 6
   },
-  introText: {
-    fontSize: 12,
-    color: "#7C2D12",
-    lineHeight: 18
+  companyPillRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8
+  },
+  companyPillText: {
+    fontSize: 13,
+    color: "#334155"
+  },
+  linkText: {
+    color: "#EA580C",
+    fontWeight: "600"
   },
   sectionBlock: {
-    marginTop: 18,
-    paddingBottom: 16,
+    paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9"
+  },
+  noBorder: {
+    borderBottomWidth: 0,
+    paddingBottom: 6
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 8
+    marginBottom: 10
   },
   sectionNumber: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#EA580C",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center"
   },
   sectionNumberText: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#FFFFFF"
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700"
   },
   sectionHeading: {
     fontSize: 15,
-    fontWeight: "800",
-    color: "#0F172A"
-  },
-  sectionLead: {
-    fontSize: 12,
-    color: "#475569",
-    lineHeight: 18
-  },
-  noticeBox: {
-    flexDirection: "row",
-    gap: 8,
-    backgroundColor: "#FFFBEB",
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-    padding: 10,
-    marginTop: 10
-  },
-  noticeText: {
-    fontSize: 11,
-    color: "#92400E",
-    lineHeight: 16,
+    fontWeight: "700",
+    color: "#0F172A",
     flex: 1
   },
+  bodyText: {
+    fontSize: 13.5,
+    color: "#334155",
+    lineHeight: 20
+  },
+  topGap: {
+    marginTop: 8
+  },
+  bold: {
+    fontWeight: "700",
+    color: "#0F172A"
+  },
+  regionalGrid: {
+    marginTop: 10,
+    gap: 10
+  },
+  regionalCard: {
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 1
+  },
+  keralaCard: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0"
+  },
+  outsideCard: {
+    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0"
+  },
+  regionalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4
+  },
+  keralaTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#047857"
+  },
+  outsideTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#475569"
+  },
+  regionalDesc: {
+    fontSize: 12.5,
+    color: "#334155",
+    lineHeight: 18
+  },
+  highlightPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF7ED",
+    borderColor: "#FFEDD5",
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 6,
+    gap: 8
+  },
+  highlightPillText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#C2410C",
+    lineHeight: 18
+  },
+  subnote: {
+    fontSize: 12,
+    color: "#64748B",
+    fontStyle: "italic",
+    lineHeight: 17
+  },
   bulletList: {
-    marginTop: 8,
+    marginTop: 10,
     gap: 8
   },
   bulletItem: {
@@ -693,105 +896,55 @@ const styles = StyleSheet.create({
     gap: 8
   },
   bulletIcon: {
-    marginTop: 2,
-    flexShrink: 0
+    marginTop: 2
   },
-  bulletContent: {
-    fontSize: 12,
+  bulletText: {
+    flex: 1,
+    fontSize: 13,
     color: "#334155",
-    lineHeight: 18,
-    flex: 1
+    lineHeight: 19
   },
-  listContainer: {
-    marginTop: 6,
-    gap: 6
-  },
-  dotItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8
-  },
-  dot: {
-    color: "#EA580C",
-    fontSize: 14,
-    lineHeight: 18
-  },
-  dotText: {
-    fontSize: 12,
-    color: "#334155",
-    lineHeight: 18,
-    flex: 1
-  },
-  codeText: {
-    fontFamily: "monospace",
-    fontWeight: "700",
-    color: "#EA580C"
-  },
-  bold: {
-    fontWeight: "700"
-  },
-  linkText: {
-    color: "#EA580C",
-    textDecorationLine: "underline"
-  },
-  contactGrid: {
-    marginTop: 12,
+  contactCard: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 12,
+    marginTop: 10,
     gap: 10
   },
   contactItem: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    alignItems: "center",
     gap: 10
   },
-  contactIcon: {
-    marginTop: 2
-  },
-  contactSmall: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "#94A3B8",
-    letterSpacing: 0.5
-  },
-  contactTitle: {
+  contactItemText: {
     fontSize: 13,
-    fontWeight: "800",
+    color: "#334155"
+  },
+  finalContactBox: {
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    padding: 14,
+    marginTop: 8,
+    gap: 8
+  },
+  finalContactTitle: {
+    fontSize: 14,
+    fontWeight: "700",
     color: "#0F172A",
-    marginTop: 1
+    marginBottom: 2
   },
-  contactDesc: {
-    fontSize: 11,
-    color: "#64748B",
-    marginTop: 2,
-    lineHeight: 15
-  },
-  accentColor: {
-    color: "#EA580C"
-  },
-  linkRow: {
+  finalContactRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4
+    gap: 8
   },
-  doneBtn: {
-    marginTop: 16,
-    backgroundColor: "#EA580C",
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
-    shadowColor: "#EA580C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4
-  },
-  doneBtnText: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#FFFFFF"
+  finalLinkText: {
+    fontSize: 13,
+    color: "#0F172A",
+    fontWeight: "500"
   }
 });
