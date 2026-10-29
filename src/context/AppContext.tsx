@@ -9,7 +9,9 @@ import {
   CONSUMER_NOTIFICATION_RADAR_METERS,
   isValidCoordinate,
   resolveEligibleConsumerLocation,
-  ResolvedConsumerLocation
+  ResolvedConsumerLocation,
+  formatGeocodedLocationName,
+  formatAddressDisplayLabel
 } from "../utils/geo";
 import {
   fetchLiveOffers,
@@ -104,7 +106,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [location, setLocation] = useState<Coordinates>(DEFAULT_LOCATION);
-  const [locationName, setLocationName] = useState<string>("Kochi, Kakkanad");
+  const [locationName, setLocationName] = useState<string>("Current location");
   const [isGPS, setIsGPS] = useState<boolean>(false);
   const [geofenceRadius, setGeofenceRadius] = useState<number>(5000); // 5 km default
   const [allOffers, setAllOffers] = useState<OfferItem[]>([]);
@@ -138,6 +140,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const storesRef = useRef<StoreProfile[]>([]);
   const isGPSRef = useRef<boolean>(false);
   const locationRef = useRef<Coordinates>(DEFAULT_LOCATION);
+  const locationRequestIdRef = useRef<number>(0);
   const deliveryAddressRef = useRef<DeliveryAddress | null>(null);
   const userRef = useRef<UserSession | null>(null);
   const processedOfferIdsRef = useRef<Set<string>>(new Set());
@@ -209,13 +212,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
 
         // If GPS is not acquired yet, center initial location on saved address coordinates
-        if (!isGPSRef.current && restoredAddress && typeof restoredAddress.lat === "number" && typeof restoredAddress.lng === "number" && !isNaN(restoredAddress.lat) && !isNaN(restoredAddress.lng)) {
+        if (!isGPSRef.current && restoredAddress && typeof restoredAddress.lat === "number" && typeof restoredAddress.lng === "number" && isValidCoordinate(restoredAddress.lat, restoredAddress.lng)) {
           const coords = { latitude: restoredAddress.lat, longitude: restoredAddress.lng };
           setLocation(coords);
           locationRef.current = coords;
-          if (restoredAddress.city || restoredAddress.district) {
-            setLocationName(`${restoredAddress.city || restoredAddress.district}, Kerala`);
-          }
+          setLocationName(formatAddressDisplayLabel(restoredAddress));
         }
 
         const rawNotifs = await AsyncStorage.getItem("smartshopper_saved_notifications");
@@ -335,13 +336,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deliveryAddressRef.current = addr;
 
     // Center fallback catalog on saved address if GPS is not currently active
-    if (!isGPSRef.current && addr && typeof addr.lat === "number" && typeof addr.lng === "number" && !isNaN(addr.lat) && !isNaN(addr.lng)) {
+    if (!isGPSRef.current && addr && typeof addr.lat === "number" && typeof addr.lng === "number" && isValidCoordinate(addr.lat, addr.lng)) {
+      locationRequestIdRef.current++;
       const coords = { latitude: addr.lat, longitude: addr.lng };
       setLocation(coords);
       locationRef.current = coords;
-      if (addr.city || addr.district) {
-        setLocationName(`${addr.city || addr.district}, Kerala`);
-      }
+      setLocationName(formatAddressDisplayLabel(addr));
     }
 
     // Sync saved address coordinates with registered push token for 5,000m geo-filter
@@ -372,51 +372,87 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [user]);
 
 
+  // Reverse geocode helper bound to request sequence ID to eliminate race conditions
+  const reverseGeocodeCoords = useCallback(async (coords: Coordinates, requestId: number) => {
+    try {
+      const geoResults = await Location.reverseGeocodeAsync(coords);
+      // If a newer location request or manual selection occurred, discard stale result
+      if (requestId !== locationRequestIdRef.current) return;
+
+      if (geoResults && geoResults.length > 0) {
+        const formatted = formatGeocodedLocationName(geoResults[0]);
+        setLocationName(formatted);
+      } else {
+        setLocationName("Current location");
+      }
+    } catch (err) {
+      if (requestId !== locationRequestIdRef.current) return;
+      console.warn("[AppContext] Reverse geocoding failed:", err);
+      setLocationName("Current location");
+    }
+  }, []);
+
   // Request GPS Location fast (prefer last known or quick fix with timeout)
   const requestGPS = useCallback(async () => {
+    const requestId = ++locationRequestIdRef.current;
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status === "granted") {
-        // 1. Immediately grab last known location for zero-latency start
-        const lastKnown = await Location.getLastKnownPositionAsync().catch(() => null);
-        if (lastKnown) {
-          const coords = {
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude
-          };
-          setLocation(coords);
-          setIsGPS(true);
-          syncLocationWithPushToken(coords, "gps").catch(() => {});
+      if (status !== "granted") {
+        if (requestId === locationRequestIdRef.current) {
+          setIsGPS(false);
+          isGPSRef.current = false;
+          setLocationName("Location permission denied");
         }
+        return;
+      }
 
-        // 2. Fetch fresh position with low accuracy/balanced and timeout
-        const freshPromise = Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced
-        });
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
-        const curr = await Promise.race([freshPromise, timeoutPromise]);
-
-        if (curr && curr.coords) {
-          const coords = {
-            latitude: curr.coords.latitude,
-            longitude: curr.coords.longitude
-          };
+      // 1. Immediately grab last known location for zero-latency start
+      const lastKnown = await Location.getLastKnownPositionAsync().catch(() => null);
+      if (lastKnown && lastKnown.coords && requestId === locationRequestIdRef.current) {
+        const coords: Coordinates = {
+          latitude: lastKnown.coords.latitude,
+          longitude: lastKnown.coords.longitude
+        };
+        if (isValidCoordinate(coords.latitude, coords.longitude)) {
           setLocation(coords);
+          locationRef.current = coords;
           setIsGPS(true);
+          isGPSRef.current = true;
           syncLocationWithPushToken(coords, "gps").catch(() => {});
+          reverseGeocodeCoords(coords, requestId);
+        }
+      }
 
-          // Geocode in background without blocking
-          Location.reverseGeocodeAsync(coords).then(([geo]) => {
-            if (geo) {
-              setLocationName(`${geo.name || geo.district || geo.city || "Current Location"}, ${geo.region || "Kerala"}`);
-            }
-          }).catch(() => {});
+      // 2. Fetch fresh position with low accuracy/balanced and timeout
+      const freshPromise = Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced
+      });
+      const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
+      const curr = await Promise.race([freshPromise, timeoutPromise]);
+
+      if (curr && curr.coords && requestId === locationRequestIdRef.current) {
+        const coords: Coordinates = {
+          latitude: curr.coords.latitude,
+          longitude: curr.coords.longitude
+        };
+        if (isValidCoordinate(coords.latitude, coords.longitude)) {
+          setLocation(coords);
+          locationRef.current = coords;
+          setIsGPS(true);
+          isGPSRef.current = true;
+          syncLocationWithPushToken(coords, "gps").catch(() => {});
+          reverseGeocodeCoords(coords, requestId);
         }
       }
     } catch (e) {
       console.warn("GPS Request Error:", e);
+      if (requestId === locationRequestIdRef.current) {
+        setIsGPS(false);
+        isGPSRef.current = false;
+        setLocationName("Location unavailable");
+      }
     }
-  }, []);
+  }, [reverseGeocodeCoords]);
 
   // Fetch Data from Supabase
   const refreshData = useCallback(async () => {
@@ -834,6 +870,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [openAuthModal, user]);
 
   const setManualLocation = useCallback((coords: Coordinates, name: string) => {
+    locationRequestIdRef.current++;
     setLocation(coords);
     locationRef.current = coords;
     setLocationName(name);

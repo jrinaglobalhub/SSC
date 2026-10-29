@@ -265,9 +265,9 @@ export const CartScreen: React.FC = () => {
       const detectedStreet = [geo?.street, geo?.name, geo?.district]
         .filter(Boolean)
         .join(", ");
-      const detectedCity = geo?.city || geo?.subregion || geo?.district || "Kochi";
-      const detectedDistrict = geo?.district || geo?.subregion || geo?.region || "Kerala";
-      const detectedPostal = geo?.postalCode || "682030";
+      const detectedCity = geo?.city || geo?.subregion || geo?.district || "";
+      const detectedDistrict = geo?.district || geo?.subregion || geo?.region || "";
+      const detectedPostal = geo?.postalCode || "";
 
       const updatedAddr: DeliveryAddress = {
         ...editAddress,

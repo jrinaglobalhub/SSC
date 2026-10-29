@@ -5,6 +5,79 @@ export const DEFAULT_LOCATION: Coordinates = {
   longitude: 76.3419 // Kakkanad / Kochi, Kerala
 };
 
+export interface GeocodedAddressLike {
+  city?: string | null;
+  district?: string | null;
+  subregion?: string | null;
+  region?: string | null;
+  country?: string | null;
+  name?: string | null;
+  street?: string | null;
+  postalCode?: string | null;
+  isoCountryCode?: string | null;
+  formattedAddress?: string | null;
+}
+
+/**
+ * Formats a reverse-geocoded address into an accurate, human-friendly display label.
+ * Coordinates are the source of truth: parses locality, district, state, and country
+ * directly from the geocoding response. Never hardcodes any city, district, or state.
+ * Returns a truthful fallback ("Current location") if geocoding returns empty or null.
+ */
+export function formatGeocodedLocationName(
+  geo?: GeocodedAddressLike | null
+): string {
+  if (!geo) return "Current location";
+
+  // Locality: choose the most specific human-friendly place name
+  const locality = [geo.city, geo.district, geo.subregion, geo.name, geo.street]
+    .map((s) => s?.trim())
+    .find((s): s is string => Boolean(s && s.length > 0));
+
+  const state = geo.region?.trim() || null;
+  const country = geo.country?.trim() || null;
+
+  if (locality && state) {
+    // Avoid redundant repetition like "Delhi, Delhi"
+    if (locality.toLowerCase() === state.toLowerCase()) {
+      return country ? `${locality}, ${country}` : locality;
+    }
+    return `${locality}, ${state}`;
+  }
+
+  if (locality) {
+    return country ? `${locality}, ${country}` : locality;
+  }
+
+  if (state) {
+    return country ? `${state}, ${country}` : state;
+  }
+
+  if (country) {
+    return country;
+  }
+
+  return "Current location";
+}
+
+/**
+ * Formats a saved delivery address into a clean display label without injecting
+ * any arbitrary state or city fallback.
+ */
+export function formatAddressDisplayLabel(addr?: DeliveryAddress | null): string {
+  if (!addr) return "Saved Address";
+  if (addr.streetArea?.trim() && addr.city?.trim()) {
+    return `${addr.streetArea.trim()}, ${addr.city.trim()}`;
+  }
+  if (addr.streetArea?.trim() && addr.district?.trim()) {
+    return `${addr.streetArea.trim()}, ${addr.district.trim()}`;
+  }
+  if (addr.city?.trim() && addr.district?.trim()) {
+    return `${addr.city.trim()}, ${addr.district.trim()}`;
+  }
+  return addr.city?.trim() || addr.streetArea?.trim() || addr.district?.trim() || "Saved Address";
+}
+
 /**
  * Fixed 5,000-metre (5 km) consumer deal radar notification radius.
  */

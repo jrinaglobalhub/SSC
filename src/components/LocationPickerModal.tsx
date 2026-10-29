@@ -19,14 +19,12 @@ import {
   Navigation,
   Check,
   ChevronRight,
-  Map as MapIcon,
   Home,
   SlidersHorizontal
 } from "lucide-react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useApp } from "../context/AppContext";
 import { Coordinates } from "../types";
-import { formatDistance } from "../utils/geo";
+import { formatDistance, isValidCoordinate } from "../utils/geo";
 
 const PALODE_LOCATION = {
   id: "palode",
@@ -60,8 +58,6 @@ export const LocationPickerModal: React.FC = () => {
     resetToGPSLocation,
     deliveryAddress
   } = useApp();
-
-  const navigation = useNavigation<any>();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
@@ -117,7 +113,7 @@ export const LocationPickerModal: React.FC = () => {
 
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=json&countrycodes=in&limit=8&q=${encodeURIComponent(
-        query + ", Kerala"
+        query
       )}`;
       const res = await fetch(url, {
         signal: controller.signal,
@@ -139,7 +135,7 @@ export const LocationPickerModal: React.FC = () => {
           return {
             id: `nom_${item.place_id || idx}_${Date.now()}`,
             name: primaryName,
-            subtext: sub || "Kerala, India",
+            subtext: sub || "India",
             coords: {
               latitude: parseFloat(item.lat),
               longitude: parseFloat(item.lon)
@@ -171,16 +167,6 @@ export const LocationPickerModal: React.FC = () => {
     Keyboard.dismiss();
     setShowLocationModal(false);
     await resetToGPSLocation();
-  };
-
-  const handlePickOnMap = () => {
-    Keyboard.dismiss();
-    setShowLocationModal(false);
-    try {
-      navigation.navigate("Map");
-    } catch (err) {
-      console.warn("Navigation to map failed:", err);
-    }
   };
 
   const handleOpenRadiusModal = () => {
@@ -229,7 +215,7 @@ export const LocationPickerModal: React.FC = () => {
               <TextInput
                 value={searchQuery}
                 onChangeText={handleQueryChange}
-                placeholder="Search area, town, or landmark in Kerala..."
+                placeholder="Search area, town, or city..."
                 placeholderTextColor="#94A3B8"
                 style={styles.searchInput}
                 returnKeyType="search"
@@ -268,7 +254,12 @@ export const LocationPickerModal: React.FC = () => {
                     <TouchableOpacity
                       key={item.id}
                       style={styles.searchResultItem}
-                      onPress={() => handleSelectLocation(item.coords, `${item.name}, Kerala`)}
+                      onPress={() =>
+                        handleSelectLocation(
+                          item.coords,
+                          item.subtext ? `${item.name}, ${item.subtext.split(",")[0].trim()}` : item.name
+                        )
+                      }
                       activeOpacity={0.7}
                     >
                       <View style={styles.resultPinBox}>
@@ -291,7 +282,7 @@ export const LocationPickerModal: React.FC = () => {
                   </View>
                 ) : isSearching ? (
                   <View style={styles.emptySearchBox}>
-                    <Text style={styles.emptySearchText}>Searching locations across Kerala...</Text>
+                    <Text style={styles.emptySearchText}>Searching locations...</Text>
                   </View>
                 ) : null}
               </View>
@@ -331,12 +322,17 @@ export const LocationPickerModal: React.FC = () => {
               <TouchableOpacity
                 style={styles.actionCard}
                 onPress={() => {
-                  const lat = typeof deliveryAddress.lat === "number" ? deliveryAddress.lat : 10.0159;
-                  const lng = typeof deliveryAddress.lng === "number" ? deliveryAddress.lng : 76.3419;
-                  const label = [deliveryAddress.streetArea, deliveryAddress.city || "Kerala"]
-                    .filter(Boolean)
-                    .join(", ");
-                  handleSelectLocation({ latitude: lat, longitude: lng }, label);
+                  if (
+                    typeof deliveryAddress.lat === "number" &&
+                    typeof deliveryAddress.lng === "number" &&
+                    isValidCoordinate(deliveryAddress.lat, deliveryAddress.lng)
+                  ) {
+                    const label =
+                      [deliveryAddress.streetArea, deliveryAddress.city, deliveryAddress.district]
+                        .filter(Boolean)
+                        .join(", ") || "Saved Address";
+                    handleSelectLocation({ latitude: deliveryAddress.lat, longitude: deliveryAddress.lng }, label);
+                  }
                 }}
                 activeOpacity={0.8}
               >
@@ -354,24 +350,6 @@ export const LocationPickerModal: React.FC = () => {
                 <ChevronRight size={18} color="#94A3B8" />
               </TouchableOpacity>
             )}
-
-            {/* Pick on Interactive Map */}
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={handlePickOnMap}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.actionIconBox, { backgroundColor: "#EFF6FF" }]}>
-                <MapIcon size={18} color="#2563EB" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.actionTitle}>Pick on Interactive Map</Text>
-                <Text style={styles.actionSubtitle}>
-                  Pin your exact spot by tapping anywhere on the live Kerala map
-                </Text>
-              </View>
-              <ChevronRight size={18} color="#94A3B8" />
-            </TouchableOpacity>
 
             {/* Quick 1-Tap Location: Palode */}
             <View style={styles.sectionBlock}>
