@@ -33,7 +33,7 @@ Run lint and typecheck before declaring any task done.
 
 ## Building with EAS & Native Android
 
-- Native Android configuration lives in `android/` with Gradle 9.3.1, compileSdk 35, and React Native New Architecture (`newArchEnabled=true`, Hermes engine).
+- Native Android configuration lives in `android/` with Gradle 9.4.1, compileSdk 35+, and React Native New Architecture (`newArchEnabled=true`, Hermes engine).
 - Release APKs can be built locally or with EAS (`eas build --profile preview|production`). Run EAS CLI as `npx eas-cli@latest <command>`.
 - Docs: https://docs.expo.dev/eas/index.md
 

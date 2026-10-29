@@ -26,6 +26,7 @@ import { BuyNowModal } from "../components/BuyNowModal";
 import { CartModal } from "../components/CartModal";
 import { useApp } from "../context/AppContext";
 import { requestNotificationPermission } from "../services/notificationService";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type RootStackParamList = {
   MainTabs: undefined;
@@ -39,6 +40,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 const MainTabs: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const {
     setUser,
     showAuthModal,
@@ -53,6 +55,9 @@ const MainTabs: React.FC = () => {
     requestNotificationPermission().catch(() => {});
   }, []);
 
+  const tabHeight = 62 + insets.bottom;
+  const tabPaddingBottom = insets.bottom > 0 ? insets.bottom : 8;
+
   return (
     <View style={styles.container}>
       <Tab.Navigator
@@ -64,9 +69,9 @@ const MainTabs: React.FC = () => {
             backgroundColor: "#FFFFFF",
             borderTopColor: "#E2E8F0",
             borderTopWidth: 1,
-            height: Platform.OS === "ios" ? 84 : 64,
-            paddingBottom: Platform.OS === "ios" ? 24 : 10,
-            paddingTop: 8,
+            height: tabHeight,
+            paddingBottom: tabPaddingBottom,
+            paddingTop: 6,
             elevation: 8,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: -2 },

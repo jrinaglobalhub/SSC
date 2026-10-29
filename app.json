@@ -19,10 +19,15 @@
       "googleServicesFile": "./google-services.json",
       "allowBackup": false,
       "adaptiveIcon": {
-        "backgroundColor": "#1E293B",
+        "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "androidNavigationBar": {
+        "visible": "always",
+        "barStyle": "dark-content",
+        "backgroundColor": "#FFFFFF"
       },
       "permissions": [
         "ACCESS_FINE_LOCATION",
