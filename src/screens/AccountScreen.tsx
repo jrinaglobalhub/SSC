@@ -24,7 +24,8 @@ import {
   Edit3,
   UserCog,
   MapPin,
-  Ticket
+  Ticket,
+  RotateCcw
 } from "lucide-react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -352,6 +353,16 @@ export const AccountScreen: React.FC = () => {
           >
             <FileText size={18} color="#64748B" />
             <Text style={styles.menuTitle}>Terms of Service</Text>
+            <ChevronRight size={16} color="#94A3B8" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => navigation.navigate("RefundPolicy")}
+            activeOpacity={0.7}
+          >
+            <RotateCcw size={18} color="#64748B" />
+            <Text style={styles.menuTitle}>Refund & Cancellation Policy</Text>
             <ChevronRight size={16} color="#94A3B8" />
           </TouchableOpacity>
 

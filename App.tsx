@@ -1,10 +1,28 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, LinkingOptions } from "@react-navigation/native";
 import { AppProvider } from "./src/context/AppContext";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { SplashScreen } from "./src/components/SplashScreen";
+import { RootStackParamList } from "./src/types";
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [
+    "https://ssc.jrina.online",
+    "http://ssc.jrina.online",
+    "smartshopper://",
+  ],
+  config: {
+    screens: {
+      MainTabs: "",
+      PrivacyPolicy: "policies",
+      TermsOfService: "terms",
+      RefundPolicy: "refunds",
+      Vouchers: "vouchers",
+    },
+  },
+};
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -13,7 +31,7 @@ export default function App() {
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }} edges={["top", "left", "right"]}>
         <AppProvider>
-          <NavigationContainer>
+          <NavigationContainer linking={linking}>
             <RootNavigator />
           </NavigationContainer>
         </AppProvider>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -73,11 +73,14 @@ export const LocationPickerModal: React.FC = () => {
   // Clean search input on modal open/close
   useEffect(() => {
     if (!showLocationModal) {
-      setSearchQuery("");
-      setSearchResults([]);
-      setSearchError(null);
       if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
       if (abortControllerRef.current) abortControllerRef.current.abort();
+      const timer = setTimeout(() => {
+        setSearchQuery("");
+        setSearchResults([]);
+        setSearchError(null);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [showLocationModal]);
 

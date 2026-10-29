@@ -1,161 +1,170 @@
 ================================================================================
-                       PRIVACY POLICY FOR SMARTSHOPPER
-           SmartShopper Consumer (SSC) & SmartShopper Merchant (SSM)
-                        Operated by JRINA Private Limited
+                        PRIVACY POLICY FOR SMARTSHOPPER
+            SmartShopper Consumer (SSC) & SmartShopper Merchant (SSM)
+                         Operated by JRINA Private Limited
 ================================================================================
-Last Updated: October 24, 2026
-Effective Date: October 24, 2026
+Last Updated: October 2026
+Effective Date: October 2026
 
-Official Domain: https://jrina.online
+Official Domain: https://jrina.online / https://ssc.jrina.online
 Consumer App ID: online.jrina.smartshopper.consumer
 Merchant App ID: online.jrina.smartshopper.merchant
+Registered Entity: JRINA Private Limited
+Registered Office: Peringammala, Palode, Nedumangad, Thiruvananthapuram,
+                   Kerala, India - 695562
+Support Desk: support@jrina.online | Grievance Desk: grievance@jrina.online
 
 --------------------------------------------------------------------------------
 1. INTRODUCTION & SCOPE
 --------------------------------------------------------------------------------
 JRINA Private Limited ("Company", "we", "us", or "our") respects your privacy
-and is committed to protecting the personal data of all users of the SmartShopper
-ecosystem, including:
-  a) SmartShopper Consumer ("SSC") mobile application and web portals.
-  b) SmartShopper Merchant ("SSM") mobile application, POS, and merchant tools.
-  c) Related online services accessible via https://jrina.online.
+and is committed to safeguarding personal data in compliance with the Information
+Technology Act, 2000, the Information Technology (Reasonable Security Practices
+and Procedures and Sensitive Personal Data or Information) Rules, 2011, and the
+Digital Personal Data Protection (DPDP) Act, 2023.
 
-This Privacy Policy explains how we collect, use, store, process, and disclose
-your information when you download, install, register, access, or use our mobile
-applications and related services. Please read this Privacy Policy carefully. By
-accessing or using SSC or SSM, you agree to the collection and use of information
-in accordance with this policy and applicable laws, including the Information
-Technology Act, 2000, and the Digital Personal Data Protection Act (DPDP), 2023.
+This Privacy Policy governs the collection, processing, storage, and protection
+of personal data across the SmartShopper platform, comprising:
+  a) SmartShopper Consumer ("SSC") mobile application;
+  b) SmartShopper Merchant ("SSM") mobile application & POS suite; and
+  c) Associated web services operating under https://ssc.jrina.online and
+     https://jrina.online.
+
+By installing, registering with, accessing, or using SmartShopper, you acknowledge
+and consent to the practices described in this Privacy Policy.
 
 --------------------------------------------------------------------------------
-2. INFORMATION WE COLLECT
+2. DATA WE ACTUALLY COLLECT
 --------------------------------------------------------------------------------
-We collect information to provide, maintain, and improve our hyper-local deal
-discovery, retail workstation, and billing services.
+We collect only the minimum personal data necessary to provide hyper-local deal
+discovery, retail counter billing, and in-app communications.
 
-A. Information You Provide to Us:
-   - Account & Profile Data: Full name, mobile phone number, email address,
-     profile picture, and authentication credentials.
-   - Merchant Business Information (SSM): Store/Business trade name, physical
-     store address, GSTIN (Goods and Services Tax Identification Number), business
-     category, bank account/settlement details for payouts, and store operating hours.
-   - Product & Inventory Data (SSM): Product descriptions, barcodes/SKUs, shelf
-     pricing, stock levels, and discount deal configurations.
-   - Customer Transactions (SSC & SSM): Counter billing entries, digital receipts,
-     invoice totals, GST breakdown, voucher redemption codes, and purchase history.
-   - Communications: Messages sent through customer-merchant in-app chat, support
-     queries, and verified buyer reviews or ratings.
+A. Consumer Account & Profile Information (SSC):
+   - Identity & Contact: Full name, verified mobile phone number, and optional
+     email address during registration or OTP login.
+   - SmartShopper Customer ID: A unique system-generated identifier (e.g.,
+     "SS-CUS-xxxx") encoded in a personal QR code displayed at retail checkout
+     to facilitate counter loyalty and digital e-bill delivery.
+   - Saved Delivery Addresses: House/apartment details, street, city (e.g., Palode),
+     district, and pincode provided voluntarily for order fulfillment.
 
-B. Information Collected Automatically:
-   - Geolocation Data:
-     * SSC: Precise or approximate foreground location to detect nearby partner
-       stores, radar flash deals, and distance-based promotions within your
-       selected geofence radius (500m - 5000m).
-     * SSM: Store GPS coordinates calibration to establish your store's radar
-       beacon and geofence boundary.
-   - Device & Technical Data: Device model, hardware manufacturer, operating
-     system version, unique device identifiers, IP address, connection type,
-     app version, crash logs, and performance metrics.
-   - Push Notification Tokens: Expo Push Notification tokens and Firebase Cloud
-     Messaging (FCM) device tokens required to deliver real-time deal alerts,
-     chat messages, and billing updates.
+B. Location Data & Retention Architecture:
+   - Foreground Consented Location: With your explicit permission, SSC accesses
+     your device's GPS coordinates while the app is in use to calculate distances
+     to nearby stores and display local promotions.
+   - Quick Location Preset: Users may manually select quick locality presets
+     (such as Palode, Kerala) without granting hardware GPS permissions.
+   - Notification Geofence Storage: To dispatch real-time 5,000-metre proximity
+     push alerts when partner stores publish flash deals, SSC stores your latest
+     consented coordinate pair (latitude, longitude) and location source
+     ("verified_device_gps" or "verified_saved_address") in our secure Supabase
+     `user_push_tokens` table.
+   - What We DO NOT Collect: SSC does NOT track or store continuous background
+     GPS trails, speed, travel routes, or historical breadcrumb trails.
 
-C. Information We DO NOT Collect:
-   - We do not store sensitive payment credentials such as credit/debit card
-     numbers, CVVs, or Net Banking passwords. All online payments are handled
-     directly by RBI-regulated payment gateways (such as Cashfree Payments).
+C. Merchant Business Data (SSM):
+   - Store trade name, physical store address, GPS coordinates for radar boundary,
+     contact telephone, business category, GSTIN (where registered), and bank
+     settlement accounts for merchant SaaS transactions.
+
+D. Transactions & In-App Communications:
+   - Digital E-Bills: Counter sales invoices generated by partner merchants
+     displaying purchased item names, quantities, invoice totals, and GST breakdown.
+   - Voucher Redemptions: Status of claimed promotional vouchers, redemption
+     timestamps, and single-use verification tokens.
+   - Customer-Merchant Chat: Direct inquiry messages exchanged between shoppers
+     and store managers via our real-time messaging pipeline.
+   - AI Shopping Assistant: Ephemeral conversational text queries processed via
+     Google Gemini 1.5 Flash to assist with store product suggestions. Chat queries
+     are processed in real time and are not sold to third-party data brokers.
+
+E. Financial & Payment Credentials (EXCLUSIONS):
+   - Consumer checkouts are settled directly between consumers and merchants
+     via Cash on Delivery (COD) or direct UPI. SSC does not collect, process, or
+     store credit card numbers, debit card numbers, CVVs, or Net Banking PINs.
+   - Merchant platform subscription fees on SSM are processed directly by
+     RBI-authorized payment gateways (Cashfree Payments India Pvt. Ltd.).
 
 --------------------------------------------------------------------------------
 3. HOW WE USE YOUR INFORMATION
 --------------------------------------------------------------------------------
-We use the collected information for the following legitimate purposes:
-  1. Service Delivery: Facilitating counter billing, catalog management, coupon
-     issuance, real-time voucher verification, and in-store redemptions.
-  2. Location-Based Features: Delivering real-time localized deal notifications to
-     shoppers physically within a merchant's designated radar geofence.
-  3. Real-Time Communication: Enabling instant customer inquiry chats and merchant
-     responses between verified buyers and stores.
-  4. Invoice & Compliance: Generating GST-compliant digital invoices and audit
-     records for retail merchants.
-  5. Security & Fraud Prevention: Verifying single-use voucher authenticity,
-     preventing duplicate redemptions, and securing merchant counter sessions.
-  6. Service Improvements & Analytics: Monitoring app performance, debugging crashes,
-     and improving user interface usability.
+We use collected data solely for legitimate, operational purposes:
+  1. Hyper-Local Deal Radar: Evaluating merchant deal geofences against your latest
+     consented location to dispatch deals within 5,000 metres.
+  2. Loyalty Identification: Rendering your Customer ID QR code to enable partner
+     stores to credit loyalty points and attach digital receipts.
+  3. Push Notifications: Transmitting real-time order status, deal alerts, and
+     incoming chat messages via Expo Push Notifications and Firebase Cloud Messaging.
+  4. Real-Time Chat & Customer Support: Relaying customer inquiries to merchants.
+  5. Security & Fraud Prevention: Verifying single-use voucher QR tokens to prevent
+     counter fraud or unauthorized coupon reuse.
 
 --------------------------------------------------------------------------------
-4. THIRD-PARTY SERVICES & SERVICE PROVIDERS
+4. THIRD-PARTY PROCESSORS & DATA TRANSFERS
 --------------------------------------------------------------------------------
-We share data only with trusted third-party service providers essential for app
-functionality, subject to strict confidentiality and security agreements:
-  - Supabase Inc.: Cloud database, user authentication, and secure Realtime
-    sync infrastructure (Data encrypted in transit and at rest).
-  - Expo / Firebase (Google LLC): Push notification infrastructure for dispatching
-    background and foreground notifications for deals, chats, and redemptions.
-  - Cashfree Payments India Pvt. Ltd.: Secure payment processing for merchant
-    subscription fees or consumer digital checkouts where applicable.
-  - OpenStreetMap / Location Services: Map tiles and geocoding services.
+Personal data is processed only through vetted infrastructure partners under
+strict confidentiality and security standards:
+  - Supabase Inc.: Cloud-hosted PostgreSQL database, authentication, and Realtime
+    engine with TLS 1.3 transit encryption and Row-Level Security (RLS) enforcement.
+  - Google LLC / Firebase Cloud Messaging (FCM): Secure delivery of Android push
+    notifications.
+  - Expo (650 Industries Inc.): Notification routing infrastructure.
+  - Google Cloud Vertex AI / Gemini: Ephemeral processing of conversational queries
+    for the in-app AI Shopping Assistant.
+  - Cashfree Payments India Pvt. Ltd.: Secure payment processing exclusively for
+    merchant SaaS platform subscriptions on SSM.
+  - OpenStreetMap & Leaflet: Geographic mapping tiles and coordinate distance calculations.
 
-We do NOT sell, rent, trade, or monetize your personal data to any third-party
-advertisers or data brokers.
-
---------------------------------------------------------------------------------
-5. DATA STORAGE, SECURITY & RETENTION
---------------------------------------------------------------------------------
-- Security Measures: We implement industry-standard administrative, physical, and
-  technical security safeguards, including HTTPS/TLS 1.3 encryption in transit,
-  Row-Level Security (RLS) database policies, and authenticated server-side API
-  pipelines.
-- Data Retention: We retain user and transaction data only as long as necessary
-  to fulfill the purposes outlined in this policy or as required by statutory
-  accounting, tax (GST records), and commercial regulations under Indian law.
-- Inactive Tokens: Push notification tokens that are invalid, unregistered, or
-  superseded by a new device session are automatically pruned or deactivated.
+We do NOT sell, rent, trade, or monetize your personal data to advertisers or third
+parties for behavioral marketing.
 
 --------------------------------------------------------------------------------
-6. DATA ACCESS, DELETION & USER RIGHTS
+5. DATA SECURITY & RETENTION
 --------------------------------------------------------------------------------
-You have the following rights regarding your personal information:
-  - Access & Correction: You may review and update your profile information, store
-    profile, or catalog directly within the SSC or SSM apps.
-  - Permissions Management: You can revoke camera permissions (used for QR code
-    scanning) or location permissions at any time via your Android device settings.
-    (Note: Disabling location may limit radar deal discovery).
-  - Account & Data Deletion: You may request complete deletion of your account and
-    associated personal data by contacting our Grievance Officer at
-    support@jrina.online. Upon verification, eligible records will be permanently
-    purged within 30 days, except records legally mandated for GST and tax audits.
+- Security Safeguards: All network communications are encrypted in transit using
+  HTTPS / TLS 1.3. Database tables are protected by Supabase Row-Level Security
+  (RLS) ensuring consumers and merchants can only access authorized records.
+- Retention Period: Account data and digital bills are retained for the active life
+  of the user account. Inactive push notification tokens are automatically pruned.
+  Statutory tax records (such as merchant GST sales invoices) are retained for the
+  mandatory audit period required under Indian financial regulations.
+
+--------------------------------------------------------------------------------
+6. USER RIGHTS UNDER DPDP ACT, 2023
+--------------------------------------------------------------------------------
+In accordance with the Digital Personal Data Protection Act, 2023, you have:
+  - Right to Access & Correction: View and edit your profile details and saved
+    addresses directly in the Account tab.
+  - Right to Withdraw Consent: Revoke device location or push notification
+    permissions at any time via Android system settings or in-app notification toggles.
+  - Right to Erasure / Account Deletion: Request complete deletion of your account
+    and associated personal data by contacting grievance@jrina.online or
+    support@jrina.online. Eligible records will be permanently purged within 30 days.
+  - Right to Nominate & Grievance Redressal: Nominate a representative or submit
+    data privacy grievances to our Grievance Desk.
 
 --------------------------------------------------------------------------------
 7. CHILDREN'S PRIVACY
 --------------------------------------------------------------------------------
-SmartShopper services (both SSC and SSM) are not directed to individuals under
-the age of 18. We do not knowingly collect personal information from minors. If
-we discover that a minor has provided us with personal data, we will take prompt
-steps to delete such information from our servers.
+SmartShopper is not directed to individuals under eighteen (18) years of age.
+We do not knowingly collect personal data from minors. If we identify that a minor
+has registered, their data will be promptly removed.
 
 --------------------------------------------------------------------------------
-8. CHANGES TO THIS PRIVACY POLICY
+8. GRIEVANCE REDRESSAL & CONTACT INFORMATION
 --------------------------------------------------------------------------------
-We may update this Privacy Policy from time to time to reflect changes in our
-practices, operational features, or legal requirements. Updated policies will be
-posted on this page and on our website at https://jrina.online/privacy with a
-revised "Last Updated" date. Continued use of SSC or SSM after any update
-signifies your acceptance of the revised terms.
+In accordance with the Information Technology Act, 2000, and the Digital Personal
+Data Protection Act, 2023, the details of our Grievance Desk are:
 
---------------------------------------------------------------------------------
-9. GRIEVANCE OFFICER & CONTACT INFORMATION
---------------------------------------------------------------------------------
-In accordance with the Information Technology Act, 2000, and the rules made
-thereunder, the contact details of the Grievance Officer for JRINA Private Limited
-are provided below:
-
-  Grievance Officer:
+  Grievance Desk:
   JRINA Private Limited
-  Official Website: https://jrina.online
+  Registered Address: Peringammala, Palode, Nedumangad, Thiruvananthapuram,
+                      Kerala, India - 695562
+  Official Website: https://ssc.jrina.online/policies / https://jrina.online
   Support Email: support@jrina.online
   Grievance Email: grievance@jrina.online
-  Subject Line for Inquiries: "Privacy Policy Grievance - SmartShopper"
+  Subject Header: "Privacy Grievance - SmartShopper"
 
-For any questions, concerns, or requests regarding this Privacy Policy or our
-data practices, please write to us at the above contact details.
+Response Window: Grievances are acknowledged within 48 hours and resolved within
+stipulated statutory timelines under Indian law.
 ================================================================================

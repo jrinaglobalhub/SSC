@@ -18,11 +18,14 @@ import {
   Mail,
   Phone,
   ExternalLink,
-  AlertTriangle
+  AlertTriangle,
+  ShieldCheck,
+  RotateCcw,
+  CheckCircle2
 } from "lucide-react-native";
 
 export const TermsOfServiceScreen: React.FC = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
   const handleOpenEmail = (subject?: string, body?: string) => {
     const url = `mailto:info@jrina.online?subject=${encodeURIComponent(
@@ -61,6 +64,32 @@ export const TermsOfServiceScreen: React.FC = () => {
           </View>
         </View>
 
+        {/* Legal Policies Tab Bar */}
+        <View style={styles.tabBarWrapper}>
+          <TouchableOpacity
+            style={styles.tabItem}
+            onPress={() => navigation.navigate("PrivacyPolicy")}
+            activeOpacity={0.7}
+          >
+            <ShieldCheck size={13} color="#94A3B8" />
+            <Text style={styles.tabText}>Privacy Policy</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.tabItem, styles.tabItemActive]} activeOpacity={1}>
+            <FileText size={13} color="#EA580C" />
+            <Text style={[styles.tabText, styles.tabTextActive]}>Terms of Service</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.tabItem}
+            onPress={() => navigation.navigate("RefundPolicy")}
+            activeOpacity={0.7}
+          >
+            <RotateCcw size={13} color="#94A3B8" />
+            <Text style={styles.tabText}>Refunds</Text>
+          </TouchableOpacity>
+        </View>
+
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
@@ -83,7 +112,7 @@ export const TermsOfServiceScreen: React.FC = () => {
 
               <View style={styles.effectiveBadge}>
                 <Calendar size={13} color="#EA580C" />
-                <Text style={styles.effectiveText}>Effective Date: 12 October 2026</Text>
+                <Text style={styles.effectiveText}>Effective Date: October 2026 | Last Updated: October 2026</Text>
               </View>
             </View>
 
@@ -95,9 +124,9 @@ export const TermsOfServiceScreen: React.FC = () => {
                   ssc.jrina.online
                 </Text>
                 ), operated by <Text style={styles.bold}>JRINA Private Limited</Text> (&quot;Company&quot;,
-                &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). By accessing, browsing, registering for,
-                or using our Consumer Application, Customer Digital ID Card, or promotional voucher features,
-                you acknowledge and agree to be bound by these Terms and Conditions.
+                &quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). By accessing, registering for, or using
+                our Consumer Mobile Application, Customer Digital Pass, promotional vouchers, or order services,
+                you agree to be bound by these Terms and Conditions and our Privacy Policy.
               </Text>
             </View>
 
@@ -107,22 +136,20 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>1</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Platform Role & Independent Merchant Offers</Text>
+                <Text style={styles.sectionHeading}>Platform Role & Independent Merchants</Text>
               </View>
               <Text style={styles.sectionLead}>
-                SmartShopper operates exclusively as a technology platform connecting consumers with
-                participating offline retail stores, restaurants, service outlets, and local businesses
-                (&quot;Merchants&quot;).
+                SmartShopper operates exclusively as a technology marketplace connecting consumers with
+                participating offline retail stores, supermarkets, restaurants, and service outlets (&quot;Merchants&quot;).
               </Text>
               <View style={styles.noticeBox}>
                 <AlertTriangle size={16} color="#FB923C" style={{ marginTop: 2, flexShrink: 0 }} />
                 <Text style={styles.noticeText}>
-                  <Text style={styles.bold}>Important Notice:</Text> Merchants independently create, publish,
-                  price, and honor their respective deals, discounts, vouchers, and product availability. While
-                  JRINA Private Limited verifies merchant credentials during onboarding, the Merchant remains
-                  solely responsible for the accuracy of offer descriptions, quality of goods and services,
-                  stock availability, pricing, statutory taxes, and fulfillment, subject to applicable Indian
-                  consumer protection laws.
+                  <Text style={styles.bold}>Independent Merchant Responsibility:</Text> Merchants independently
+                  determine, publish, price, and fulfill their respective discounts, deals, and products. While
+                  JRINA Private Limited verifies merchant profiles during onboarding, the Merchant remains solely
+                  responsible for product quality, tax invoicing, stock availability, and physical delivery, subject
+                  to mandatory protections under the Consumer Protection Act, 2019.
                 </Text>
               </View>
             </View>
@@ -133,13 +160,14 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>2</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Eligibility & Consumer Account Responsibilities</Text>
+                <Text style={styles.sectionHeading}>Eligibility & Account Security</Text>
               </View>
               <View style={styles.listContainer}>
                 {[
                   "You must be at least 18 years of age or possess legal parental/guardian authorization to use the SmartShopper consumer platform.",
-                  "You agree to provide accurate, current, and authentic registration details (full name, verified email, and contact number).",
-                  "You are responsible for maintaining the confidentiality of your login credentials and are fully liable for all activities under your account."
+                  "You agree to provide accurate, truthful, and authentic registration details (full name, phone number, and verified email address).",
+                  "You are responsible for safeguarding your login credentials and are responsible for all activities occurring under your account.",
+                  "Guest users may browse nearby stores and deals within an active radar; creating an authenticated profile is required to claim vouchers, save delivery addresses, and place orders."
                 ].map((item, idx) => (
                   <View key={idx} style={styles.dotItem}>
                     <Text style={styles.dot}>•</Text>
@@ -155,17 +183,17 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>3</Text>
                 </View>
-                <Text style={styles.sectionHeading}>SmartShopper Digital Card & Customer ID</Text>
+                <Text style={styles.sectionHeading}>Customer Digital ID & Loyalty Pass</Text>
               </View>
               <Text style={styles.sectionLead}>
-                Upon account creation, each consumer is assigned a unique permanent Customer ID (e.g.,{" "}
-                <Text style={styles.codeText}>SS-CUS-xxxx</Text>) represented via an interactive
-                ISO-compliant QR Code and Code 128 Barcode.
+                Each registered consumer is issued a unique permanent Customer ID (e.g.,{" "}
+                <Text style={styles.codeText}>SS-CUS-xxxx</Text>) represented via an ISO-compliant QR Code and
+                Code 128 Barcode within the app.
               </Text>
-              <Text style={styles.sectionLead}>
-                Presenting your Digital Card at partner merchant checkouts enables cashiers to link verified
-                itemized purchases, record digital E-Bills, and validate eligible consumer discounts. Your
-                Digital Card is personal to your registered identity and non-transferable.
+              <Text style={[styles.sectionLead, { marginTop: 6 }]}>
+                Presenting your Customer Digital Pass at participating merchant checkouts enables cashiers to link
+                eligible counter discounts and record digital E-Bills. Your Digital Pass is strictly personal to your
+                registered identity and non-transferable.
               </Text>
             </View>
 
@@ -175,14 +203,14 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>4</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Voucher Claiming, Expiry & Redemption Rules</Text>
+                <Text style={styles.sectionHeading}>Voucher Claiming, Expiry & Redemption</Text>
               </View>
               <View style={styles.listContainer}>
                 {[
-                  "Promotional vouchers claimed on SmartShopper generate a unique alphanumeric voucher code and QR code.",
-                  "Vouchers must be redeemed at the designated merchant store prior to their stated expiration window or countdown timer.",
-                  "Vouchers hold no cash equivalent, cannot be exchanged for cash, and are subject to merchant terms (such as minimum purchase values or maximum discount caps) disclosed in the offer card.",
-                  "Merchants reserve the right to verify voucher authenticity via their Merchant redemption scanner prior to applying discounts at checkout."
+                  "Claiming a promotional voucher generates a unique alphanumeric code and verification QR code.",
+                  "Vouchers must be redeemed at the designated store location prior to their countdown expiry time.",
+                  "Vouchers hold no monetary cash value, cannot be converted to cash, and are subject to merchant terms (such as minimum purchase requirements) stated on the offer card.",
+                  "Participating merchants verify voucher authenticity using their merchant scanning workstation before applying discounts at checkout."
                 ].map((item, idx) => (
                   <View key={idx} style={styles.dotItem}>
                     <Text style={styles.dot}>•</Text>
@@ -198,14 +226,31 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>5</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Itemized Digital E-Bills & Records</Text>
+                <Text style={styles.sectionHeading}>Consumer Orders, Delivery & Payments</Text>
               </View>
               <Text style={styles.sectionLead}>
-                SmartShopper provides itemized digital E-Bills sent by participating merchants upon scanning
-                your Customer ID. These records serve as a convenient paperless summary of your store visit and
-                purchases. Physical tax invoices issued by the merchant at point-of-sale remain the official
-                legal tax document for statutory warranty and return claims with the respective merchant.
+                SmartShopper provides a shopping cart and Buy Now workflow for verified merchant products within a 5 km proximity:
               </Text>
+              <View style={styles.bulletList}>
+                <View style={styles.bulletItem}>
+                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
+                  <Text style={styles.bulletContent}>
+                    <Text style={styles.bold}>Fulfillment Options:</Text> Shoppers can select between Store Pickup or Direct Merchant Delivery to their saved address.
+                  </Text>
+                </View>
+                <View style={styles.bulletItem}>
+                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
+                  <Text style={styles.bulletContent}>
+                    <Text style={styles.bold}>Direct Consumer Payment:</Text> Payments for retail goods are made directly to the merchant upon delivery/pickup via Cash on Delivery (COD) or store UPI QR. JRINA Private Limited does not collect, hold, or process retail merchandise payments.
+                  </Text>
+                </View>
+                <View style={styles.bulletItem}>
+                  <CheckCircle2 size={16} color="#10B981" style={styles.bulletIcon} />
+                  <Text style={styles.bulletContent}>
+                    <Text style={styles.bold}>Physical Tax Invoices:</Text> The physical tax invoice issued by the merchant at point-of-sale constitutes the statutory proof of purchase for warranties and tax records.
+                  </Text>
+                </View>
+              </View>
             </View>
 
             {/* Section 6 */}
@@ -214,20 +259,13 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>6</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Verified Buyer Reviews & Price Fairness Ratings</Text>
+                <Text style={styles.sectionHeading}>Distinction from JRINA Paid Services</Text>
               </View>
-              <View style={styles.listContainer}>
-                {[
-                  'Consumers may submit ratings, feedback, and upload receipt photos to receive "Verified Shopper" badges.',
-                  "Reviews must reflect genuine personal store visits and honest purchasing experiences.",
-                  "Submitting fraudulent, defamatory, abusive, competitor-sabotaging, or fabricated purchase claims is strictly prohibited and grounds for immediate account suspension."
-                ].map((item, idx) => (
-                  <View key={idx} style={styles.dotItem}>
-                    <Text style={styles.dot}>•</Text>
-                    <Text style={styles.dotText}>{item}</Text>
-                  </View>
-                ))}
-              </View>
+              <Text style={styles.sectionLead}>
+                SmartShopper Consumer (SSC) is 100% free for shoppers. Any paid platform subscriptions, workstation
+                licensing fees, or premium merchant services provided by JRINA Private Limited apply strictly to
+                registered business merchants (SSM) and are billed via certified payment aggregators (Cashfree Payments).
+              </Text>
             </View>
 
             {/* Section 7 */}
@@ -236,13 +274,12 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>7</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Geographic Services, Geofencing & Accuracy</Text>
+                <Text style={styles.sectionHeading}>Geographic Radar & Location Services</Text>
               </View>
               <Text style={styles.sectionLead}>
-                SmartShopper uses your device GPS coordinates or manually selected locality hubs to calculate
-                distances to nearby stores and deals. While we utilize accurate Haversine distance computations
-                and OpenStreetMap coordinates, real-time map precision may vary depending on device hardware,
-                signal availability, or browser permissions.
+                SmartShopper calculates proximity distances to local stores using device GPS coordinates or user-selected
+                localities (e.g., Palode, Kerala). While we compute accurate Haversine distances and utilize OpenStreetMap
+                geocodes, GPS precision may vary depending on device hardware, satellite connectivity, or system permissions.
               </Text>
             </View>
 
@@ -252,13 +289,13 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>8</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Prohibited Activities & Misuse</Text>
+                <Text style={styles.sectionHeading}>Reviews, In-App Chat & Community Guidelines</Text>
               </View>
               <View style={styles.listContainer}>
                 {[
-                  "Attempting to bypass authentication, scrape proprietary offer feeds, or inject unauthorized automated bots.",
-                  "Duplicating, forging, or illegally circulating single-use voucher QR codes.",
-                  "Harassing merchant staff, store owners, or JRINA Private Limited personnel through chat, messaging, or support channels."
+                  "Consumers may post ratings, reviews, and message store owners regarding inventory and order status.",
+                  "All communications must remain truthful, courteous, and lawful.",
+                  "Posting defamatory, obscene, harassing, competitor-sabotaging, or fraudulent reviews is strictly prohibited and grounds for immediate account termination."
                 ].map((item, idx) => (
                   <View key={idx} style={styles.dotItem}>
                     <Text style={styles.dot}>•</Text>
@@ -274,13 +311,20 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>9</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Intellectual Property</Text>
+                <Text style={styles.sectionHeading}>Prohibited Conduct & Anti-Scraping</Text>
               </View>
-              <Text style={styles.sectionLead}>
-                All trademarks, logos, brand assets, source code, UI designs, and digital materials associated
-                with SmartShopper are the exclusive intellectual property of JRINA Private Limited. Merchant
-                trade names and logos displayed remain the property of their respective owners.
-              </Text>
+              <View style={styles.listContainer}>
+                {[
+                  "Bypassing platform authentication, tampering with single-use voucher QR codes, or creating fake accounts.",
+                  "Employing automated bots, scrapers, or extraction crawlers on our deal feeds or merchant databases.",
+                  "Interfering with the normal operation, network infrastructure, or security of our Supabase backend."
+                ].map((item, idx) => (
+                  <View key={idx} style={styles.dotItem}>
+                    <Text style={styles.dot}>•</Text>
+                    <Text style={styles.dotText}>{item}</Text>
+                  </View>
+                ))}
+              </View>
             </View>
 
             {/* Section 10 */}
@@ -289,14 +333,12 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>10</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Limitation of Liability & Disclaimers</Text>
+                <Text style={styles.sectionHeading}>Intellectual Property Rights</Text>
               </View>
               <Text style={styles.sectionLead}>
-                To the fullest extent permitted by applicable law, JRINA Private Limited provides the platform
-                on an &quot;as-is&quot; and &quot;as-available&quot; basis without warranties of any kind.
-                JRINA Private Limited shall not be liable for any indirect, incidental, punitive, or
-                consequential damages resulting from store transactions, merchant fulfillment defaults, product
-                defects, or temporary network outages.
+                All trademarks, logos, brand assets, source code, UI designs, and radar algorithms associated with
+                SmartShopper are the exclusive intellectual property of JRINA Private Limited. Merchant trade names,
+                product trademarks, and logos displayed remain the property of their respective owners.
               </Text>
             </View>
 
@@ -306,18 +348,14 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>11</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Account Termination & Deletion</Text>
+                <Text style={styles.sectionHeading}>Limitation of Liability & Disclaimers</Text>
               </View>
               <Text style={styles.sectionLead}>
-                Consumers may request voluntary account closure and complete profile deletion at any time via
-                the Account tab or by emailing{" "}
-                <Text
-                  style={styles.linkText}
-                  onPress={() => handleOpenEmail("Account Deletion Request - SmartShopper")}
-                >
-                  info@jrina.online
-                </Text>
-                . We process verified deletion requests promptly in accordance with our Privacy Policy.
+                To the fullest extent permitted by applicable law, SmartShopper is provided on an &quot;as-is&quot; and
+                &quot;as-available&quot; basis. JRINA Private Limited shall not be liable for indirect, incidental, or
+                consequential damages resulting from store transactions, merchant fulfillment delays, merchant product
+                defects, or temporary network interruptions, without prejudice to mandatory statutory consumer rights under
+                Indian law.
               </Text>
             </View>
 
@@ -327,20 +365,40 @@ export const TermsOfServiceScreen: React.FC = () => {
                 <View style={styles.sectionNumber}>
                   <Text style={styles.sectionNumberText}>12</Text>
                 </View>
-                <Text style={styles.sectionHeading}>Governing Law & Jurisdiction</Text>
+                <Text style={styles.sectionHeading}>Account Termination & Data Deletion</Text>
               </View>
               <Text style={styles.sectionLead}>
-                These Terms & Conditions are governed by and construed in accordance with the laws of India.
-                Any disputes arising out of or in connection with the platform shall be subject to the
-                exclusive jurisdiction of the competent courts in Thiruvananthapuram, Kerala, India.
+                You may request complete account closure and personal data erasure at any time by emailing{" "}
+                <Text
+                  style={styles.linkText}
+                  onPress={() => handleOpenEmail("Account Deletion Request - SmartShopper")}
+                >
+                  info@jrina.online
+                </Text>
+                . We process verified requests within 30 days in accordance with our Privacy Policy.
               </Text>
             </View>
 
-            {/* Grievance & Registered Office */}
+            {/* Section 13 */}
+            <View style={styles.sectionBlock}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionNumber}>
+                  <Text style={styles.sectionNumberText}>13</Text>
+                </View>
+                <Text style={styles.sectionHeading}>Governing Law & Jurisdiction</Text>
+              </View>
+              <Text style={styles.sectionLead}>
+                These Terms and Conditions shall be governed by and construed in accordance with the laws of the Republic
+                of India. Any disputes arising out of or related to these Terms shall be subject to the exclusive jurisdiction
+                of the competent courts in Thiruvananthapuram, Kerala, India.
+              </Text>
+            </View>
+
+            {/* Grievance & Corporate Office */}
             <View style={[styles.sectionBlock, { borderBottomWidth: 0, paddingBottom: 0 }]}>
               <Text style={styles.sectionHeading}>Grievance Officer & Registered Office</Text>
               <Text style={[styles.sectionLead, { marginTop: 6 }]}>
-                For legal notices, platform terms clarification, or grievances:
+                For legal inquiries, terms clarification, or platform grievances:
               </Text>
 
               <View style={styles.contactGrid}>
@@ -351,39 +409,22 @@ export const TermsOfServiceScreen: React.FC = () => {
                     <Text style={styles.contactSmall}>COMPANY & REGISTERED OFFICE</Text>
                     <Text style={styles.contactTitle}>JRINA Private Limited</Text>
                     <Text style={styles.contactDesc}>
-                      Peringammala, Thiruvananthapuram, Kerala, India
+                      Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala, India - 695562
                     </Text>
                   </View>
                 </View>
 
-                {/* Website */}
-                <TouchableOpacity
-                  style={styles.contactItem}
-                  onPress={handleOpenWebsite}
-                  activeOpacity={0.7}
-                >
-                  <Globe size={20} color="#EA580C" style={styles.contactIcon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.contactSmall}>OFFICIAL WEBSITE</Text>
-                    <View style={styles.linkRow}>
-                      <Text style={[styles.contactTitle, styles.accentColor]}>
-                        https://www.jrina.online
-                      </Text>
-                      <ExternalLink size={12} color="#EA580C" />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-
                 {/* Email */}
                 <TouchableOpacity
                   style={styles.contactItem}
-                  onPress={() => handleOpenEmail("Legal Inquiry - SmartShopper Terms")}
+                  onPress={() => handleOpenEmail("Terms & Legal Inquiry - SmartShopper")}
                   activeOpacity={0.7}
                 >
                   <Mail size={20} color="#EA580C" style={styles.contactIcon} />
                   <View style={{ flex: 1 }}>
                     <Text style={styles.contactSmall}>SUPPORT & GRIEVANCES</Text>
                     <Text style={[styles.contactTitle, styles.accentColor]}>info@jrina.online</Text>
+                    <Text style={styles.contactDesc}>Response within 24-48 business hours</Text>
                   </View>
                 </TouchableOpacity>
 
@@ -397,6 +438,25 @@ export const TermsOfServiceScreen: React.FC = () => {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.contactSmall}>SUPPORT HELPLINE / WHATSAPP</Text>
                     <Text style={[styles.contactTitle, { color: "#10B981" }]}>+91 6238624428</Text>
+                    <Text style={styles.contactDesc}>Mon - Sat: 9:00 AM - 7:00 PM IST</Text>
+                  </View>
+                </TouchableOpacity>
+
+                {/* Website */}
+                <TouchableOpacity
+                  style={styles.contactItem}
+                  onPress={handleOpenWebsite}
+                  activeOpacity={0.7}
+                >
+                  <Globe size={20} color="#EA580C" style={styles.contactIcon} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.contactSmall}>OFFICIAL CORPORATE PORTAL</Text>
+                    <View style={styles.linkRow}>
+                      <Text style={[styles.contactTitle, styles.accentColor]}>
+                        https://www.jrina.online
+                      </Text>
+                      <ExternalLink size={12} color="#EA580C" />
+                    </View>
                   </View>
                 </TouchableOpacity>
               </View>
@@ -456,161 +516,195 @@ const styles = StyleSheet.create({
     marginTop: 1
   },
   headerIconWrap: {
-    padding: 6,
-    borderRadius: 8,
-    backgroundColor: "rgba(234, 88, 12, 0.15)"
+    padding: 6
+  },
+  tabBarWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1E293B",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#334155"
+  },
+  tabItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0F172A",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#334155",
+    gap: 5
+  },
+  tabItemActive: {
+    backgroundColor: "#FFF7ED",
+    borderColor: "#EA580C"
+  },
+  tabText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#94A3B8"
+  },
+  tabTextActive: {
+    color: "#EA580C",
+    fontWeight: "800"
   },
   scroll: {
     flex: 1
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 40
+    padding: 14,
+    paddingBottom: 36
   },
   mainCard: {
-    backgroundColor: "#1E293B",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    padding: 18,
+    padding: 16,
     borderWidth: 1,
-    borderColor: "#334155",
-    marginBottom: 20
+    borderColor: "#1E293B",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 4
   },
   cardHeader: {
     paddingBottom: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#334155",
-    marginBottom: 16
+    borderBottomColor: "#F1F5F9"
   },
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 10
+    gap: 12
   },
   titleIconBadge: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: 12,
-    backgroundColor: "rgba(234, 88, 12, 0.15)",
+    backgroundColor: "#FFF7ED",
+    borderWidth: 1,
+    borderColor: "#FFEDD5",
     alignItems: "center",
     justifyContent: "center"
   },
   cardMainTitle: {
     fontSize: 18,
     fontWeight: "900",
-    color: "#FFFFFF"
+    color: "#0F172A"
   },
   entitySub: {
     fontSize: 12,
-    color: "#CBD5E1",
+    color: "#64748B",
     marginTop: 2
   },
   effectiveBadge: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    alignSelf: "flex-start",
-    backgroundColor: "#0F172A",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#334155"
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    alignSelf: "flex-start",
+    marginTop: 12
   },
   effectiveText: {
     fontSize: 11,
-    fontWeight: "600",
-    color: "#94A3B8"
+    fontWeight: "700",
+    color: "#64748B"
   },
   introBox: {
-    backgroundColor: "rgba(234, 88, 12, 0.08)",
+    backgroundColor: "#FFF7ED",
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(234, 88, 12, 0.25)",
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 20
+    borderColor: "#FFEDD5",
+    padding: 12,
+    marginTop: 14
   },
   introText: {
-    fontSize: 12.5,
-    color: "#E2E8F0",
-    lineHeight: 20
-  },
-  bold: {
-    fontWeight: "700",
-    color: "#FFFFFF"
-  },
-  linkText: {
-    color: "#FB923C",
-    fontWeight: "700",
-    textDecorationLine: "underline"
-  },
-  codeText: {
-    backgroundColor: "#0F172A",
-    color: "#FB923C",
-    fontFamily: "monospace",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
     fontSize: 12,
-    fontWeight: "700"
+    color: "#7C2D12",
+    lineHeight: 18
   },
   sectionBlock: {
-    marginBottom: 22,
-    paddingBottom: 18,
+    marginTop: 18,
+    paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#334155"
+    borderBottomColor: "#F1F5F9"
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 10
+    marginBottom: 8
   },
   sectionNumber: {
-    width: 24,
-    height: 24,
-    borderRadius: 8,
-    backgroundColor: "#0F172A",
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#EA580C",
     alignItems: "center",
     justifyContent: "center"
   },
   sectionNumberText: {
     fontSize: 11,
-    fontWeight: "900",
-    color: "#FB923C"
+    fontWeight: "800",
+    color: "#FFFFFF"
   },
   sectionHeading: {
     fontSize: 15,
     fontWeight: "800",
-    color: "#FFFFFF",
-    flex: 1
+    color: "#0F172A"
   },
   sectionLead: {
-    fontSize: 12.5,
-    color: "#CBD5E1",
-    lineHeight: 19,
-    marginBottom: 10
+    fontSize: 12,
+    color: "#475569",
+    lineHeight: 18
   },
   noticeBox: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 10,
-    backgroundColor: "rgba(15, 23, 42, 0.6)",
-    borderRadius: 12,
-    padding: 12,
+    gap: 8,
+    backgroundColor: "#FFFBEB",
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#334155",
-    marginTop: 6
+    borderColor: "#FDE68A",
+    padding: 10,
+    marginTop: 10
   },
   noticeText: {
-    flex: 1,
+    fontSize: 11,
+    color: "#92400E",
+    lineHeight: 16,
+    flex: 1
+  },
+  bulletList: {
+    marginTop: 8,
+    gap: 8
+  },
+  bulletItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8
+  },
+  bulletIcon: {
+    marginTop: 2,
+    flexShrink: 0
+  },
+  bulletContent: {
     fontSize: 12,
-    color: "#CBD5E1",
-    lineHeight: 18
+    color: "#334155",
+    lineHeight: 18,
+    flex: 1
   },
   listContainer: {
-    gap: 8,
-    paddingLeft: 4
+    marginTop: 6,
+    gap: 6
   },
   dotItem: {
     flexDirection: "row",
@@ -618,73 +712,86 @@ const styles = StyleSheet.create({
     gap: 8
   },
   dot: {
-    fontSize: 14,
     color: "#EA580C",
+    fontSize: 14,
     lineHeight: 18
   },
   dotText: {
-    flex: 1,
-    fontSize: 12.5,
-    color: "#CBD5E1",
-    lineHeight: 19
+    fontSize: 12,
+    color: "#334155",
+    lineHeight: 18,
+    flex: 1
+  },
+  codeText: {
+    fontFamily: "monospace",
+    fontWeight: "700",
+    color: "#EA580C"
+  },
+  bold: {
+    fontWeight: "700"
+  },
+  linkText: {
+    color: "#EA580C",
+    textDecorationLine: "underline"
   },
   contactGrid: {
-    gap: 10,
-    marginTop: 10
+    marginTop: 12,
+    gap: 10
   },
   contactItem: {
-    backgroundColor: "#0F172A",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#F8FAFC",
     borderRadius: 12,
     padding: 12,
     borderWidth: 1,
-    borderColor: "#334155",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12
+    borderColor: "#E2E8F0",
+    gap: 10
   },
   contactIcon: {
-    flexShrink: 0
+    marginTop: 2
   },
   contactSmall: {
-    fontSize: 9.5,
+    fontSize: 9,
     fontWeight: "800",
     color: "#94A3B8",
     letterSpacing: 0.5
   },
   contactTitle: {
-    fontSize: 12.5,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
     marginTop: 1
   },
   contactDesc: {
     fontSize: 11,
-    color: "#94A3B8",
-    marginTop: 1
+    color: "#64748B",
+    marginTop: 2,
+    lineHeight: 15
+  },
+  accentColor: {
+    color: "#EA580C"
   },
   linkRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4
   },
-  accentColor: {
-    color: "#FB923C"
-  },
   doneBtn: {
+    marginTop: 16,
     backgroundColor: "#EA580C",
     paddingVertical: 14,
     borderRadius: 14,
     alignItems: "center",
-    justifyContent: "center",
     shadowColor: "#EA580C",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 5,
-    elevation: 3
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4
   },
   doneBtnText: {
-    color: "#FFFFFF",
     fontSize: 14,
-    fontWeight: "800"
+    fontWeight: "800",
+    color: "#FFFFFF"
   }
 });

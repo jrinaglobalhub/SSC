@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, ActivityIndicator } from "react-native";
-import { Bell, RefreshCw, ChevronDown, ShoppingCart, LogIn } from "lucide-react-native";
+import { Bell, RefreshCw, ChevronDown, LogIn } from "lucide-react-native";
 import { useApp } from "../context/AppContext";
 import { formatDistance } from "../utils/geo";
 
@@ -13,8 +13,6 @@ export const Header: React.FC = () => {
     setShowCustomerCode,
     setShowNotificationsModal,
     unreadNotificationsCount,
-    cartCount,
-    setShowCartModal,
     refreshData,
     isLoading,
     isGPS,
@@ -41,21 +39,8 @@ export const Header: React.FC = () => {
           </View>
         </View>
 
-        {/* Right Actions: Cart + Notification Bell + User Profile Avatar Pill */}
+        {/* Right Actions: Notification Bell + User Profile Avatar Pill */}
         <View style={styles.rightActions}>
-          <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => setShowCartModal(true)}
-            activeOpacity={0.7}
-          >
-            <ShoppingCart size={18} color="#475569" />
-            {cartCount > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>{cartCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.bellButton}
             onPress={() => {
@@ -186,36 +171,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8
-  },
-  cartButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F8FAFC",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    position: "relative"
-  },
-  cartBadge: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#EA580C",
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-    borderWidth: 1.5,
-    borderColor: "#FFFFFF"
-  },
-  cartBadgeText: {
-    color: "#FFFFFF",
-    fontSize: 9,
-    fontWeight: "900"
   },
   bellButton: {
     width: 36,

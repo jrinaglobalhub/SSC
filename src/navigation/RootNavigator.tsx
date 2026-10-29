@@ -11,6 +11,7 @@ import { CartScreen } from "../screens/CartScreen";
 import { AccountScreen } from "../screens/AccountScreen";
 import { PrivacyPolicyScreen } from "../screens/PrivacyPolicyScreen";
 import { TermsOfServiceScreen } from "../screens/TermsOfServiceScreen";
+import { RefundPolicyScreen } from "../screens/RefundPolicyScreen";
 import { VouchersScreen } from "../screens/VouchersScreen";
 
 import { GeofenceRadiusModal } from "../components/GeofenceRadiusModal";
@@ -30,6 +31,7 @@ export type RootStackParamList = {
   MainTabs: undefined;
   PrivacyPolicy: undefined;
   TermsOfService: undefined;
+  RefundPolicy: undefined;
   Vouchers: undefined;
 };
 
@@ -181,6 +183,7 @@ export const RootNavigator: React.FC = () => {
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
       <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+      <Stack.Screen name="RefundPolicy" component={RefundPolicyScreen} />
       <Stack.Screen name="Vouchers" component={VouchersScreen} />
     </Stack.Navigator>
   );

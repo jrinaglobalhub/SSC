@@ -1,0 +1,145 @@
+================================================================================
+              REFUND AND CANCELLATION POLICY FOR SMARTSHOPPER
+         SmartShopper Consumer (SSC) & SmartShopper Merchant (SSM)
+                     Operated by JRINA Private Limited
+================================================================================
+Last Updated: October 2026
+Effective Date: October 2026
+
+Official Domain: https://jrina.online / https://ssc.jrina.online
+Consumer App ID: online.jrina.smartshopper.consumer
+Merchant App ID: online.jrina.smartshopper.merchant
+Registered Entity: JRINA Private Limited
+Registered Office: Peringammala, Palode, Nedumangad, Thiruvananthapuram,
+                   Kerala, India - 695562
+Support Desk: support@jrina.online | Grievance Desk: grievance@jrina.online
+
+--------------------------------------------------------------------------------
+1. INTRODUCTION & PLATFORM ROLE
+--------------------------------------------------------------------------------
+This Refund & Cancellation Policy outlines the guidelines, terms, and procedures
+governing cancellations, returns, refunds, and financial disputes across the
+SmartShopper platform, comprising SmartShopper Consumer ("SSC") and SmartShopper
+Merchant ("SSM"), operated by JRINA Private Limited ("Company", "we", "us", or "our").
+
+JRINA Private Limited operates SmartShopper strictly as an intermediary technology
+and digital discovery platform under Section 79 of the Information Technology Act,
+2000. SmartShopper facilitates hyper-local deal discovery, proximity radar alerts,
+digital voucher issuance, and customer-merchant direct communication.
+
+JRINA Private Limited is NOT a seller, retailer, distributor, or manufacturer of
+goods, groceries, or services listed by independent merchant partners.
+
+--------------------------------------------------------------------------------
+2. CONSUMER RETAIL PURCHASES (SSC)
+--------------------------------------------------------------------------------
+2.1. Transaction Settlement Method:
+All retail transactions initiated through or facilitated by SmartShopper Consumer
+(including counter purchases, click-and-collect, or merchant delivery orders) are
+settled directly between the consumer and the independent merchant partner using:
+  a) Cash on Delivery / Counter Cash (COD), or
+  b) Direct Peer-to-Merchant Unified Payments Interface (UPI) transfer.
+
+SmartShopper Consumer DOES NOT collect, process, hold, or route consumer purchase
+funds through an escrow, wallet, or payment intermediary account.
+
+2.2. Merchant Responsibility & Return Policies:
+Each independent merchant partner establishes, maintains, and enforces their own
+return, replacement, cancellation, and refund policies in accordance with applicable
+consumer protection standards.
+  a) Perishable Items (e.g., fresh groceries, vegetables, milk, meat, bakery items):
+     Typically non-returnable once accepted at counter delivery, unless demonstrably
+     spoiled or defective at the point of receipt.
+  b) Non-Perishable Goods: Subject to individual merchant store return windows,
+     provided items are returned in original packaging with physical invoices.
+  c) Order Cancellations: Consumers may cancel a pending order directly with the
+     merchant before dispatch or fulfillment by contacting the merchant via the
+     in-app chat or phone number provided on the store profile.
+
+2.3. Processing of Consumer Refunds:
+Because consumer purchase payments are made directly to the merchant (via cash or
+direct UPI), any approved return or refund must be reimbursed directly by the
+respective merchant to the consumer. JRINA Private Limited does not possess consumer
+retail funds and cannot execute automated financial chargebacks for retail goods.
+
+--------------------------------------------------------------------------------
+3. DIGITAL VOUCHERS & PROMOTIONAL OFFERS
+--------------------------------------------------------------------------------
+3.1. Promotional Instrument Nature:
+Digital vouchers, flash deals, and promotional coupons claimed within the SSC app
+are non-monetary, single-use promotional instruments intended to grant discounts
+at participating partner stores.
+
+3.2. No Cash Value:
+Vouchers possess no independent cash face value, cannot be redeemed for legal tender,
+cannot be transferred to third-party bank accounts, and cannot be refunded or exchanged
+for currency under any circumstances.
+
+3.3. Merchant Honoring & Expiry:
+Vouchers must be redeemed at the merchant counter prior to the stated expiration date
+and subject to specific offer criteria (e.g., minimum purchase threshold). Expired,
+previously redeemed, or invalidated vouchers cannot be reissued or refunded.
+
+--------------------------------------------------------------------------------
+4. MERCHANT SAAS SUBSCRIPTION CHARGES (SSM)
+--------------------------------------------------------------------------------
+4.1. Nature of Merchant Charges:
+Charges levied by JRINA Private Limited on the SmartShopper Merchant ("SSM")
+application represent recurring business-to-business (B2B) software-as-a-service
+(SaaS) platform subscription and technology licensing fees, processed through
+RBI-authorized payment aggregators (such as Cashfree Payments India Pvt. Ltd.).
+
+4.2. Cancellation of Merchant Subscriptions:
+Merchants may cancel their platform subscription renewal at any time via the SSM
+dashboard or by notifying merchant support at support@jrina.online. Cancellation takes
+effect at the conclusion of the currently active paid billing cycle.
+
+4.3. Subscription Refund Eligibility:
+  a) Initial Activation Window: A merchant may request a full refund of platform fees
+     within seven (7) calendar days of initial account onboarding if the software or
+     radar broadcast engine demonstrably fails to activate due to verifiable technical
+     defects on JRINA's infrastructure.
+  b) Post-Activation Period: Subscription fees are non-refundable once the platform
+     tools, store profile, and radar broadcast systems have been operational during
+     the billing cycle.
+
+--------------------------------------------------------------------------------
+5. FAILED, DUPLICATE, OR DISPUTED TRANSACTIONS
+--------------------------------------------------------------------------------
+5.1. Technical Duplicate Charges:
+In the event of duplicate billing or debits occurring on JRINA's merchant SaaS
+subscription gateway, verified duplicate amounts will be reversed to the original
+payment source within 5 to 7 business days following merchant notification.
+
+5.2. Consumer-Merchant Dispute Mediation:
+While JRINA Private Limited is not a party to retail consumer transactions, we are
+committed to maintaining a trustworthy marketplace. If a consumer experiences an
+unresolved dispute regarding defective goods, unhonored valid vouchers, or incorrect
+billing by a listed partner merchant:
+  a) The consumer may submit details (including merchant name, bill photo, date,
+     and description of issue) to support@jrina.online.
+  b) JRINA will facilitate communication with the merchant to seek an amicable
+     resolution. Repeated merchant non-compliance will result in suspension or
+     permanent removal from the SmartShopper platform.
+
+--------------------------------------------------------------------------------
+6. GRIEVANCE ESCALATION & CONTACT
+--------------------------------------------------------------------------------
+For questions, return grievances, or clarification regarding this Refund and
+Cancellation Policy, please contact our support desk:
+
+  JRINA Private Limited
+  Attn: Support & Grievance Desk
+  Address: Peringammala, Palode, Nedumangad, Thiruvananthapuram, Kerala - 695562
+  General Support: support@jrina.online
+  Grievance Inquiries: grievance@jrina.online
+  Website: https://ssc.jrina.online/policies / https://jrina.online
+
+--------------------------------------------------------------------------------
+7. GOVERNING LAW & JURISDICTION
+--------------------------------------------------------------------------------
+This Policy is governed by and construed in accordance with the laws of the Republic
+of India. Any legal dispute or proceeding arising from this Policy shall be subject
+to the exclusive jurisdiction of the competent courts in Thiruvananthapuram, Kerala,
+India.
+================================================================================
