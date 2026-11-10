@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { OfferItem, StoreProfile, VoucherDetails, Coordinates, Bill, UserSession, ChatMessage, ChatThread, CatalogItem, DeliveryAddress } from "../types";
-import { calculateDistanceInMeters, DEFAULT_LOCATION } from "../utils/geo";
+import { OfferItem, StoreProfile, VoucherDetails, Coordinates, Bill, UserSession, ChatMessage, CatalogItem, DeliveryAddress, CustomerOrder, CustomerOrderStatus, SscBanner } from "../types";
+import { calculateDistanceInMeters, DEFAULT_LOCATION, isLocationInsideKerala } from "../utils/geo";
 
 export const SUPABASE_URL = "https://tpcrwtxtqvvdghtfckea.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_duE4gQ7TYTYpO7sRjeKcXQ_1mf2F-d3";
@@ -42,7 +42,10 @@ export async function fetchLiveOffers(
         if (s.name) storesMap.set(s.name.toLowerCase().trim(), s);
       });
     } else {
-      const { data: storesData } = await supabase.from("stores").select("*");
+      const { data: storesData } = await supabase
+        .from("stores")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (storesData && Array.isArray(storesData)) {
         storesData.forEach((s) => {
           if (s.id) storesMap.set(s.id, s);
@@ -73,16 +76,23 @@ export async function fetchLiveOffers(
           })
         : undefined;
 
-      const storeImg = store?.image_url || store?.logo_url;
+      // Resolve store cover image from StoreProfile (camelCase) or raw DB row (snake_case)
+      const storeCoverImg = store?.coverImageUrl || store?.imageUrl || store?.image_url;
+      const storeLogoImg = store?.logoUrl || store?.logo_url;
       const pctNum = o.offer_percentage != null ? parseFloat(o.offer_percentage) : undefined;
       const isStoreDeal = o.deal_target_type === "STORE" || !o.deal_target_type;
       const displayDiscount = o.discount_tag || (pctNum ? `${pctNum}% OFF` : "EXCLUSIVE DEAL");
+
+      // Authoritative category resolution:
+      // The merchant's verified store category is the primary authority for merchant deals.
+      const authoritativeCategory = store?.category || o.category || "Retail Store";
 
       items.push({
         id: o.id,
         storeId: o.store_id || store?.id,
         storeName: o.store_name || store?.name || "SmartShopper Partner Store",
-        category: o.category || store?.category || "Retail Store",
+        title: o.title || o.discount_tag || "Special Offer",
+        category: authoritativeCategory,
         discountTag: displayDiscount,
         originalPrice: isStoreDeal ? "" : (o.original_price || "₹0"),
         offerPrice: isStoreDeal ? "" : (o.offer_price || "₹0"),
@@ -91,7 +101,7 @@ export async function fetchLiveOffers(
         expiresInMinutes: o.expires_in_minutes || 60,
         verifiedBillReviewsCount: store?.verified_bills_count || 0,
         priceFairnessScore: parseFloat(store?.price_fairness_score || "5.0"),
-        imageUrl: o.image_url || storeImg || DEFAULT_IMG,
+        imageUrl: o.image_url || storeCoverImg || DEFAULT_IMG,
         mapCoords: { x: o.map_x || 50, y: o.map_y || 50 },
         isHotspot: Boolean(o.is_hotspot),
         couponCode: o.coupon_code || "",
@@ -102,7 +112,8 @@ export async function fetchLiveOffers(
         phone: store?.phone || o.phone || "",
         operatingHours: store?.operating_hours || "8:00 AM - 10:00 PM",
         storeDescription: store?.description || "",
-        storeImageUrl: storeImg || DEFAULT_IMG,
+        storeCoverImageUrl: storeCoverImg || undefined,
+        storeImageUrl: storeCoverImg || storeLogoImg || undefined,
         dealTargetType: o.deal_target_type || "STORE",
         targetProductId: o.target_product_id || undefined,
         startAt: o.start_at || undefined,
@@ -123,15 +134,52 @@ export async function fetchLiveOffers(
   }
 }
 
-/**
- * Fetches all registered stores with distances
- */
-export async function fetchStores(userCoords: Coordinates = DEFAULT_LOCATION): Promise<StoreProfile[]> {
-  try {
-    const { data, error } = await supabase.from("stores").select("*");
-    if (error || !data) return [];
+export interface FetchStoresResult {
+  stores: StoreProfile[];
+  totalCount: number;
+  hasMore: boolean;
+  error: string | null;
+}
 
-    return data.map((s: any) => {
+export interface FetchStoresOptions {
+  page?: number;
+  pageSize?: number;
+}
+
+/**
+ * Fetches registered stores with exact counts, explicit ordering, and pagination support.
+ */
+export async function fetchStoresWithMeta(
+  userCoords: Coordinates = DEFAULT_LOCATION,
+  options?: FetchStoresOptions
+): Promise<FetchStoresResult> {
+  try {
+    const page = Math.max(1, options?.page ?? 1);
+    const pageSize = Math.max(1, options?.pageSize ?? 100);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    const { data, error, count } = await supabase
+      .from("stores")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.warn("[Supabase] fetchStoresWithMeta error:", error.message);
+      return {
+        stores: [],
+        totalCount: 0,
+        hasMore: false,
+        error: error.message
+      };
+    }
+
+    if (!data) {
+      return { stores: [], totalCount: 0, hasMore: false, error: null };
+    }
+
+    const stores: StoreProfile[] = data.map((s: any) => {
       const rawLat = s.lat ?? s.latitude;
       const rawLng = s.lng ?? s.longitude;
       const lat = rawLat !== undefined && rawLat !== null ? parseFloat(rawLat) : NaN;
@@ -159,14 +207,38 @@ export async function fetchStores(userCoords: Coordinates = DEFAULT_LOCATION): P
         verifiedBillsCount: s.verified_bills_count || 0,
         description: s.description || "",
         imageUrl: s.image_url || DEFAULT_IMG,
-        logoUrl: s.logo_url || DEFAULT_IMG,
+        coverImageUrl: s.image_url || undefined,
+        logoUrl: s.logo_url || undefined,
         distanceInMeters: dist
       };
     });
-  } catch (err) {
-    console.warn("[Supabase] fetchStores error:", err);
-    return [];
+
+    const totalCount = typeof count === "number" ? count : stores.length;
+    const hasMore = to < (totalCount - 1);
+
+    return {
+      stores,
+      totalCount,
+      hasMore,
+      error: null
+    };
+  } catch (err: any) {
+    console.warn("[Supabase] fetchStoresWithMeta exception:", err);
+    return {
+      stores: [],
+      totalCount: 0,
+      hasMore: false,
+      error: err?.message || "Failed to fetch stores"
+    };
   }
+}
+
+/**
+ * Fetches all registered stores with distances (backwards compatible wrapper)
+ */
+export async function fetchStores(userCoords: Coordinates = DEFAULT_LOCATION): Promise<StoreProfile[]> {
+  const res = await fetchStoresWithMeta(userCoords, { page: 1, pageSize: 200 });
+  return res.stores;
 }
 
 /**
@@ -272,12 +344,24 @@ export async function getClaimedVouchers(): Promise<VoucherDetails[]> {
  */
 export async function fetchUserBills(customerCode?: string): Promise<Bill[]> {
   try {
-    let query = supabase.from("bills").select("*, items:bill_items(*)").order("created_at", { ascending: false });
-    if (customerCode) {
-      query = query.or(`customer_id.eq.${customerCode},customer_phone.eq.${customerCode}`);
+    if (!customerCode || !customerCode.trim()) {
+      return [];
     }
+    const cleanCode = customerCode.trim();
+    const query = supabase
+      .from("bills")
+      .select("*, items:bill_items(*)")
+      .or(`customer_id.eq.${cleanCode},customer_phone.eq.${cleanCode}`)
+      .order("created_at", { ascending: false });
+
     const { data, error } = await query;
-    if (error || !data) return [];
+    if (error) {
+      if (error.code !== "42501") {
+        console.warn("[SSC Supabase] fetchUserBills query error:", error.message);
+      }
+      return [];
+    }
+    if (!data || !Array.isArray(data)) return [];
 
     return data.map((b: any) => ({
       id: b.id,
@@ -300,7 +384,8 @@ export async function fetchUserBills(customerCode?: string): Promise<Bill[]> {
         lineTotal: parseFloat(it.line_total || 0)
       })) || []
     }));
-  } catch {
+  } catch (err: any) {
+    console.warn("[SSC Supabase] fetchUserBills exception:", err?.message || err);
     return [];
   }
 }
@@ -316,6 +401,7 @@ export interface RegisterPayload {
   fullName: string;
   phone: string;
   role?: string;
+  referralCode?: string;
 }
 
 export interface LoginPayload {
@@ -329,7 +415,120 @@ export interface AuthResult {
   message?: string;
   emailConfirmationRequired?: boolean;
   emailNotConfirmed?: boolean;
+  notRegisteredForApp?: boolean;
   user?: UserSession;
+}
+
+export interface ReferralValidationResult {
+  valid: boolean;
+  normalizedCode?: string;
+  referrerType?: "customer" | "store" | "campaign";
+  referrerId?: string;
+  referrerName?: string;
+  reason?: string;
+}
+
+/**
+ * Official promotional / marketing campaign referral codes
+ */
+export const KNOWN_CAMPAIGN_REFERRAL_CODES: Record<string, { name: string; bonus: string }> = {
+  SMARTSHOPPER: { name: "SmartShopper Official Welcome Pass", bonus: "Free 1-Month Premium Deals" },
+  SSC2026: { name: "SSC 2026 Early Adopter Pass", bonus: "Exclusive VIP Store Offers" },
+  WELCOME: { name: "New Shopper Welcome Pass", bonus: "Welcome Cashback Voucher" },
+  KERALA50: { name: "Kerala Hyperlocal Shopper Pass", bonus: "Flat ₹50 Partner Discount" },
+  OFFER50: { name: "Festive Deals Pass", bonus: "50% Off First Coupon" },
+  DEALS100: { name: "Smart Saver Pass", bonus: "₹100 Store Voucher" },
+  JRINA2026: { name: "JRINA Partner Enterprise Pass", bonus: "Direct Partner Deals" }
+};
+
+/**
+ * Validates consumer referral codes against existing backend logic,
+ * registered customer codes, partner stores, and campaign passes.
+ */
+export async function validateReferralCode(
+  rawCode?: string
+): Promise<ReferralValidationResult> {
+  const clean = (rawCode || "").trim().toUpperCase();
+  if (!clean) {
+    // Optional field: empty is valid
+    return { valid: true };
+  }
+
+  // 1. Check official promotional campaign codes
+  if (KNOWN_CAMPAIGN_REFERRAL_CODES[clean]) {
+    const campaign = KNOWN_CAMPAIGN_REFERRAL_CODES[clean];
+    return {
+      valid: true,
+      normalizedCode: clean,
+      referrerType: "campaign",
+      referrerId: clean,
+      referrerName: campaign.name
+    };
+  }
+
+  // 2. Check Customer ID pass format (SSC-XXXXX)
+  if (/^SSC-[A-Z0-9]{4,12}$/i.test(clean)) {
+    try {
+      const { data: userMatch } = await supabase
+        .from("app_users")
+        .select("id, customer_id, full_name, username")
+        .eq("customer_id", clean)
+        .maybeSingle();
+
+      if (userMatch) {
+        return {
+          valid: true,
+          normalizedCode: clean,
+          referrerType: "customer",
+          referrerId: userMatch.id,
+          referrerName: userMatch.full_name || userMatch.username || clean
+        };
+      }
+    } catch {
+      // Fall through to valid customer pass format
+    }
+
+    return {
+      valid: true,
+      normalizedCode: clean,
+      referrerType: "customer",
+      referrerId: clean,
+      referrerName: `Shopper Pass (${clean})`
+    };
+  }
+
+  // 3. Check Partner Stores by Store ID, Store Code, or Normalized Name
+  const storeQuery = clean.toLowerCase();
+  try {
+    const { data: storesList } = await supabase
+      .from("stores")
+      .select("id, name");
+
+    if (storesList && storesList.length > 0) {
+      const matched = storesList.find(
+        (s) =>
+          s.id.toLowerCase() === storeQuery ||
+          s.id.toLowerCase().replace(/^store_/, "") === storeQuery.replace(/^store_/, "") ||
+          s.name.toLowerCase().replace(/[^a-z0-9]/g, "") === storeQuery.replace(/[^a-z0-9]/g, "")
+      );
+
+      if (matched) {
+        return {
+          valid: true,
+          normalizedCode: clean,
+          referrerType: "store",
+          referrerId: matched.id,
+          referrerName: matched.name
+        };
+      }
+    }
+  } catch {}
+
+  // 4. Invalid referral code - prevent silent acceptance
+  return {
+    valid: false,
+    reason: "Invalid referral code. Please enter a valid partner code, shopper pass (e.g. SSC-XXXXX), or leave it empty."
+  };
 }
 
 /**
@@ -365,39 +564,94 @@ export async function checkUsernameAvailability(
 }
 
 /**
- * Registers a new user with Supabase Auth + metadata
+ * Registers a new user with Supabase Auth + metadata, securely storing referral attribution
  */
 export async function registerUserInDatabase(payload: RegisterPayload): Promise<AuthResult> {
   const cleanEmail = payload.email.trim().toLowerCase();
   const cleanUsername = payload.username.trim();
   const role = payload.role || "consumer";
 
+  // Validate referral code if provided
+  let validatedReferral: ReferralValidationResult = { valid: true };
+  if (payload.referralCode && payload.referralCode.trim()) {
+    validatedReferral = await validateReferralCode(payload.referralCode);
+    if (!validatedReferral.valid) {
+      return {
+        success: false,
+        message: validatedReferral.reason || "Invalid referral code."
+      };
+    }
+  }
+
   try {
+    const authMetadata: Record<string, any> = {
+      app_code: "SSC",
+      username: cleanUsername,
+      full_name: payload.fullName.trim(),
+      phone: payload.phone.trim(),
+      role: "consumer"
+    };
+
+    // Store referral attribution in auth metadata linked to user account
+    if (validatedReferral.normalizedCode) {
+      authMetadata.referral_code = validatedReferral.normalizedCode;
+      authMetadata.referred_by = validatedReferral.referrerId || validatedReferral.normalizedCode;
+      authMetadata.referrer_type = validatedReferral.referrerType;
+      authMetadata.referrer_name = validatedReferral.referrerName;
+      authMetadata.referral_registered_at = new Date().toISOString();
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password: payload.password,
       options: {
         emailRedirectTo: "https://ssc.jrina.online/auth/callback",
-        data: {
-          username: cleanUsername,
-          full_name: payload.fullName.trim(),
-          phone: payload.phone.trim(),
-          role
-        }
+        data: authMetadata
       }
     });
 
+    let authUser = data?.user;
+
     if (error) {
-      return { success: false, message: error.message };
+      const errLower = error.message.toLowerCase();
+      // If user already exists in auth.users (e.g. independently registered in SSM Merchant or SSD Delivery)
+      if (errLower.includes("already registered") || errLower.includes("user already")) {
+        // Authenticate with the provided password to verify identity ownership
+        const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: payload.password
+        });
+        if (signInErr || !signInData?.user) {
+          return {
+            success: false,
+            message: "An account with this email already exists in SmartShopper. Incorrect password."
+          };
+        }
+        authUser = signInData.user;
+      } else {
+        return { success: false, message: error.message };
+      }
     }
 
-    const authUser = data.user;
     if (!authUser) {
       return { success: false, message: "Registration failed to return user." };
     }
 
-    const isConfirmed = Boolean(authUser.email_confirmed_at || data.session);
-    if (!isConfirmed) {
+    // Persist referral attribution in app_users table if accessible
+    if (validatedReferral.normalizedCode) {
+      try {
+        await supabase
+          .from("app_users")
+          .update({
+            referral_code: validatedReferral.normalizedCode,
+            referred_by: validatedReferral.referrerId || validatedReferral.normalizedCode
+          })
+          .eq("id", authUser.id);
+      } catch {}
+    }
+
+    const isConfirmed = Boolean(authUser.email_confirmed_at || data?.session);
+    if (!isConfirmed && !data?.session) {
       return {
         success: true,
         emailConfirmationRequired: true,
@@ -405,15 +659,69 @@ export async function registerUserInDatabase(payload: RegisterPayload): Promise<
       };
     }
 
-    // Try fetching customer_id created by DB trigger
-    let customerId: string | undefined;
+    // Generate explicit customer ID
+    const generatedCustId = `CUST-${authUser.id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+
+    // 1. Authoritative Application Account Registration (SSC Isolation)
+    const { data: regRpc, error: regRpcErr } = await supabase.rpc("rpc_register_app_account", {
+      p_app_code: "SSC",
+      p_payload: {
+        fullName: payload.fullName.trim(),
+        username: cleanUsername,
+        phone: payload.phone.trim(),
+        email: cleanEmail,
+        referralCode: validatedReferral.normalizedCode || null
+      }
+    });
+
+    if (regRpcErr || (regRpc && !regRpc.success)) {
+      console.warn("[SSC Registration RPC Warning]:", regRpcErr || regRpc);
+      return {
+        success: false,
+        message: regRpc?.message || regRpcErr?.message || "Failed to register SSC Consumer account."
+      };
+    }
+
+    // 2. Persist in app_user_accounts table
+    try {
+      await supabase.from("app_user_accounts").upsert({
+        auth_user_id: authUser.id,
+        app_code: "SSC",
+        account_type: "CONSUMER",
+        email: cleanEmail,
+        mobile: payload.phone.trim(),
+        status: "ACTIVE",
+        metadata: {
+          customer_id: generatedCustId,
+          full_name: payload.fullName.trim(),
+          username: cleanUsername
+        }
+      }, { onConflict: "auth_user_id,app_code" });
+    } catch {}
+
+    // 3. Persist in app_users table with consumer role
+    try {
+      await supabase.from("app_users").upsert({
+        id: authUser.id,
+        username: cleanUsername,
+        display_username: cleanUsername,
+        customer_id: generatedCustId,
+        full_name: payload.fullName.trim(),
+        phone: payload.phone.trim(),
+        role: "consumer"
+      }, { onConflict: "id" });
+    } catch {}
+
+    let customerId: string = generatedCustId;
     try {
       const { data: userRow } = await supabase
         .from("app_users")
         .select("customer_id")
         .eq("id", authUser.id)
         .maybeSingle();
-      customerId = userRow?.customer_id;
+      if (userRow?.customer_id) {
+        customerId = userRow.customer_id;
+      }
     } catch {}
 
     const initials = (payload.fullName || "SS")
@@ -425,14 +733,16 @@ export async function registerUserInDatabase(payload: RegisterPayload): Promise<
 
     const session: UserSession = {
       id: authUser.id,
-      customerId: customerId || `SSC-${authUser.id.slice(0, 5).toUpperCase()}`,
+      customerId,
       username: cleanUsername,
       email: cleanEmail,
       name: payload.fullName.trim(),
       phone: payload.phone.trim(),
       isVerified: true,
       avatarInitials: initials,
-      role
+      role: "consumer",
+      referralCode: validatedReferral.normalizedCode,
+      referredBy: validatedReferral.referrerId || validatedReferral.normalizedCode
     };
 
     await AsyncStorage.setItem("smartshopper_active_user", JSON.stringify(session));
@@ -451,16 +761,19 @@ export async function loginUserInDatabase(payload: LoginPayload): Promise<AuthRe
   let email = cleanInput;
 
   try {
-    // If input doesn't contain '@', look up email from app_users table
+    // If input doesn't contain '@', resolve registered email address via secure RPC
     if (!cleanInput.includes("@")) {
-      const { data: userRow } = await supabase
-        .from("app_users")
-        .select("id, username")
-        .ilike("username", cleanInput)
-        .maybeSingle();
+      const { data: resolvedEmail, error: rpcErr } = await supabase.rpc("rpc_get_email_by_username", {
+        p_username: cleanInput
+      });
 
-      if (!userRow) {
-        return { success: false, message: "No account found matching this username." };
+      if (!rpcErr && resolvedEmail) {
+        email = resolvedEmail;
+      } else {
+        return {
+          success: false,
+          message: "No account found matching this username. Please check your username or sign in with your email address."
+        };
       }
     }
 
@@ -494,33 +807,77 @@ export async function loginUserInDatabase(payload: LoginPayload): Promise<AuthRe
       };
     }
 
-    // Fetch profile and customer_id from app_users
+    // =========================================================================
+    // AUTHORITATIVE APPLICATION ACCESS VALIDATION (SSC CONSUMER)
+    // Registration in SSM (Merchant) or SSD (Delivery) NEVER grants SSC access!
+    // Validated strictly against public.app_user_accounts
+    // =========================================================================
+    let isAuthorized = false;
     let customerId: string | undefined;
     let dbFullName = authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "Smart Consumer";
     let dbPhone = authUser.user_metadata?.phone || "";
     let dbUsername = authUser.user_metadata?.username || authUser.email?.split("@")[0] || "consumer";
-    let dbRole = authUser.user_metadata?.role || "consumer";
+    let dbRole = "consumer";
     let dbAddress: DeliveryAddress | undefined = authUser.user_metadata?.delivery_address;
+    let rejectionReason = "No consumer account found for this user. Please register for a SmartShopper Consumer account.";
 
+    // 1. Authoritative Application Verification: rpc_verify_app_access (SSC Gate)
     try {
-      const { data: appUserData } = await supabase
-        .from("app_users")
-        .select("*")
-        .eq("id", authUser.id)
-        .maybeSingle();
-
-      if (appUserData) {
-        customerId = appUserData.customer_id;
-        dbFullName = appUserData.full_name || dbFullName;
-        dbPhone = appUserData.phone || dbPhone;
-        dbUsername = appUserData.username || dbUsername;
-        dbRole = appUserData.role || dbRole;
-        if (appUserData.address && typeof appUserData.address === "object") {
-          dbAddress = appUserData.address;
-        }
+      const { data: accessRes, error: accessErr } = await supabase.rpc("rpc_verify_app_access", { p_app_code: "SSC" });
+      if (!accessErr && accessRes?.success && accessRes.consumer) {
+        isAuthorized = true;
+        customerId = accessRes.consumer.customer_id;
+        dbFullName = accessRes.consumer.full_name || dbFullName;
+        dbPhone = accessRes.consumer.phone || dbPhone;
+        dbUsername = accessRes.consumer.username || dbUsername;
+        if (accessRes.consumer.address) dbAddress = accessRes.consumer.address;
+      } else if (accessRes?.message) {
+        rejectionReason = accessRes.message;
       }
-    } catch (err) {
-      console.warn("[Supabase] Profile lookup error:", err);
+    } catch {}
+
+    // 2. Authoritative backend RPC fallback: rpc_authenticate_ssc_consumer
+    if (!isAuthorized) {
+      try {
+        const { data: authRpc, error: authRpcErr } = await supabase.rpc("rpc_authenticate_ssc_consumer");
+        if (!authRpcErr && authRpc) {
+          if (authRpc.success && authRpc.consumer) {
+            isAuthorized = true;
+            customerId = authRpc.consumer.customer_id;
+            dbFullName = authRpc.consumer.full_name || dbFullName;
+            dbPhone = authRpc.consumer.phone || dbPhone;
+            dbUsername = authRpc.consumer.username || dbUsername;
+            if (authRpc.consumer.address) dbAddress = authRpc.consumer.address;
+          } else if (authRpc.error) {
+            rejectionReason = authRpc.error;
+          }
+        }
+      } catch {}
+    }
+
+    // 3. Fallback table inspection: ssc_users / app_user_accounts
+    if (!isAuthorized) {
+      try {
+        const { data: sscRow } = await supabase
+          .from("ssc_users")
+          .select("*")
+          .eq("auth_user_id", authUser.id)
+          .maybeSingle();
+        if (sscRow && sscRow.status === "ACTIVE") {
+          isAuthorized = true;
+        }
+      } catch {}
+    }
+
+    // STRICT ACCESS GATE: If user is NOT a registered Consumer in app_user_accounts, DENY and SIGN OUT
+    if (!isAuthorized) {
+      await supabase.auth.signOut().catch(() => {});
+      await AsyncStorage.removeItem("smartshopper_active_user");
+      return {
+        success: false,
+        notRegisteredForApp: true,
+        message: rejectionReason
+      };
     }
 
     const initials = dbFullName
@@ -687,9 +1044,24 @@ export async function updateUserProfile(
  */
 export async function saveUserDeliveryAddress(
   userId: string,
-  address: DeliveryAddress | null
+  address: DeliveryAddress | null,
+  userCoords?: Coordinates
 ): Promise<{ success: boolean; user?: UserSession; message?: string }> {
   try {
+    // Enforce Kerala-only delivery address restriction in backend logic
+    if (address) {
+      const coords = (address.lat != null && address.lng != null)
+        ? { latitude: address.lat, longitude: address.lng }
+        : userCoords;
+
+      if (coords && !isLocationInsideKerala(coords)) {
+        return {
+          success: false,
+          message: "Delivery address service is currently available only for users located in Kerala."
+        };
+      }
+    }
+
     // 1. Update Supabase Auth user_metadata (always accessible by authenticated user)
     try {
       await supabase.auth.updateUser({
@@ -709,7 +1081,7 @@ export async function saveUserDeliveryAddress(
           address: address
         })
         .eq("id", userId);
-    } catch (dbErr) {
+    } catch {
       // Non-blocking fallback
     }
 
@@ -1039,25 +1411,30 @@ export async function fetchStoreCatalog(storeId: string): Promise<CatalogItem[]>
     const { data, error } = await supabase
       .from("catalog")
       .select("*")
-      .or(`store_id.eq.${storeId},store_id.eq.${canonical},store_id.eq.${clean},store_id.ilike.%${clean}%`);
+      .or(`store_id.eq.${storeId},store_id.eq.${canonical},store_id.eq.${clean},store_id.ilike.%${clean}%`)
+      .or("is_deleted.is.null,is_deleted.eq.false");
 
     let items: CatalogItem[] = [];
 
     if (!error && data && data.length > 0) {
-      items = data.map((row: any) => ({
-        id: String(row.id),
-        name: row.name || "Product Item",
-        category: row.category || "General",
-        originalPrice: row.original_price || "",
-        offerPrice: row.offer_price || "",
-        imageUrl:
-          row.image_url ||
-          "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
-        inStock: row.in_stock !== false,
-        sku: row.sku,
-        description: row.description,
-        storeId: storeId
-      }));
+      items = data
+        .filter((row: any) => row.is_deleted !== true && !row.deleted_at)
+        .map((row: any) => ({
+          id: String(row.id),
+          name: row.name || "Product Item",
+          category: row.category || "General",
+          originalPrice: row.original_price || "",
+          offerPrice: row.offer_price || "",
+          imageUrl:
+            row.image_url ||
+            "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
+          inStock: row.in_stock !== false,
+          sku: row.sku,
+          description: row.description,
+          storeId: storeId,
+          isDeleted: Boolean(row.is_deleted),
+          deletedAt: row.deleted_at || undefined
+        }));
     }
 
     // If no items in Supabase DB for this store, check curated fallbacks
@@ -1111,8 +1488,11 @@ export async function fetchNearbyProducts(
       return [];
     }
 
-    // 2. Query Supabase catalog table
-    const { data: dbCatalog } = await supabase.from("catalog").select("*");
+    // 2. Query Supabase catalog table, excluding deleted items
+    const { data: dbCatalog } = await supabase
+      .from("catalog")
+      .select("*")
+      .or("is_deleted.is.null,is_deleted.eq.false");
 
     const allProducts: CatalogItem[] = [];
     const storesMap = new Map<string, StoreProfile>();
@@ -1126,6 +1506,11 @@ export async function fetchNearbyProducts(
 
     if (dbCatalog && Array.isArray(dbCatalog)) {
       dbCatalog.forEach((row: any) => {
+        // Exclude deleted merchant products
+        if (row.is_deleted === true || row.deleted_at) {
+          return;
+        }
+
         const storeKey = row.store_id || "";
         const clean = normalizeStoreKey(storeKey);
         const matchedStore =
@@ -1150,7 +1535,9 @@ export async function fetchNearbyProducts(
             description: row.description,
             storeId: matchedStore.id,
             storeName: matchedStore.name,
-            distanceInMeters: matchedStore.distanceInMeters
+            distanceInMeters: matchedStore.distanceInMeters,
+            isDeleted: Boolean(row.is_deleted),
+            deletedAt: row.deleted_at || undefined
           });
         }
       });
@@ -1193,6 +1580,376 @@ export async function fetchNearbyProducts(
     return [];
   }
 }
+
+// ==========================================
+// 10. CUSTOMER ORDERS & CHECKOUT PERSISTENCE
+// ==========================================
+
+export async function saveCustomerOrderToDb(
+  order: CustomerOrder
+): Promise<{
+  success: boolean;
+  orderId?: string;
+  orderNumber?: string;
+  totalAmount?: number;
+  itemSubtotal?: number;
+  deliveryCharge?: number;
+  platformFee?: number;
+  status?: string;
+  otp?: string;
+  items?: any[];
+  error?: string;
+}> {
+  try {
+    const idempotencyKey = order.idempotencyKey || `idemp_${order.id || Date.now()}`;
+    const { data, error } = await supabase.rpc("place_customer_order", {
+      p_order: {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        storeId: order.storeId,
+        storeName: order.storeName,
+        storeAddress: order.storeAddress,
+        storePhone: order.storePhone,
+        customerId: order.customerId,
+        customerName: order.deliveryAddress?.fullName || "Customer",
+        customerPhone: order.deliveryAddress?.phone || "",
+        deliveryAddress: order.deliveryAddress,
+        deliveryOption: order.deliveryOption || (order.deliveryCharge === 0 ? "pickup" : "delivery"),
+        itemSubtotal: order.itemSubtotal,
+        deliveryCharge: order.deliveryCharge,
+        platformFee: order.platformFee,
+        totalCodAmount: order.totalCodAmount,
+        paymentMethod: order.paymentMethod || "cod",
+        otp: order.otp,
+        roadDistanceKm: order.roadDistanceKm || 0,
+        idempotencyKey
+      },
+      p_items: (order.items || []).map((it, idx) => ({
+        id: it.id && it.id.startsWith("item_") ? it.id : `item_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 9)}`,
+        productId: it.productId || it.id,
+        product_id: it.productId || it.id,
+        name: it.name,
+        category: it.category,
+        sku: it.sku,
+        imageUrl: it.imageUrl,
+        offerPrice: it.offerPrice,
+        unitPrice: parseFloat(String(it.offerPrice || "0").replace(/[^\d.]/g, "")) || 0,
+        quantity: it.quantity || 1
+      })),
+      p_idempotency_key: idempotencyKey
+    });
+
+    if (!error && data && data.success) {
+      return {
+        success: true,
+        orderId: data.order_id,
+        orderNumber: data.order_number,
+        totalAmount: data.total_amount,
+        itemSubtotal: data.item_subtotal,
+        deliveryCharge: data.delivery_charge,
+        platformFee: data.platform_fee,
+        status: data.status,
+        otp: data.otp,
+        items: data.items
+      };
+    }
+
+    if (error) {
+      console.warn("[SSC Supabase] place_customer_order rpc error:", error);
+      return { success: false, error: error.message };
+    }
+
+    if (data && !data.success) {
+      return { success: false, error: data.error || "Order creation rejected." };
+    }
+
+    return { success: false, error: "Order creation failed." };
+  } catch (err: any) {
+    console.warn("[SSC Supabase] saveCustomerOrderToDb exception:", err);
+    return { success: false, error: err?.message || "Order persistence exception" };
+  }
+}
+
+export async function fetchCustomerOrdersFromDb(
+  customerPhone?: string,
+  customerId?: string,
+  orderIds?: string[]
+): Promise<CustomerOrder[]> {
+  try {
+    // Only invoke RPC if caller has provided identity information or active auth session exists
+    const { data: sessionData } = await supabase.auth.getSession().catch(() => ({ data: { session: null } }));
+    if (!sessionData?.session?.user && !customerId && !customerPhone) {
+      return [];
+    }
+
+    const { data: rpcData, error } = await supabase.rpc("fetch_customer_orders", {
+      p_customer_phone: customerPhone || null,
+      p_customer_id: customerId || null,
+      p_order_ids: orderIds && orderIds.length > 0 ? orderIds : null
+    });
+
+    if (!error && rpcData?.success && Array.isArray(rpcData.orders)) {
+      return rpcData.orders.map((o: any) => ({
+        id: String(o.id),
+        orderNumber: String(o.order_number),
+        storeId: String(o.store_id),
+        storeName: o.store_name || "Partner Store",
+        storeAddress: o.store_address || "",
+        storePhone: o.store_phone || "",
+        items: (o.items || []).map((it: any) => ({
+          id: String(it.id),
+          productId: it.product_id,
+          name: it.name || it.product_name || "Item",
+          category: it.category,
+          sku: it.sku,
+          imageUrl: it.imageUrl || it.image_url || "",
+          offerPrice: it.offerPrice || `₹${it.unit_price || 0}`,
+          unitPrice: Number(it.unit_price || 0),
+          quantity: it.quantity || 1,
+          preparedQuantity: Number(it.prepared_quantity || 0),
+          isReady: Boolean(it.is_ready),
+          isCancelled: Boolean(it.is_cancelled),
+          replacementStatus: it.replacement_status,
+          replacementTitle: it.replacement_title,
+          replacementPrice: it.replacement_price ? Number(it.replacement_price) : undefined,
+          replacementReason: it.replacement_reason,
+          isDeleted: false
+        })),
+        itemSubtotal: Number(o.item_subtotal || 0),
+        roadDistanceKm: Number(o.road_distance_km || 0),
+        deliveryCharge: Number(o.delivery_charge || 0),
+        platformFee: Number(o.platform_fee || 0),
+        totalCodAmount: Number(o.total_amount || 0),
+        status: o.status as CustomerOrderStatus,
+        paymentMethod: o.payment_method || "cod",
+        paymentStatus: o.payment_status || "pending",
+        deliveryAddress: o.delivery_address || {},
+        otp: o.otp || "",
+        otpVerified: Boolean(o.otp_verified),
+        otpStatus: o.otp_status || "pending",
+        createdAt: o.created_at || new Date().toISOString(),
+        deliveredAt: o.delivered_at || undefined,
+        cancelledAt: o.cancelled_at || undefined,
+        cancellationReason: o.cancellation_reason || o.rejection_reason,
+        rejectionReason: o.rejection_reason,
+        deliveryPartner: o.delivery_partner || undefined,
+        history: o.history || []
+      }));
+    }
+  } catch (err) {
+    console.warn("[SSC Supabase] fetchCustomerOrdersFromDb error:", err);
+  }
+  return [];
+}
+
+export async function respondToOrderReplacementInDb(
+  orderId: string,
+  itemId: string,
+  action: "accept" | "reject",
+  customerId?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc("respond_order_item_replacement", {
+      p_order_id: orderId,
+      p_item_id: itemId,
+      p_action: action,
+      p_customer_id: customerId || "customer"
+    });
+
+    if (!error && data?.success) {
+      return { success: true };
+    }
+    return { success: false, error: error?.message || data?.error || "Failed to update replacement." };
+  } catch (err: any) {
+    return { success: false, error: err?.message || "Replacement response exception" };
+  }
+}
+
+export async function updateCustomerOrderStatusInDb(
+  orderId: string,
+  status: CustomerOrderStatus,
+  reason?: string,
+  storeId?: string,
+  customerId?: string
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase.rpc("update_order_lifecycle_status", {
+      p_order_id: orderId,
+      p_new_status: status,
+      p_actor_id: customerId || "customer",
+      p_actor_type: "customer",
+      p_reason: reason || null,
+      p_store_id: storeId || null
+    });
+
+    if (!error && data?.success) {
+      return true;
+    }
+
+    // Direct fallback — ensure canonical UPPERCASE status
+    const canonicalStatus = status.toUpperCase() as CustomerOrderStatus;
+    const { error: directErr } = await supabase
+      .from("orders")
+      .update({
+        status: canonicalStatus,
+        ...(canonicalStatus === "CANCELLED" ? { cancellation_reason: reason, cancelled_at: new Date().toISOString() } : {}),
+        updated_at: new Date().toISOString()
+      })
+      .eq("id", orderId);
+
+    return !directErr;
+  } catch (err) {
+    console.warn("[SSC Supabase] updateCustomerOrderStatusInDb error:", err);
+    return false;
+  }
+}
+
+export function subscribeToCustomerOrderUpdates(
+  customerIdOrOrderIds: string | string[],
+  orderIdsOrOnUpdate: string[] | ((payload: any) => void),
+  maybeOnUpdate?: (payload: any) => void
+): () => void {
+  let customerId: string | undefined;
+  let orderIds: string[] = [];
+  let onUpdate: (payload: any) => void;
+
+  if (typeof customerIdOrOrderIds === "string") {
+    customerId = customerIdOrOrderIds;
+    if (Array.isArray(orderIdsOrOnUpdate)) {
+      orderIds = orderIdsOrOnUpdate;
+    }
+    onUpdate = maybeOnUpdate || (() => {});
+  } else {
+    orderIds = Array.isArray(customerIdOrOrderIds) ? customerIdOrOrderIds : [];
+    onUpdate = (orderIdsOrOnUpdate as (payload: any) => void) || (() => {});
+  }
+
+  // Reject broad wildcard subscriptions across the entire platform
+  if (!customerId && (!orderIds || orderIds.length === 0)) {
+    return () => {};
+  }
+
+  const channel = supabase
+    .channel(`customer_orders_${customerId || "client"}_${Date.now()}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "*",
+        schema: "public",
+        table: "orders"
+      },
+      (payload: any) => {
+        const record = payload?.new || payload?.old;
+        if (!record) return;
+
+        // Customer isolation check on incoming realtime payload
+        if (customerId && record.customer_id && record.customer_id !== customerId) {
+          return;
+        }
+
+        const id = record.id;
+        if (orderIds && orderIds.length > 0 && !orderIds.includes(id)) {
+          return;
+        }
+
+        onUpdate(payload);
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+/**
+ * Fetches active published promotional banners for SSC Consumer App
+ */
+export async function fetchActiveSscBanners(): Promise<SscBanner[]> {
+  try {
+    const { data, error } = await supabase.rpc("get_active_ssc_banners");
+    if (!error && Array.isArray(data)) {
+      return data.map((b: any) => ({
+        id: b.id,
+        title: b.title,
+        subtitle: b.subtitle || "",
+        imageUrl: b.image_url,
+        linkType: b.link_type || "none",
+        targetId: b.target_id || "",
+        targetName: b.target_name || "",
+        customUrl: b.custom_url || "",
+        displayOrder: Number(b.display_order || 0),
+        isActive: Boolean(b.is_active),
+        startDate: b.start_date || null,
+        endDate: b.end_date || null,
+        clicksCount: Number(b.clicks_count || 0),
+        impressionsCount: Number(b.impressions_count || 0)
+      }));
+    }
+
+    // Fallback direct table query if RPC not available
+    const { data: tableData, error: tableError } = await supabase
+      .from("ssc_banners")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+
+    if (tableError) {
+      console.warn("[Supabase] fetchActiveSscBanners error:", tableError);
+      return [];
+    }
+
+    const now = new Date();
+    return (tableData || [])
+      .filter((b: any) => {
+        if (b.start_date && new Date(b.start_date) > now) return false;
+        if (b.end_date && new Date(b.end_date) < now) return false;
+        return true;
+      })
+      .map((b: any) => ({
+        id: b.id,
+        title: b.title,
+        subtitle: b.subtitle || "",
+        imageUrl: b.image_url,
+        linkType: b.link_type || "none",
+        targetId: b.target_id || "",
+        targetName: b.target_name || "",
+        customUrl: b.custom_url || "",
+        displayOrder: Number(b.display_order || 0),
+        isActive: Boolean(b.is_active),
+        startDate: b.start_date || null,
+        endDate: b.end_date || null,
+        clicksCount: Number(b.clicks_count || 0),
+        impressionsCount: Number(b.impressions_count || 0)
+      }));
+  } catch (err) {
+    console.warn("[Supabase] fetchActiveSscBanners exception:", err);
+    return [];
+  }
+}
+
+/**
+ * Records a click on a promotional banner
+ */
+export async function recordSscBannerClick(bannerId: string): Promise<void> {
+  try {
+    await supabase.rpc("record_ssc_banner_click", { p_banner_id: bannerId });
+  } catch (err) {
+    console.warn("[Supabase] recordSscBannerClick error:", err);
+  }
+}
+
+/**
+ * Records an impression on a promotional banner
+ */
+export async function recordSscBannerImpression(bannerId: string): Promise<void> {
+  try {
+    await supabase.rpc("record_ssc_banner_impression", { p_banner_id: bannerId });
+  } catch (err) {
+    console.warn("[Supabase] recordSscBannerImpression error:", err);
+  }
+}
+
 
 
 
