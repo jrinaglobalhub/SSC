@@ -55,9 +55,17 @@ export interface CatalogItem {
   description?: string;
   storeId?: string;
   storeName?: string;
+  storePhone?: string;
   distanceInMeters?: number;
   isDeleted?: boolean;
   deletedAt?: string;
+  productType?: string;
+  isDigital?: boolean;
+  allIndiaDelivery?: boolean;
+  deliveryScope?: string;
+  isReplaceable?: boolean;
+  replacementPolicy?: string;
+  specifications?: Record<string, any>;
 }
 
 export interface CartItem {
@@ -109,6 +117,8 @@ export interface CustomerOrderProductSnapshot {
   quantity: number;
   sku?: string;
   isDeleted?: boolean;
+  isDigital?: boolean;
+  isReplaceable?: boolean;
   replacementEligible?: boolean;
   replacementPolicy?: string;
   preparedQuantity?: number;
@@ -358,13 +368,19 @@ export type RootStackParamList = {
 
 export interface SscBanner {
   id: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   imageUrl: string;
-  linkType: "store" | "deal" | "category" | "custom_url" | "none";
+  linkType: "store" | "deal" | "product" | "category" | "custom_url" | "external" | "none";
   targetId?: string;
   targetName?: string;
   customUrl?: string;
+  sourceType?: "custom" | "ssm_approved";
+  sourceRequestId?: string;
+  merchantId?: string;
+  merchantName?: string;
+  redirectType?: string;
+  redirectTarget?: string;
   displayOrder: number;
   isActive: boolean;
   startDate?: string | null;
