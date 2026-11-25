@@ -1,18 +1,7 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-  TextInput,
-  Image,
-  ActivityIndicator,
-  Alert,
-  Linking
-} from "react-native";
+import { View, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Image, ActivityIndicator, Alert, Linking, useWindowDimensions } from "react-native";
+import { AppText as Text } from "../components/common/AppText";
+import { AppTextInput as TextInput } from "../components/common/AppTextInput";
 import {
   Search,
   X,
@@ -24,21 +13,41 @@ import {
   ChevronRight,
   Package,
   MapPin,
-  ShoppingCart,
-  Zap,
   Heart,
   Check,
   WifiOff,
-  Navigation
+  Navigation,
+  LayoutGrid,
+  Utensils,
+  ShoppingBasket,
+  Smartphone,
+  HeartPulse,
+  Laptop,
+  Shirt,
+  Snowflake,
+  ShoppingCart
 } from "lucide-react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useApp } from "../context/AppContext";
+import { useTabBarScroll } from "../hooks/useTabBarScroll";
 import { StoreCard } from "../components/StoreCard";
 import { Header } from "../components/Header";
+import { SeasonalBackground } from "../components/SeasonalBackground";
+import { FrostDivider, FacetedFloretteCrystal, DendriticTriForkSnowflake } from "../components/FrozenNatureElements";
+import { ProductFilterTabs } from "../components/ProductFilterTabs";
+import { ProductFilterTab, matchesProductFilterTab } from "../utils/productFilter";
 import { TopDealsCarousel } from "../components/TopDealsCarousel";
 import { formatDistance, calculateDistanceInMeters, extractAreaFromAddress } from "../utils/geo";
 import { OfferItem, CatalogItem, SscBanner } from "../types";
-import { fetchActiveSscBanners, recordSscBannerClick, recordSscBannerImpression } from "../api/supabase";
+import {
+  fetchActiveSscBanners,
+  getCachedActiveSscBanners,
+  recordSscBannerClick,
+  recordSscBannerImpression,
+  subscribeToRealtimeBanners,
+  BannerLocationContext
+} from "../api/supabase";
 
 const CATEGORIES = [
   "All Deals & Stores",
@@ -49,6 +58,20 @@ const CATEGORIES = [
   "Wellness",
   "IT & Services",
   "Fashion"
+];
+
+const CATEGORY_ITEMS: {
+  label: string;
+  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
+}[] = [
+  { label: "All Deals & Stores", icon: LayoutGrid },
+  { label: "Dining", icon: Utensils },
+  { label: "Grocery", icon: ShoppingBasket },
+  { label: "Electronics", icon: Smartphone },
+  { label: "Beauty", icon: Sparkles },
+  { label: "Wellness", icon: HeartPulse },
+  { label: "IT & Services", icon: Laptop },
+  { label: "Fashion", icon: Shirt }
 ];
 
 const RADIUS_PRESETS = [
@@ -74,6 +97,20 @@ function calculateDiscountPercent(orig?: string, offer?: string): string | null 
 
 export const HomeScreen: React.FC = () => {
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const { onScroll: onScrollTabBar } = useTabBarScroll();
+  const { width: windowWidth } = useWindowDimensions();
+
+  // Responsive 3-column product grid calculation (falls back to 2 columns on narrow/small devices < 360dp)
+  const isThreeColumns = windowWidth >= 360;
+  const productColumns = isThreeColumns ? 3 : 2;
+  const productGridGap = isThreeColumns ? 8 : 12;
+  const productGridPadding = isThreeColumns ? 12 : 14;
+  const productCardWidth = Math.floor(
+    (windowWidth - productGridPadding * 2 - productGridGap * (productColumns - 1)) / productColumns
+  );
+  const productImgHeight = isThreeColumns ? Math.round(productCardWidth * 0.95) : 140;
+
   const {
     offers,
     allOffers,
@@ -92,7 +129,6 @@ export const HomeScreen: React.FC = () => {
     setGeofenceRadius,
     setShowRadiusModal,
     setSelectedStore,
-    setShowAiAssistant,
     setSelectedOfferForVoucher,
     addToCart,
     setBuyNowProduct,
@@ -102,33 +138,90 @@ export const HomeScreen: React.FC = () => {
     wishlistCount,
     isLoading,
     refreshData,
-    getStoreRoadDistance
+    getStoreRoadDistance,
+    deliveryAddress,
+    seasonalTheme
   } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState("All Deals & Stores");
+  const [selectedProductTab, setSelectedProductTab] = useState<ProductFilterTab>("all");
   const [searchInput, setSearchInput] = useState("");
   const [cartFeedback, setCartFeedback] = useState<string | null>(null);
   const [promotionalBanners, setPromotionalBanners] = useState<SscBanner[]>([]);
+  const isFocused = useIsFocused();
+  const trackedImpressionIdsRef = React.useRef<Set<string>>(new Set());
+  const lastBannerFetchTimeRef = React.useRef<number>(0);
 
-  // Fetch active promotional banners from Supabase
+  // 1. Initial instant load from offline cache for 0ms startup latency
   React.useEffect(() => {
     let isMounted = true;
-    const loadPromoBanners = async () => {
-      try {
-        const list = await fetchActiveSscBanners();
-        if (isMounted) {
-          setPromotionalBanners(list);
-          list.forEach((b) => recordSscBannerImpression(b.id));
-        }
-      } catch (err) {
-        console.warn("[HomeScreen] loadPromoBanners error:", err);
+    getCachedActiveSscBanners().then((cached) => {
+      if (isMounted && cached.length > 0) {
+        setPromotionalBanners(cached);
       }
-    };
-    loadPromoBanners();
+    });
     return () => {
       isMounted = false;
     };
   }, []);
+
+  // 2. Fetch active eligible banners based on live location targeting and focus
+  const loadPromoBanners = React.useCallback(async () => {
+    try {
+      const locationContext: BannerLocationContext = {};
+      if (!isLocationPermissionDenied && location) {
+        locationContext.latitude = location.latitude;
+        locationContext.longitude = location.longitude;
+        if (deliveryAddress?.district) {
+          locationContext.district = deliveryAddress.district;
+        }
+        if (deliveryAddress?.city) {
+          locationContext.city = deliveryAddress.city;
+        }
+        if (deliveryAddress?.pincode) {
+          locationContext.pincode = deliveryAddress.pincode;
+        }
+      }
+
+      const list = await fetchActiveSscBanners(locationContext);
+      lastBannerFetchTimeRef.current = Date.now();
+      setPromotionalBanners(list);
+
+      // Track impressions once per session per banner
+      list.forEach((b) => {
+        if (!trackedImpressionIdsRef.current.has(b.id)) {
+          trackedImpressionIdsRef.current.add(b.id);
+          recordSscBannerImpression(b.id);
+        }
+      });
+    } catch (err) {
+      console.warn("[HomeScreen] loadPromoBanners error:", err);
+    }
+  }, [location, isLocationPermissionDenied, deliveryAddress]);
+
+  React.useEffect(() => {
+    if (!isFocused) return;
+
+    // Throttle refetches on quick re-focus (within 10s) unless location changed
+    const now = Date.now();
+    if (now - lastBannerFetchTimeRef.current < 10000 && promotionalBanners.length > 0) {
+      return;
+    }
+
+    loadPromoBanners();
+  }, [isFocused, loadPromoBanners, promotionalBanners.length]);
+
+  // 3. Real-time synchronization: Instantly reflect SSA Banner create/edit/delete/reorder
+  React.useEffect(() => {
+    const unsubscribe = subscribeToRealtimeBanners(() => {
+      lastBannerFetchTimeRef.current = 0;
+      loadPromoBanners();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [loadPromoBanners]);
 
   const STORES_PAGE_SIZE = 10;
   const [visibleStoreLimit, setVisibleStoreLimit] = useState(STORES_PAGE_SIZE);
@@ -315,8 +408,6 @@ export const HomeScreen: React.FC = () => {
   const hasMoreStores = filteredStores.length > visibleStoreLimit;
 
   const filteredProducts = React.useMemo(() => {
-    if (!isInsideKerala) return [];
-
     return nearbyProducts.filter((p) => {
       // Must be within 5 km radius
       if ((p.distanceInMeters ?? 999999) > 5000) return false;
@@ -339,9 +430,14 @@ export const HomeScreen: React.FC = () => {
         return false;
       }
 
+      // 4-Option Product Type / Delivery Filter Tab
+      if (!matchesProductFilterTab(p, selectedProductTab)) {
+        return false;
+      }
+
       return true;
     });
-  }, [nearbyProducts, isInsideKerala, searchInput, selectedCategory]);
+  }, [nearbyProducts, isInsideKerala, searchInput, selectedCategory, selectedProductTab]);
 
   const handleProductPress = (product: CatalogItem) => {
     (navigation as any).navigate("ProductDetails", {
@@ -382,119 +478,189 @@ export const HomeScreen: React.FC = () => {
   const handlePressBanner = (banner: SscBanner) => {
     recordSscBannerClick(banner.id);
 
-    if (banner.linkType === "store" && banner.targetId) {
-      const foundStore = stores.find((s) => s.id === banner.targetId);
+    const targetType = (banner.redirectType || banner.linkType || "none").toLowerCase();
+    const targetVal = banner.redirectTarget || banner.targetId || banner.customUrl;
+
+    if (targetType === "store" && targetVal) {
+      const foundStore = stores.find((s) => s.id === targetVal);
       if (foundStore) {
         setSelectedStore(foundStore);
       } else {
         (navigation as any).navigate("Deals");
       }
-    } else if (banner.linkType === "deal" && banner.targetId) {
-      const foundDeal = (allOffers || offers).find((o) => o.id === banner.targetId);
+    } else if ((targetType === "deal" || targetType === "offer") && targetVal) {
+      const foundDeal = (allOffers || offers).find((o) => o.id === targetVal);
       if (foundDeal) {
         setSelectedOfferForVoucher(foundDeal);
       } else {
         (navigation as any).navigate("Deals");
       }
-    } else if (banner.linkType === "category" && banner.targetId) {
+    } else if (targetType === "product" && targetVal) {
+      const foundProduct = nearbyProducts.find((p) => p.id === targetVal);
+      if (foundProduct) {
+        (navigation as any).navigate("ProductDetails", {
+          productId: foundProduct.id,
+          product: foundProduct
+        });
+      } else {
+        // Fallback: Navigate to Deals tab if specific product is not in immediate radius
+        (navigation as any).navigate("Deals");
+      }
+    } else if (targetType === "category" && targetVal) {
       const matchedCat = CATEGORIES.find(
-        (c) => c.toLowerCase() === banner.targetId?.toLowerCase()
+        (c) => c.toLowerCase() === targetVal.toLowerCase()
       );
-      setSelectedCategory(matchedCat || banner.targetId);
-    } else if (banner.linkType === "custom_url" && banner.customUrl) {
-      Linking.openURL(banner.customUrl).catch((err) =>
-        console.warn("[HomeScreen] Could not open banner custom URL:", err)
-      );
+      setSelectedCategory(matchedCat || targetVal);
+    } else if ((targetType === "custom_url" || targetType === "external") && targetVal) {
+      let finalUrl = targetVal.trim();
+      if (!/^https?:\/\//i.test(finalUrl)) {
+        finalUrl = `https://${finalUrl}`;
+      }
+      Linking.canOpenURL(finalUrl)
+        .then((supported) => {
+          if (supported) {
+            Linking.openURL(finalUrl).catch((err) =>
+              console.warn("[HomeScreen] Could not open banner external URL:", err)
+            );
+          }
+        })
+        .catch((err) => console.warn("[HomeScreen] Error validating banner URL:", err));
     }
   };
 
   const radiusLabel = geofenceRadius >= 999999 ? "Unlimited" : formatDistance(geofenceRadius);
 
   return (
-    <View style={styles.container}>
-      <Header />
-
-      <FlatList
-        data={[]}
-        keyExtractor={(_, index) => `item_${index}`}
+    <View style={[styles.container, { backgroundColor: seasonalTheme.backgroundColor }]}>
+      <SeasonalBackground theme={seasonalTheme} />
+      <ScrollView
+        stickyHeaderIndices={[1]}
+        onScroll={onScrollTabBar}
+        scrollEventThrottle={16}
         refreshControl={
           <RefreshControl refreshing={isLoading} onRefresh={refreshData} colors={["#EA580C"]} />
         }
         showsVerticalScrollIndicator={false}
-        ListHeaderComponent={
-          <View style={styles.headerComponent}>
-            {/* Unified Search Input with Wishlist button */}
-            <View style={styles.searchSection}>
-              <View style={styles.searchBar}>
-                <Search size={14} color="#94A3B8" />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="Search deals, stores, or items..."
-                  placeholderTextColor="#94A3B8"
-                  value={searchInput}
-                  onChangeText={setSearchInput}
-                />
-                {searchInput ? (
-                  <TouchableOpacity
-                    onPress={() => setSearchInput("")}
-                    style={styles.clearSearchBtn}
-                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                  >
-                    <X size={14} color="#64748B" />
-                  </TouchableOpacity>
-                ) : null}
-              </View>
+        contentContainerStyle={{ paddingBottom: insets.bottom + 84 }}
+      >
+        {/* Child 0: Main Header (scrolls away naturally with page) */}
+        <Header />
 
-              {/* Wishlist Icon Button */}
-              {isWishlistVisible && (
+        {/* Child 1: Sticky Search Bar & Category Row */}
+        <View
+          style={[
+            styles.stickyTopControls,
+            {
+              backgroundColor: seasonalTheme.surfaceColor,
+              borderBottomColor: seasonalTheme.surfaceBorderColor
+            }
+          ]}
+        >
+          {/* Subtle Winter Ice Crystal Accent in Search Area */}
+          {seasonalTheme.isWinter && (
+            <View pointerEvents="none" style={styles.searchWinterCrystal}>
+              <FacetedFloretteCrystal size={16} opacity={0.45} />
+            </View>
+          )}
+
+          {/* Search Bar & Wishlist at the Top */}
+          <View style={styles.searchSection}>
+            <View
+              style={[
+                styles.searchBar,
+                {
+                  backgroundColor: seasonalTheme.inputSurfaceColor,
+                  borderColor: seasonalTheme.surfaceBorderColor
+                }
+              ]}
+            >
+              <Search size={14} color="#94A3B8" />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search deals, stores, or items..."
+                placeholderTextColor="#94A3B8"
+                value={searchInput}
+                onChangeText={setSearchInput}
+                returnKeyType="search"
+              />
+              {searchInput ? (
                 <TouchableOpacity
-                  style={styles.wishlistHeaderBtn}
-                  onPress={() => (navigation as any).navigate("Wishlist")}
-                  activeOpacity={0.75}
-                  hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
-                  accessibilityLabel="My Wishlist"
+                  onPress={() => setSearchInput("")}
+                  style={styles.clearSearchBtn}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  accessibilityLabel="Clear search input"
                 >
-                  <Heart
-                    size={19}
-                    color={wishlistCount > 0 ? "#EA580C" : "#0F172A"}
-                    fill={wishlistCount > 0 ? "#EA580C" : "transparent"}
-                  />
-                  {wishlistCount > 0 && (
-                    <View style={styles.wishlistBadge}>
-                      <Text style={styles.wishlistBadgeText}>
-                        {wishlistCount > 99 ? "99+" : wishlistCount}
-                      </Text>
-                    </View>
-                  )}
+                  <X size={14} color="#64748B" />
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
 
-            {/* Horizontal Category Chips */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
-            >
-              {CATEGORIES.map((cat) => {
-                const isSelected = selectedCategory === cat;
-                return (
-                  <TouchableOpacity
-                    key={cat}
-                    style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
-                    onPress={() => setSelectedCategory(cat)}
-                  >
-                    <Text
-                      style={[styles.categoryChipText, isSelected && styles.categoryChipTextSelected]}
-                    >
-                      {cat}
+            {/* Wishlist Icon Button */}
+            {isWishlistVisible && (
+              <TouchableOpacity
+                style={[
+                  styles.wishlistHeaderBtn,
+                  { borderColor: seasonalTheme.surfaceBorderColor }
+                ]}
+                onPress={() => (navigation as any).navigate("Wishlist")}
+                activeOpacity={0.75}
+                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                accessibilityLabel="My Wishlist"
+              >
+                <Heart
+                  size={19}
+                  color={wishlistCount > 0 ? "#EA580C" : "#0F172A"}
+                  fill={wishlistCount > 0 ? "#EA580C" : "transparent"}
+                />
+                {wishlistCount > 0 && (
+                  <View style={styles.wishlistBadge}>
+                    <Text style={styles.wishlistBadgeText}>
+                      {wishlistCount > 99 ? "99+" : wishlistCount}
                     </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+                  </View>
+                )}
+              </TouchableOpacity>
+            )}
+          </View>
 
-            {/* Top Deals Auto-Swiping Carousel with Dynamic SSA Promotional Banners */}
+          {/* Horizontal Minimal Category Row */}
+          <ScrollView
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoryScroll}
+          >
+            {CATEGORY_ITEMS.map(({ label, icon: IconComponent }) => {
+              const isSelected = selectedCategory === label;
+              return (
+                <TouchableOpacity
+                  key={label}
+                  style={[styles.categoryItem, isSelected && styles.categoryItemSelected]}
+                  onPress={() => setSelectedCategory(label)}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isSelected }}
+                >
+                  <IconComponent
+                    size={15}
+                    color="#0F172A"
+                    strokeWidth={isSelected ? 2.25 : 1.75}
+                  />
+                  <Text
+                    style={[styles.categoryItemText, isSelected && styles.categoryItemTextSelected]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* Child 2: Main Scrollable Content */}
+        <View>
+          <View style={styles.headerComponent}>
+          {/* Top Deals Auto-Swiping Carousel with Dynamic SSA Promotional Banners */}
             <TopDealsCarousel
               deals={filteredDeals}
               stores={stores}
@@ -503,6 +669,11 @@ export const HomeScreen: React.FC = () => {
               onPressDeal={(deal) => setSelectedOfferForVoucher(deal)}
               onPressExplore={() => (navigation as any).navigate("Deals")}
             />
+
+            {/* Subtle Winter Divider Framing Below Banner Carousel */}
+            {seasonalTheme.isWinter && (
+              <FrostDivider style={{ marginVertical: 6 }} />
+            )}
 
             {/* Location-Aware Welcome Experience (Shown ONLY when 0 stores within 5 km, not loading, not error, not GPS denied) */}
             {hasNoNearbyStores && (
@@ -706,41 +877,43 @@ export const HomeScreen: React.FC = () => {
               </View>
             )}
 
-            {/* SENSITIVE SECTION: Flipkart-Style Products Near You (5 KM Radius - Kerala Only) */}
+            {/* SENSITIVE SECTION: Flipkart-Style Products (5 KM Radius - Kerala Only) */}
             {isInsideKerala && (
               <View style={styles.productsSection}>
-                <View style={styles.productsHeaderRow}>
-                  <View style={styles.productsHeaderLeft}>
-                    <View style={styles.productIconBox}>
-                      <Package size={17} color="#EA580C" />
-                    </View>
-                    <View>
-                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-                        <Text style={styles.productsSectionTitle}>Products Near You</Text>
-                        <View style={styles.kerala5KmPill}>
-                          <Text style={styles.kerala5KmText}>5 KM RADIUS</Text>
-                        </View>
-                      </View>
-                      <Text style={styles.productsSectionSubtitle}>
-                        Flipkart-style local inventory within 5 km in Kerala
-                      </Text>
-                    </View>
-                  </View>
-                  <View style={styles.productCountPill}>
-                    <Text style={styles.productCountText}>{filteredProducts.length} Items</Text>
-                  </View>
-                </View>
+                {/* 5-Option Folder-Style Product Filter Tabs + Connected Container */}
+                <View style={styles.productFilterSection}>
+                  <ProductFilterTabs
+                    selectedTab={selectedProductTab}
+                    onSelectTab={setSelectedProductTab}
+                  />
 
-                {filteredProducts.length === 0 ? (
-                  <View style={styles.emptyProductsCard}>
-                    <Package size={28} color="#94A3B8" />
-                    <Text style={styles.emptyProductsText}>
-                      No store products found within 5 km of your location
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.flipkartGrid}>
-                    {filteredProducts.map((item) => {
+                  <View style={styles.productTabsContainer}>
+                    {filteredProducts.length === 0 ? (
+                      <View style={styles.emptyProductsCard}>
+                        <Package size={28} color="#94A3B8" />
+                        <Text style={styles.emptyProductsText}>
+                          {selectedProductTab === "all_india"
+                            ? "No products eligible for All India Delivery found"
+                            : selectedProductTab === "nearby"
+                            ? "No nearby store products found within 5 km of your location"
+                            : selectedProductTab === "digital"
+                            ? "No digital products found within 5 km"
+                            : selectedProductTab === "physical"
+                            ? "No physical products found within 5 km"
+                            : "No store products found within 5 km of your location"}
+                        </Text>
+                      </View>
+                    ) : (
+                      <View
+                        style={[
+                          styles.flipkartGrid,
+                          {
+                            gap: productGridGap,
+                            paddingHorizontal: productGridPadding
+                          }
+                        ]}
+                      >
+                        {filteredProducts.map((item) => {
                       const discountPct = calculateDiscountPercent(
                         item.originalPrice,
                         item.offerPrice
@@ -748,10 +921,23 @@ export const HomeScreen: React.FC = () => {
                       const isFav = wishlistIds.has(item.id);
 
                       return (
-                        <View key={item.id} style={styles.flipkartCard}>
+                        <View
+                          key={item.id}
+                          style={[
+                            styles.flipkartCard,
+                            {
+                              width: productCardWidth,
+                              backgroundColor: seasonalTheme.cardSurfaceColor,
+                              borderColor: seasonalTheme.surfaceBorderColor
+                            }
+                          ]}
+                        >
                           {/* Image Container with Wishlist & Category Badges */}
                           <TouchableOpacity
-                            style={styles.fkImgContainer}
+                            style={[
+                              styles.fkImgContainer,
+                              { height: productImgHeight }
+                            ]}
                             onPress={() => handleProductPress(item)}
                             activeOpacity={0.9}
                           >
@@ -763,12 +949,15 @@ export const HomeScreen: React.FC = () => {
 
                             {/* Wishlist Heart Icon */}
                             <TouchableOpacity
-                              style={styles.fkHeartBtn}
+                              style={[
+                                styles.fkHeartBtn,
+                                isThreeColumns && styles.fkHeartBtnCompact
+                              ]}
                               onPress={() => toggleWishlist(item.id)}
                               activeOpacity={0.7}
                             >
                               <Heart
-                                size={14}
+                                size={isThreeColumns ? 12 : 14}
                                 color={isFav ? "#EF4444" : "#64748B"}
                                 fill={isFav ? "#EF4444" : "transparent"}
                               />
@@ -776,8 +965,19 @@ export const HomeScreen: React.FC = () => {
 
                             {/* Category Badge */}
                             {item.category ? (
-                              <View style={styles.fkCategoryBadge}>
-                                <Text style={styles.fkCategoryText}>
+                              <View
+                                style={[
+                                  styles.fkCategoryBadge,
+                                  isThreeColumns && styles.fkCategoryBadgeCompact
+                                ]}
+                              >
+                                <Text
+                                  style={[
+                                    styles.fkCategoryText,
+                                    isThreeColumns && styles.fkCategoryTextCompact
+                                  ]}
+                                  numberOfLines={1}
+                                >
                                   {item.category.toUpperCase()}
                                 </Text>
                               </View>
@@ -787,10 +987,21 @@ export const HomeScreen: React.FC = () => {
                             {(() => {
                               const roadInfo = getStoreRoadDistance(item.storeId || item.storeName || "");
                               return (
-                                <View style={styles.fkDistanceBadge}>
-                                  <MapPin size={9} color="#16A34A" />
-                                  <Text style={styles.fkDistanceText}>
-                                    {roadInfo ? `${roadInfo.formatted} by road` : "Near you"}
+                                <View
+                                  style={[
+                                    styles.fkDistanceBadge,
+                                    isThreeColumns && styles.fkDistanceBadgeCompact
+                                  ]}
+                                >
+                                  <MapPin size={isThreeColumns ? 8 : 9} color="#16A34A" />
+                                  <Text
+                                    style={[
+                                      styles.fkDistanceText,
+                                      isThreeColumns && styles.fkDistanceTextCompact
+                                    ]}
+                                    numberOfLines={1}
+                                  >
+                                    {roadInfo ? roadInfo.formatted : "Nearby"}
                                   </Text>
                                 </View>
                               );
@@ -798,15 +1009,26 @@ export const HomeScreen: React.FC = () => {
                           </TouchableOpacity>
 
                           {/* Card Body */}
-                          <View style={styles.fkCardBody}>
+                          <View
+                            style={[
+                              styles.fkCardBody,
+                              isThreeColumns && styles.fkCardBodyCompact
+                            ]}
+                          >
                             {/* Store Name with icon */}
                             <TouchableOpacity
                               style={styles.fkStoreRow}
                               onPress={() => handleProductPress(item)}
                               activeOpacity={0.8}
                             >
-                              <Store size={10} color="#64748B" />
-                              <Text style={styles.fkStoreName} numberOfLines={1}>
+                              <Store size={isThreeColumns ? 9 : 10} color="#64748B" />
+                              <Text
+                                style={[
+                                  styles.fkStoreName,
+                                  isThreeColumns && styles.fkStoreNameCompact
+                                ]}
+                                numberOfLines={1}
+                              >
                                 {item.storeName || "Partner Store"}
                               </Text>
                             </TouchableOpacity>
@@ -816,7 +1038,13 @@ export const HomeScreen: React.FC = () => {
                               onPress={() => handleProductPress(item)}
                               activeOpacity={0.8}
                             >
-                              <Text style={styles.fkTitle} numberOfLines={2}>
+                              <Text
+                                style={[
+                                  styles.fkTitle,
+                                  isThreeColumns && styles.fkTitleCompact
+                                ]}
+                                numberOfLines={2}
+                              >
                                 {item.name}
                               </Text>
                             </TouchableOpacity>
@@ -827,61 +1055,90 @@ export const HomeScreen: React.FC = () => {
                               onPress={() => handleProductPress(item)}
                               activeOpacity={0.8}
                             >
-                              <Text style={styles.fkOfferPrice}>
+                              <Text
+                                style={[
+                                  styles.fkOfferPrice,
+                                  isThreeColumns && styles.fkOfferPriceCompact
+                                ]}
+                              >
                                 {item.offerPrice || "Special"}
                               </Text>
                               {item.originalPrice ? (
-                                <Text style={styles.fkOrigPrice}>
+                                <Text
+                                  style={[
+                                    styles.fkOrigPrice,
+                                    isThreeColumns && styles.fkOrigPriceCompact
+                                  ]}
+                                >
                                   {item.originalPrice}
                                 </Text>
                               ) : null}
                               {discountPct ? (
-                                <Text style={styles.fkDiscountText}>
+                                <Text
+                                  style={[
+                                    styles.fkDiscountText,
+                                    isThreeColumns && styles.fkDiscountTextCompact
+                                  ]}
+                                >
                                   {discountPct}
                                 </Text>
                               ) : null}
                             </TouchableOpacity>
 
-                            {/* Local Delivery / Assured Pill */}
-                            <View style={styles.fkAssuredRow}>
-                              <Text style={styles.fkAssuredText}>5km Local Store Pickup</Text>
-                            </View>
-
-                            {/* Flipkart Action Buttons: Add to Cart & Buy Now */}
-                            <View style={styles.fkActionsRow}>
-                              <TouchableOpacity
-                                style={styles.fkAddToCartBtn}
-                                onPress={() => handleAddToCart(item)}
-                                activeOpacity={0.8}
+                            {/* Add to Cart Button */}
+                            <TouchableOpacity
+                              style={[
+                                styles.fkAddToCartBtn,
+                                isThreeColumns && styles.fkAddToCartBtnCompact
+                              ]}
+                              onPress={() => handleAddToCart(item)}
+                              activeOpacity={0.8}
+                            >
+                              <ShoppingCart size={isThreeColumns ? 11 : 13} color="#EA580C" />
+                              <Text
+                                style={[
+                                  styles.fkAddToCartText,
+                                  isThreeColumns && styles.fkAddToCartTextCompact
+                                ]}
+                                numberOfLines={1}
                               >
-                                <ShoppingCart size={12} color="#EA580C" />
-                                <Text style={styles.fkAddToCartText}>Add to Cart</Text>
-                              </TouchableOpacity>
-
-                              <TouchableOpacity
-                                style={styles.fkBuyNowBtn}
-                                onPress={() => handleBuyNow(item)}
-                                activeOpacity={0.85}
-                              >
-                                <Zap size={12} color="#FFFFFF" fill="#FFFFFF" />
-                                <Text style={styles.fkBuyNowText}>Buy Now</Text>
-                              </TouchableOpacity>
-                            </View>
+                                Add to Cart
+                              </Text>
+                            </TouchableOpacity>
                           </View>
                         </View>
                       );
                     })}
                   </View>
-                )}
+                    )}
+                  </View>
+                </View>
               </View>
             )}
           </View>
-        }
-        renderItem={() => null}
-        ListFooterComponent={
           <View style={styles.footerComponent}>
+            {/* Subtle Frost Divider before Stores Section */}
+            {seasonalTheme.isWinter && (
+              <FrostDivider style={{ marginBottom: 10, marginTop: 4 }} />
+            )}
+
             {/* Section 2: Stores Around You */}
-            <View style={styles.storesSection}>
+            <View
+              style={[
+                styles.storesSection,
+                {
+                  backgroundColor: seasonalTheme.sectionSurfaceColor,
+                  borderColor: seasonalTheme.surfaceBorderColor
+                }
+              ]}
+            >
+              {/* Subtle Winter Ice Crystal Accent in Section Corner */}
+              {seasonalTheme.isWinter && (
+                <View pointerEvents="none" style={styles.storesWinterFrostDecor}>
+                  <FacetedFloretteCrystal size={22} opacity={0.35} />
+                </View>
+              )}
+
               <View style={styles.storesHeaderRow}>
                 <View style={styles.storeIconBox}>
                   <Store size={18} color="#FFFFFF" />
@@ -889,6 +1146,9 @@ export const HomeScreen: React.FC = () => {
                 <View style={{ flex: 1, paddingLeft: 10 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <Text style={styles.storesSectionTitle}>Stores Around You</Text>
+                    {seasonalTheme.isWinter && (
+                      <Snowflake size={14} color="#3B82F6" />
+                    )}
                     <View style={styles.storeCountPill}>
                       <Text style={styles.storeCountText}>
                         {hasMoreStores
@@ -915,7 +1175,14 @@ export const HomeScreen: React.FC = () => {
                   return (
                     <TouchableOpacity
                       key={p.label}
-                      style={[styles.presetChip, isCur && styles.presetChipActive]}
+                      style={[
+                        styles.presetChip,
+                        !isCur && {
+                          backgroundColor: seasonalTheme.cardSurfaceColor,
+                          borderColor: seasonalTheme.surfaceBorderColor
+                        },
+                        isCur && styles.presetChipActive
+                      ]}
                       onPress={() => setGeofenceRadius(p.value)}
                     >
                       <Text style={[styles.presetChipText, isCur && styles.presetChipTextActive]}>
@@ -928,7 +1195,15 @@ export const HomeScreen: React.FC = () => {
 
               {/* Stores Discovery Body: Loading, Error, Location-Denied, Empty, or Results */}
               {isLoading && stores.length === 0 ? (
-                <View style={styles.storesStateCard}>
+                <View
+                  style={[
+                    styles.storesStateCard,
+                    {
+                      backgroundColor: seasonalTheme.cardSurfaceColor,
+                      borderColor: seasonalTheme.surfaceBorderColor
+                    }
+                  ]}
+                >
                   <ActivityIndicator size="small" color="#EA580C" />
                   <Text style={styles.storesStateTitle}>Searching nearby partner stores...</Text>
                   <Text style={styles.storesStateDesc}>
@@ -936,7 +1211,15 @@ export const HomeScreen: React.FC = () => {
                   </Text>
                 </View>
               ) : storesError && stores.length === 0 ? (
-                <View style={styles.storesStateCard}>
+                <View
+                  style={[
+                    styles.storesStateCard,
+                    {
+                      backgroundColor: seasonalTheme.cardSurfaceColor,
+                      borderColor: seasonalTheme.surfaceBorderColor
+                    }
+                  ]}
+                >
                   <View style={styles.storesStateIconCircle}>
                     <WifiOff size={24} color="#EA580C" />
                   </View>
@@ -954,7 +1237,15 @@ export const HomeScreen: React.FC = () => {
                   </TouchableOpacity>
                 </View>
               ) : isLocationPermissionDenied && !isGPS ? (
-                <View style={styles.storesStateCard}>
+                <View
+                  style={[
+                    styles.storesStateCard,
+                    {
+                      backgroundColor: seasonalTheme.cardSurfaceColor,
+                      borderColor: seasonalTheme.surfaceBorderColor
+                    }
+                  ]}
+                >
                   <View style={styles.storesStateIconCircle}>
                     <Navigation size={24} color="#EA580C" />
                   </View>
@@ -1077,19 +1368,8 @@ export const HomeScreen: React.FC = () => {
               </Text>
             </View>
           </View>
-        }
-        contentContainerStyle={{ paddingBottom: 90 }}
-      />
-
-      {/* Floating SmartShopper AI Button (Only on Home Screen) */}
-      <TouchableOpacity
-        style={styles.floatingAiButton}
-        onPress={() => setShowAiAssistant(true)}
-        activeOpacity={0.88}
-      >
-        <Sparkles size={16} color="#FFFFFF" />
-        <Text style={styles.floatingAiText}>SmartShopper AI</Text>
-      </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/* Floating Cart Feedback Toast */}
       {cartFeedback && (
@@ -1116,15 +1396,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8FAFC"
   },
+  stickyTopControls: {
+    backgroundColor: "#FFFFFF",
+    paddingTop: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0"
+  },
   headerComponent: {
     paddingTop: 10
   },
   searchSection: {
-    paddingHorizontal: 14,
-    marginBottom: 10,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: 10,
+    paddingHorizontal: 14,
+    marginBottom: 10
   },
   searchBar: {
     flex: 1,
@@ -1180,28 +1466,29 @@ const styles = StyleSheet.create({
   },
   categoryScroll: {
     paddingHorizontal: 14,
-    gap: 8,
-    paddingBottom: 12
+    gap: 16,
+    alignItems: "center"
   },
-  categoryChip: {
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 14,
+  categoryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "#E2E8F0"
+    paddingHorizontal: 2,
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent"
   },
-  categoryChipSelected: {
-    backgroundColor: "#0F172A",
-    borderColor: "#0F172A"
+  categoryItemSelected: {
+    borderBottomColor: "#0F172A"
   },
-  categoryChipText: {
+  categoryItemText: {
     fontSize: 12,
-    fontWeight: "700",
-    color: "#475569"
+    fontWeight: "600",
+    color: "#0F172A"
   },
-  categoryChipTextSelected: {
-    color: "#FFFFFF"
+  categoryItemTextSelected: {
+    fontWeight: "800",
+    color: "#0F172A"
   },
 
   /* SENSITIVE: Products Near You Section Styles */
@@ -1209,6 +1496,16 @@ const styles = StyleSheet.create({
     marginTop: 18,
     marginBottom: 4,
     gap: 10
+  },
+  productFilterSection: {
+    marginTop: 2
+  },
+  productTabsContainer: {
+    backgroundColor: "#DCF0FD",
+    borderTopWidth: 1,
+    borderTopColor: "#94C2EA",
+    paddingTop: 10,
+    paddingBottom: 12
   },
   productsHeaderRow: {
     flexDirection: "row",
@@ -1285,16 +1582,13 @@ const styles = StyleSheet.create({
     color: "#94A3B8",
     textAlign: "center"
   },
-  /* Flipkart-Style 2-Column Grid */
+  /* Flipkart-Style Grid (3-Column on standard/intended screens, 2-Column responsive fallback on smaller screens) */
   flipkartGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 14,
     rowGap: 12
   },
   flipkartCard: {
-    width: "48.5%",
     backgroundColor: "#FFFFFF",
     borderRadius: 14,
     borderWidth: 1,
@@ -1309,7 +1603,6 @@ const styles = StyleSheet.create({
   fkImgContainer: {
     position: "relative",
     width: "100%",
-    height: 140,
     backgroundColor: "#F8FAFC"
   },
   fkProductImg: {
@@ -1332,6 +1625,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2
   },
+  fkHeartBtnCompact: {
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12
+  },
   fkCategoryBadge: {
     position: "absolute",
     top: 8,
@@ -1341,11 +1641,22 @@ const styles = StyleSheet.create({
     paddingVertical: 2.5,
     borderRadius: 4
   },
+  fkCategoryBadgeCompact: {
+    top: 6,
+    left: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 1.5,
+    maxWidth: "58%"
+  },
   fkCategoryText: {
     color: "#FFFFFF",
     fontSize: 8,
     fontWeight: "800",
     letterSpacing: 0.3
+  },
+  fkCategoryTextCompact: {
+    fontSize: 7,
+    letterSpacing: 0.1
   },
   fkDistanceBadge: {
     position: "absolute",
@@ -1364,14 +1675,29 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 1
   },
+  fkDistanceBadgeCompact: {
+    bottom: 5,
+    left: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 1.5,
+    gap: 2,
+    maxWidth: "85%"
+  },
   fkDistanceText: {
     color: "#16A34A",
     fontSize: 8.5,
     fontWeight: "800"
   },
+  fkDistanceTextCompact: {
+    fontSize: 7.5
+  },
   fkCardBody: {
     padding: 10,
     gap: 4
+  },
+  fkCardBodyCompact: {
+    padding: 6.5,
+    gap: 3
   },
   fkStoreRow: {
     flexDirection: "row",
@@ -1384,12 +1710,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     flex: 1
   },
+  fkStoreNameCompact: {
+    fontSize: 9
+  },
   fkTitle: {
     fontSize: 12,
     fontWeight: "800",
     color: "#0F172A",
     lineHeight: 16,
     minHeight: 32
+  },
+  fkTitleCompact: {
+    fontSize: 10.5,
+    lineHeight: 14,
+    minHeight: 28
   },
   fkPriceRow: {
     flexDirection: "row",
@@ -1403,15 +1737,24 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: "#0F172A"
   },
+  fkOfferPriceCompact: {
+    fontSize: 12.5
+  },
   fkOrigPrice: {
     fontSize: 10,
     color: "#94A3B8",
     textDecorationLine: "line-through"
   },
+  fkOrigPriceCompact: {
+    fontSize: 9
+  },
   fkDiscountText: {
     fontSize: 10,
     fontWeight: "800",
     color: "#16A34A"
+  },
+  fkDiscountTextCompact: {
+    fontSize: 8.5
   },
   fkAssuredRow: {
     backgroundColor: "#F0FDF4",
@@ -1422,15 +1765,29 @@ const styles = StyleSheet.create({
     marginTop: 2,
     marginBottom: 4
   },
+  fkAssuredRowCompact: {
+    paddingHorizontal: 4,
+    paddingVertical: 1.5,
+    marginTop: 1,
+    marginBottom: 2,
+    maxWidth: "100%"
+  },
   fkAssuredText: {
     fontSize: 8.5,
     fontWeight: "800",
     color: "#166534"
   },
+  fkAssuredTextCompact: {
+    fontSize: 7.5
+  },
   fkActionsRow: {
     flexDirection: "column",
     gap: 5,
     marginTop: 4
+  },
+  fkActionsRowCompact: {
+    gap: 3.5,
+    marginTop: 2
   },
   fkAddToCartBtn: {
     flexDirection: "row",
@@ -1441,12 +1798,21 @@ const styles = StyleSheet.create({
     borderColor: "#FED7AA",
     paddingVertical: 6,
     borderRadius: 7,
-    gap: 4
+    gap: 4,
+    marginTop: 4
+  },
+  fkAddToCartBtnCompact: {
+    paddingVertical: 5,
+    gap: 2.5,
+    marginTop: 2
   },
   fkAddToCartText: {
     color: "#EA580C",
     fontSize: 11,
     fontWeight: "800"
+  },
+  fkAddToCartTextCompact: {
+    fontSize: 9.5
   },
   fkBuyNowBtn: {
     flexDirection: "row",
@@ -1457,10 +1823,17 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     gap: 4
   },
+  fkBuyNowBtnCompact: {
+    paddingVertical: 5.5,
+    gap: 2.5
+  },
   fkBuyNowText: {
     color: "#FFFFFF",
     fontSize: 11,
     fontWeight: "900"
+  },
+  fkBuyNowTextCompact: {
+    fontSize: 9.5
   },
   cartToast: {
     position: "absolute",
@@ -1501,6 +1874,18 @@ const styles = StyleSheet.create({
 
   footerComponent: {
     marginTop: 14
+  },
+  searchWinterCrystal: {
+    position: "absolute",
+    right: 14,
+    top: 6,
+    zIndex: 1
+  },
+  storesWinterFrostDecor: {
+    position: "absolute",
+    right: 14,
+    top: 12,
+    zIndex: 1
   },
   storesSection: {
     backgroundColor: "#FFFFFF",
@@ -1811,31 +2196,6 @@ const styles = StyleSheet.create({
   footerSub: {
     fontSize: 10,
     color: "#94A3B8"
-  },
-  floatingAiButton: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#EA580C",
-    paddingHorizontal: 16,
-    paddingVertical: 11,
-    borderRadius: 24,
-    gap: 7,
-    elevation: 8,
-    shadowColor: "#EA580C",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
-    borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.7)"
-  },
-  floatingAiText: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    fontWeight: "900",
-    letterSpacing: 0.2
   },
   welcomeSection: {
     paddingHorizontal: 16,

@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { OfferItem, StoreProfile, VoucherDetails, Coordinates, Bill, UserSession, ChatMessage, CatalogItem, DeliveryAddress, CustomerOrder, CustomerOrderStatus, SscBanner } from "../types";
-import { calculateDistanceInMeters, DEFAULT_LOCATION, isLocationInsideKerala } from "../utils/geo";
+import { calculateDistanceInMeters, DEFAULT_LOCATION } from "../utils/geo";
 
 export const SUPABASE_URL = "https://tpcrwtxtqvvdghtfckea.supabase.co";
 export const SUPABASE_ANON_KEY = "sb_publishable_duE4gQ7TYTYpO7sRjeKcXQ_1mf2F-d3";
@@ -442,8 +442,8 @@ export const KNOWN_CAMPAIGN_REFERRAL_CODES: Record<string, { name: string; bonus
 };
 
 /**
- * Validates consumer referral codes against existing backend logic,
- * registered customer codes, partner stores, and campaign passes.
+ * Validates consumer referral codes against authoritative backend database logic,
+ * SSA referral campaigns, volunteer codes, registered customer passes, and partner stores.
  */
 export async function validateReferralCode(
   rawCode?: string
@@ -454,7 +454,37 @@ export async function validateReferralCode(
     return { valid: true };
   }
 
-  // 1. Check official promotional campaign codes
+  // 1. Authoritative Backend RPC Validation
+  try {
+    const { data, error } = await supabase.rpc("validate_referral_code", {
+      p_code: clean,
+      p_role: "consumer"
+    });
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      const record = data[0];
+      if (record.is_valid) {
+        return {
+          valid: true,
+          normalizedCode: record.normalized_code || clean,
+          referrerType: (record.referrer_type as any) || "campaign",
+          referrerId: record.referrer_id || clean,
+          referrerName: record.referrer_name || clean,
+          reason: record.message
+        };
+      } else {
+        return {
+          valid: false,
+          normalizedCode: clean,
+          reason: record.message || "Invalid referral code. Please enter a valid partner code, shopper pass, or leave it empty."
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("[Referral] Backend validation RPC error:", err);
+  }
+
+  // 2. Client-side fallback for official promotional campaign codes if offline
   if (KNOWN_CAMPAIGN_REFERRAL_CODES[clean]) {
     const campaign = KNOWN_CAMPAIGN_REFERRAL_CODES[clean];
     return {
@@ -466,65 +496,18 @@ export async function validateReferralCode(
     };
   }
 
-  // 2. Check Customer ID pass format (SSC-XXXXX)
-  if (/^SSC-[A-Z0-9]{4,12}$/i.test(clean)) {
-    try {
-      const { data: userMatch } = await supabase
-        .from("app_users")
-        .select("id, customer_id, full_name, username")
-        .eq("customer_id", clean)
-        .maybeSingle();
-
-      if (userMatch) {
-        return {
-          valid: true,
-          normalizedCode: clean,
-          referrerType: "customer",
-          referrerId: userMatch.id,
-          referrerName: userMatch.full_name || userMatch.username || clean
-        };
-      }
-    } catch {
-      // Fall through to valid customer pass format
-    }
-
+  // 2b. Client-side fallback for JRINA Campaign Referral Codes (Format: CMP-XXXXXXXXX)
+  if (/^CMP-[A-Z0-9]{9}$/.test(clean)) {
     return {
       valid: true,
       normalizedCode: clean,
-      referrerType: "customer",
+      referrerType: "campaign",
       referrerId: clean,
-      referrerName: `Shopper Pass (${clean})`
+      referrerName: "JRINA Campaign Pass"
     };
   }
 
-  // 3. Check Partner Stores by Store ID, Store Code, or Normalized Name
-  const storeQuery = clean.toLowerCase();
-  try {
-    const { data: storesList } = await supabase
-      .from("stores")
-      .select("id, name");
-
-    if (storesList && storesList.length > 0) {
-      const matched = storesList.find(
-        (s) =>
-          s.id.toLowerCase() === storeQuery ||
-          s.id.toLowerCase().replace(/^store_/, "") === storeQuery.replace(/^store_/, "") ||
-          s.name.toLowerCase().replace(/[^a-z0-9]/g, "") === storeQuery.replace(/[^a-z0-9]/g, "")
-      );
-
-      if (matched) {
-        return {
-          valid: true,
-          normalizedCode: clean,
-          referrerType: "store",
-          referrerId: matched.id,
-          referrerName: matched.name
-        };
-      }
-    }
-  } catch {}
-
-  // 4. Invalid referral code - prevent silent acceptance
+  // 3. Fallback: Invalid referral code - prevent silent acceptance
   return {
     valid: false,
     reason: "Invalid referral code. Please enter a valid partner code, shopper pass (e.g. SSC-XXXXX), or leave it empty."
@@ -543,6 +526,20 @@ export async function checkUsernameAvailability(
     return { available: false, reason: "Username must be at least 3 characters long." };
   }
   try {
+    // 1. Authoritative Backend RPC Check (Security Definer, bypasses RLS for anon)
+    const { data: rpcData, error: rpcErr } = await supabase.rpc("rpc_check_username_available", {
+      p_username: cleanUsername,
+      p_current_user_id: currentUserId || null
+    });
+
+    if (!rpcErr && rpcData && typeof rpcData === "object" && typeof rpcData.available === "boolean") {
+      return {
+        available: rpcData.available,
+        reason: rpcData.reason
+      };
+    }
+
+    // 2. Direct table check fallback
     let query = supabase
       .from("app_users")
       .select("id")
@@ -659,9 +656,6 @@ export async function registerUserInDatabase(payload: RegisterPayload): Promise<
       };
     }
 
-    // Generate explicit customer ID
-    const generatedCustId = `CUST-${authUser.id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
-
     // 1. Authoritative Application Account Registration (SSC Isolation)
     const { data: regRpc, error: regRpcErr } = await supabase.rpc("rpc_register_app_account", {
       p_app_code: "SSC",
@@ -682,37 +676,8 @@ export async function registerUserInDatabase(payload: RegisterPayload): Promise<
       };
     }
 
-    // 2. Persist in app_user_accounts table
-    try {
-      await supabase.from("app_user_accounts").upsert({
-        auth_user_id: authUser.id,
-        app_code: "SSC",
-        account_type: "CONSUMER",
-        email: cleanEmail,
-        mobile: payload.phone.trim(),
-        status: "ACTIVE",
-        metadata: {
-          customer_id: generatedCustId,
-          full_name: payload.fullName.trim(),
-          username: cleanUsername
-        }
-      }, { onConflict: "auth_user_id,app_code" });
-    } catch {}
-
-    // 3. Persist in app_users table with consumer role
-    try {
-      await supabase.from("app_users").upsert({
-        id: authUser.id,
-        username: cleanUsername,
-        display_username: cleanUsername,
-        customer_id: generatedCustId,
-        full_name: payload.fullName.trim(),
-        phone: payload.phone.trim(),
-        role: "consumer"
-      }, { onConflict: "id" });
-    } catch {}
-
-    let customerId: string = generatedCustId;
+    // Retrieve authoritative profile from app_users or RPC metadata
+    let customerId: string = regRpc?.metadata?.customer_id || "";
     try {
       const { data: userRow } = await supabase
         .from("app_users")
@@ -722,6 +687,40 @@ export async function registerUserInDatabase(payload: RegisterPayload): Promise<
       if (userRow?.customer_id) {
         customerId = userRow.customer_id;
       }
+    } catch {}
+
+    if (!customerId) {
+      customerId = `SS-CUS-${authUser.id.replace(/-/g, "").slice(0, 8).toUpperCase()}`;
+    }
+
+    // 2. Persist in app_user_accounts table (safely idempotent)
+    try {
+      await supabase.from("app_user_accounts").upsert({
+        auth_user_id: authUser.id,
+        app_code: "SSC",
+        account_type: "CONSUMER",
+        email: cleanEmail,
+        mobile: payload.phone.trim(),
+        status: "ACTIVE",
+        metadata: {
+          customer_id: customerId,
+          full_name: payload.fullName.trim(),
+          username: cleanUsername
+        }
+      }, { onConflict: "auth_user_id,app_code" });
+    } catch {}
+
+    // 3. Persist in app_users table with consumer role (safely idempotent)
+    try {
+      await supabase.from("app_users").upsert({
+        id: authUser.id,
+        username: cleanUsername,
+        display_username: cleanUsername,
+        customer_id: customerId,
+        full_name: payload.fullName.trim(),
+        phone: payload.phone.trim(),
+        role: "consumer"
+      }, { onConflict: "id" });
     } catch {}
 
     const initials = (payload.fullName || "SS")
@@ -1048,20 +1047,6 @@ export async function saveUserDeliveryAddress(
   userCoords?: Coordinates
 ): Promise<{ success: boolean; user?: UserSession; message?: string }> {
   try {
-    // Enforce Kerala-only delivery address restriction in backend logic
-    if (address) {
-      const coords = (address.lat != null && address.lng != null)
-        ? { latitude: address.lat, longitude: address.lng }
-        : userCoords;
-
-      if (coords && !isLocationInsideKerala(coords)) {
-        return {
-          success: false,
-          message: "Delivery address service is currently available only for users located in Kerala."
-        };
-      }
-    }
-
     // 1. Update Supabase Auth user_metadata (always accessible by authenticated user)
     try {
       await supabase.auth.updateUser({
@@ -1537,7 +1522,16 @@ export async function fetchNearbyProducts(
             storeName: matchedStore.name,
             distanceInMeters: matchedStore.distanceInMeters,
             isDeleted: Boolean(row.is_deleted),
-            deletedAt: row.deleted_at || undefined
+            deletedAt: row.deleted_at || undefined,
+            productType: row.product_type || undefined,
+            isDigital: typeof row.is_digital === "boolean" ? row.is_digital : undefined,
+            allIndiaDelivery:
+              typeof row.all_india_delivery === "boolean"
+                ? row.all_india_delivery
+                : typeof row.is_all_india_delivery === "boolean"
+                ? row.is_all_india_delivery
+                : undefined,
+            deliveryScope: row.delivery_scope || undefined
           });
         }
       });
@@ -1862,47 +1856,100 @@ export function subscribeToCustomerOrderUpdates(
   };
 }
 
+const SSC_CACHED_PROMOTIONAL_BANNERS_KEY = "@smartshopper_promotional_banners_cache";
+
+export interface BannerLocationContext {
+  latitude?: number | null;
+  longitude?: number | null;
+  state?: string | null;
+  district?: string | null;
+  city?: string | null;
+  pincode?: string | null;
+}
+
 /**
- * Fetches active published promotional banners for SSC Consumer App
+ * Retrieves cached promotional banners from local storage for instant 0ms offline rendering
  */
-export async function fetchActiveSscBanners(): Promise<SscBanner[]> {
+export async function getCachedActiveSscBanners(): Promise<SscBanner[]> {
   try {
-    const { data, error } = await supabase.rpc("get_active_ssc_banners");
+    const raw = await AsyncStorage.getItem(SSC_CACHED_PROMOTIONAL_BANNERS_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const now = new Date();
+    return parsed.filter((b: SscBanner) => {
+      if (b.startDate && new Date(b.startDate) > now) return false;
+      if (b.endDate && new Date(b.endDate) < now) return false;
+      return b.isActive !== false;
+    });
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Fetches active published promotional banners for SSC Consumer App with location targeting
+ */
+export async function fetchActiveSscBanners(locationContext?: BannerLocationContext): Promise<SscBanner[]> {
+  try {
+    const rpcParams: Record<string, any> = {
+      p_lat: locationContext?.latitude ?? null,
+      p_lng: locationContext?.longitude ?? null,
+      p_state: locationContext?.state?.trim() || null,
+      p_district: locationContext?.district?.trim() || null,
+      p_city: locationContext?.city?.trim() || null,
+      p_pincode: locationContext?.pincode?.trim() || null,
+    };
+
+    const { data, error } = await supabase.rpc("get_active_ssc_banners", rpcParams);
     if (!error && Array.isArray(data)) {
-      return data.map((b: any) => ({
+      const mapped: SscBanner[] = data.map((b: any) => ({
         id: b.id,
         title: b.title,
         subtitle: b.subtitle || "",
         imageUrl: b.image_url,
-        linkType: b.link_type || "none",
-        targetId: b.target_id || "",
-        targetName: b.target_name || "",
+        linkType: (b.link_type || b.redirect_type || "none") as SscBanner["linkType"],
+        targetId: b.target_id || b.redirect_target || "",
+        targetName: b.target_name || b.merchant_name || "",
         customUrl: b.custom_url || "",
+        sourceType: b.source_type || "custom",
+        sourceRequestId: b.source_request_id || undefined,
+        merchantId: b.merchant_id || undefined,
+        merchantName: b.merchant_name || undefined,
+        redirectType: b.redirect_type || b.link_type || "none",
+        redirectTarget: b.redirect_target || b.target_id || "",
         displayOrder: Number(b.display_order || 0),
         isActive: Boolean(b.is_active),
-        startDate: b.start_date || null,
-        endDate: b.end_date || null,
+        startDate: b.start_date || b.start_at || null,
+        endDate: b.end_date || b.end_at || null,
         clicksCount: Number(b.clicks_count || 0),
         impressionsCount: Number(b.impressions_count || 0)
       }));
+
+      // Cache for offline resilience
+      await AsyncStorage.setItem(SSC_CACHED_PROMOTIONAL_BANNERS_KEY, JSON.stringify(mapped)).catch(() => {});
+      return mapped;
     }
 
-    // Fallback direct table query if RPC not available
+    // Fallback: direct table query if RPC is temporarily unavailable
     const { data: tableData, error: tableError } = await supabase
       .from("ssc_banners")
       .select("*")
+      .eq("status", "active")
       .eq("is_active", true)
       .order("display_order", { ascending: true });
 
     if (tableError) {
-      console.warn("[Supabase] fetchActiveSscBanners error:", tableError);
-      return [];
+      console.warn("[Supabase] fetchActiveSscBanners fallback query error:", tableError);
+      return getCachedActiveSscBanners();
     }
 
     const now = new Date();
-    return (tableData || [])
+    const mapped: SscBanner[] = (tableData || [])
       .filter((b: any) => {
+        if (b.start_at && new Date(b.start_at) > now) return false;
         if (b.start_date && new Date(b.start_date) > now) return false;
+        if (b.end_at && new Date(b.end_at) < now) return false;
         if (b.end_date && new Date(b.end_date) < now) return false;
         return true;
       })
@@ -1911,20 +1958,29 @@ export async function fetchActiveSscBanners(): Promise<SscBanner[]> {
         title: b.title,
         subtitle: b.subtitle || "",
         imageUrl: b.image_url,
-        linkType: b.link_type || "none",
-        targetId: b.target_id || "",
-        targetName: b.target_name || "",
+        linkType: (b.link_type || b.redirect_type || "none") as SscBanner["linkType"],
+        targetId: b.target_id || b.redirect_target || "",
+        targetName: b.target_name || b.merchant_name || "",
         customUrl: b.custom_url || "",
+        sourceType: b.source_type || "custom",
+        sourceRequestId: b.source_request_id || undefined,
+        merchantId: b.merchant_id || undefined,
+        merchantName: b.merchant_name || undefined,
+        redirectType: b.redirect_type || b.link_type || "none",
+        redirectTarget: b.redirect_target || b.target_id || "",
         displayOrder: Number(b.display_order || 0),
         isActive: Boolean(b.is_active),
-        startDate: b.start_date || null,
-        endDate: b.end_date || null,
+        startDate: b.start_date || b.start_at || null,
+        endDate: b.end_date || b.end_at || null,
         clicksCount: Number(b.clicks_count || 0),
         impressionsCount: Number(b.impressions_count || 0)
       }));
+
+    await AsyncStorage.setItem(SSC_CACHED_PROMOTIONAL_BANNERS_KEY, JSON.stringify(mapped)).catch(() => {});
+    return mapped;
   } catch (err) {
     console.warn("[Supabase] fetchActiveSscBanners exception:", err);
-    return [];
+    return getCachedActiveSscBanners();
   }
 }
 
@@ -1949,6 +2005,27 @@ export async function recordSscBannerImpression(bannerId: string): Promise<void>
     console.warn("[Supabase] recordSscBannerImpression error:", err);
   }
 }
+
+/**
+ * Real-time subscription to promotional banner updates (create, edit, delete, publish, reorder)
+ */
+export function subscribeToRealtimeBanners(onUpdate: () => void): () => void {
+  const channel = supabase
+    .channel("ssc_banners_consumer_realtime")
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "ssc_banners" },
+      () => {
+        onUpdate();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
 
 
 
