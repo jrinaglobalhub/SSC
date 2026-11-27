@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { OfferItem, StoreProfile, VoucherDetails, Coordinates, Bill, UserSession, ChatMessage, CatalogItem, DeliveryAddress, CustomerOrder, CustomerOrderStatus, SscBanner } from "../types";
+import { OfferItem, StoreProfile, VoucherDetails, Coordinates, Bill, UserSession, ChatMessage, CatalogItem, DeliveryAddress, CustomerOrder, CustomerOrderStatus, SscBanner, FestivalGreeting, AlertPopup } from "../types";
 import { calculateDistanceInMeters, DEFAULT_LOCATION } from "../utils/geo";
 
 export const SUPABASE_URL = "https://tpcrwtxtqvvdghtfckea.supabase.co";
@@ -1404,22 +1404,43 @@ export async function fetchStoreCatalog(storeId: string): Promise<CatalogItem[]>
     if (!error && data && data.length > 0) {
       items = data
         .filter((row: any) => row.is_deleted !== true && !row.deleted_at)
-        .map((row: any) => ({
-          id: String(row.id),
-          name: row.name || "Product Item",
-          category: row.category || "General",
-          originalPrice: row.original_price || "",
-          offerPrice: row.offer_price || "",
-          imageUrl:
-            row.image_url ||
-            "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
-          inStock: row.in_stock !== false,
-          sku: row.sku,
-          description: row.description,
-          storeId: storeId,
-          isDeleted: Boolean(row.is_deleted),
-          deletedAt: row.deleted_at || undefined
-        }));
+        .map((row: any) => {
+          const parsedSpecs = row.specifications && typeof row.specifications === "object" ? row.specifications : undefined;
+          const rawReplPolicy = parsedSpecs?.replacement_policy || row.replacement_policy;
+          const rawReplAllowed = parsedSpecs?.replacement_allowed;
+          let isReplaceable: boolean | undefined = undefined;
+          let replacementPolicy: string | undefined = undefined;
+
+          if (rawReplPolicy === "no_replace" || rawReplAllowed === "No" || rawReplAllowed === false) {
+            isReplaceable = false;
+            replacementPolicy = "no_replace";
+          } else if (rawReplPolicy === "replace" || rawReplAllowed === "Yes" || rawReplAllowed === true) {
+            isReplaceable = true;
+            replacementPolicy = "replace";
+          }
+
+          return {
+            id: String(row.id),
+            name: row.name || "Product Item",
+            category: row.category || "General",
+            originalPrice: row.original_price || "",
+            offerPrice: row.offer_price || "",
+            imageUrl:
+              row.image_url ||
+              "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=400&q=80",
+            inStock: row.in_stock !== false,
+            sku: row.sku,
+            description: row.description,
+            storeId: storeId,
+            isDeleted: Boolean(row.is_deleted),
+            deletedAt: row.deleted_at || undefined,
+            productType: row.product_type || undefined,
+            isDigital: typeof row.is_digital === "boolean" ? row.is_digital : row.product_type === "digital",
+            specifications: parsedSpecs,
+            isReplaceable,
+            replacementPolicy
+          };
+        });
     }
 
     // If no items in Supabase DB for this store, check curated fallbacks
@@ -1506,6 +1527,20 @@ export async function fetchNearbyProducts(
         if (matchedStore) {
           storesWithDbProducts.add(matchedStore.id);
           storesWithDbProducts.add(clean);
+          const parsedSpecs = row.specifications && typeof row.specifications === "object" ? row.specifications : undefined;
+          const rawReplPolicy = parsedSpecs?.replacement_policy || row.replacement_policy;
+          const rawReplAllowed = parsedSpecs?.replacement_allowed;
+          let isReplaceable: boolean | undefined = undefined;
+          let replacementPolicy: string | undefined = undefined;
+
+          if (rawReplPolicy === "no_replace" || rawReplAllowed === "No" || rawReplAllowed === false) {
+            isReplaceable = false;
+            replacementPolicy = "no_replace";
+          } else if (rawReplPolicy === "replace" || rawReplAllowed === "Yes" || rawReplAllowed === true) {
+            isReplaceable = true;
+            replacementPolicy = "replace";
+          }
+
           allProducts.push({
             id: String(row.id),
             name: row.name || "Product Item",
@@ -1520,18 +1555,22 @@ export async function fetchNearbyProducts(
             description: row.description,
             storeId: matchedStore.id,
             storeName: matchedStore.name,
+            storePhone: matchedStore.phone,
             distanceInMeters: matchedStore.distanceInMeters,
             isDeleted: Boolean(row.is_deleted),
             deletedAt: row.deleted_at || undefined,
             productType: row.product_type || undefined,
-            isDigital: typeof row.is_digital === "boolean" ? row.is_digital : undefined,
+            isDigital: typeof row.is_digital === "boolean" ? row.is_digital : row.product_type === "digital",
             allIndiaDelivery:
               typeof row.all_india_delivery === "boolean"
                 ? row.all_india_delivery
                 : typeof row.is_all_india_delivery === "boolean"
                 ? row.is_all_india_delivery
                 : undefined,
-            deliveryScope: row.delivery_scope || undefined
+            deliveryScope: row.delivery_scope || undefined,
+            specifications: parsedSpecs,
+            isReplaceable,
+            replacementPolicy
           });
         }
       });
@@ -2019,6 +2058,114 @@ export function subscribeToRealtimeBanners(onUpdate: () => void): () => void {
         onUpdate();
       }
     )
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+/**
+ * ============================================================================
+ * FESTIVAL GREETINGS & ALERT POPUP RETRIEVAL (CONSUMER)
+ * ============================================================================
+ */
+
+/**
+ * Fetches the currently active published festival greeting card (if within schedule).
+ */
+export async function getActiveFestivalGreeting(): Promise<FestivalGreeting | null> {
+  try {
+    const { data, error } = await supabase.rpc("get_active_festival_greeting");
+    if (error) {
+      console.warn("[Supabase] getActiveFestivalGreeting error:", error);
+      return null;
+    }
+    if (!data) return null;
+
+    return {
+      id: data.id,
+      festivalName: data.festival_name,
+      title: data.title,
+      subtitle: data.subtitle || "",
+      message: data.message,
+      artworkUrl: data.artwork_url,
+      senderText: data.sender_text || "SmartShopper by JRINA Private Limited",
+      supportedLanguages: Array.isArray(data.supported_languages) ? data.supported_languages : ["all"],
+      status: data.status,
+      isActive: Boolean(data.is_active || data.status === "published"),
+      startAt: data.start_at,
+      endAt: data.end_at || null,
+      buttonText: data.button_text || "Wish You The Same!"
+    };
+  } catch (err) {
+    console.warn("[Supabase] getActiveFestivalGreeting exception:", err);
+    return null;
+  }
+}
+
+/**
+ * Fetches currently active published alert popups sorted by priority (Critical > High > Normal).
+ */
+export async function getActiveAlertPopups(): Promise<AlertPopup[]> {
+  try {
+    const { data, error } = await supabase.rpc("get_active_alert_popups");
+    if (error) {
+      console.warn("[Supabase] getActiveAlertPopups error:", error);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      title: row.title,
+      message: row.message,
+      imageUrl: row.image_url || undefined,
+      popupType: row.popup_type || "general",
+      priority: row.priority || "normal",
+      targetAudience: row.target_audience || "all",
+      status: row.status,
+      isActive: Boolean(row.is_active || row.status === "published"),
+      isDismissible: Boolean(row.is_dismissible ?? true),
+      displayFrequency: row.display_frequency || "once",
+      buttonText: row.button_text || "Dismiss",
+      buttonActionType: row.button_action_type || "none",
+      buttonActionTarget: row.button_action_target || "",
+      startAt: row.start_at,
+      endAt: row.end_at || null
+    }));
+  } catch (err) {
+    console.warn("[Supabase] getActiveAlertPopups exception:", err);
+    return [];
+  }
+}
+
+/**
+ * Records engagement metrics for greetings and alert popups safely
+ */
+export async function recordPopupMetric(
+  type: "greeting" | "alert",
+  id: string,
+  metric: "view" | "dismiss" | "acknowledge" | "delivered"
+): Promise<void> {
+  try {
+    await supabase.rpc("record_popup_metric", {
+      p_type: type,
+      p_id: id,
+      p_metric: metric
+    });
+  } catch (err) {
+    console.warn("[Supabase] recordPopupMetric error:", err);
+  }
+}
+
+/**
+ * Real-time subscription to festival greeting and alert popup changes
+ */
+export function subscribeToActivePopupsAndGreetings(onUpdate: () => void): () => void {
+  const channel = supabase
+    .channel("ssc_consumer_popups_realtime")
+    .on("postgres_changes", { event: "*", schema: "public", table: "ssc_festival_greetings" }, () => onUpdate())
+    .on("postgres_changes", { event: "*", schema: "public", table: "ssc_alert_popups" }, () => onUpdate())
     .subscribe();
 
   return () => {

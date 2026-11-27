@@ -356,6 +356,7 @@ export type RootStackParamList = {
   TermsOfService: undefined;
   RefundPolicy: undefined;
   Vouchers: undefined;
+  Receipts: undefined;
   ProductDetails: {
     productId: string;
     product?: CatalogItem;
@@ -388,5 +389,48 @@ export interface SscBanner {
   clicksCount?: number;
   impressionsCount?: number;
 }
+
+export interface FestivalGreeting {
+  id: string;
+  festivalName: string;
+  title: string;
+  subtitle?: string;
+  message: string;
+  artworkUrl?: string;
+  senderText: string;
+  supportedLanguages: string[];
+  status: "draft" | "scheduled" | "published" | "disabled" | "expired";
+  isActive: boolean;
+  startAt: string;
+  endAt?: string | null;
+  buttonText: string;
+  festivalId?: string;
+  year?: number;
+  companyAttribution?: {
+    withWarmWishesFrom: string;
+    appName: string;
+    companyName: string;
+  };
+}
+
+export interface AlertPopup {
+  id: string;
+  title: string;
+  message: string;
+  imageUrl?: string;
+  popupType: "general" | "important" | "service" | "promotional" | "emergency" | "custom";
+  priority: "normal" | "high" | "critical";
+  targetAudience: string;
+  status: "draft" | "scheduled" | "published" | "disabled" | "expired";
+  isActive: boolean;
+  isDismissible: boolean;
+  displayFrequency: "once" | "until_acknowledged" | "every_session";
+  buttonText?: string;
+  buttonActionType: "none" | "screen" | "url";
+  buttonActionTarget?: string;
+  startAt: string;
+  endAt?: string | null;
+}
+
 
 
