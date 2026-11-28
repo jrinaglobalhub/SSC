@@ -46,6 +46,14 @@ import {
   recordPopupMetric,
   subscribeToActivePopupsAndGreetings
 } from "../api/supabase";
+import {
+  getActiveFestival,
+  getActiveFestivalGreetingForDate,
+  hasSeenFestivalGreeting,
+  markFestivalGreetingSeen,
+  isFestivalGreetingEligible
+} from "../services/festivalGreetingService";
+import { loadSavedAiLanguage } from "../services/aiLanguageService";
 import { useApp } from "../context/AppContext";
 import { requestNotificationPermission } from "../services/notificationService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -95,13 +103,14 @@ const MainTabs: React.FC = () => {
 
   const sessionDismissedAlertsRef = useRef<Set<string>>(new Set());
   const sessionDismissedGreetingsRef = useRef<Set<string>>(new Set());
-  const isEvaluatingRef = useRef<boolean>(false);
+  const hasEvaluatedGreetingsThisSessionRef = useRef<boolean>(false);
+  const isEvaluatingAlertsRef = useRef<boolean>(false);
 
-  const evaluatePopupsAndGreetings = useCallback(async () => {
-    if (isEvaluatingRef.current) return;
-    isEvaluatingRef.current = true;
+  // 1. Alert Popups Evaluation (Critical / High / Normal system alerts)
+  const evaluateAlertPopups = useCallback(async (): Promise<boolean> => {
+    if (isEvaluatingAlertsRef.current) return false;
+    isEvaluatingAlertsRef.current = true;
     try {
-      // 1. Fetch active alerts in priority order (Critical > High > Normal)
       const activeAlerts = await getActiveAlertPopups();
       let candidateAlert: AlertPopup | null = null;
 
@@ -119,33 +128,65 @@ const MainTabs: React.FC = () => {
       }
 
       if (candidateAlert) {
+        // High priority emergency alert preempts greeting
         setShowGreetingModal(false);
         setActiveGreeting(null);
         setActiveAlert(candidateAlert);
         setShowAlertModal(true);
         recordPopupMetric("alert", candidateAlert.id, "view").catch(() => {});
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.warn("[MainTabs] evaluateAlertPopups error:", err);
+      return false;
+    } finally {
+      isEvaluatingAlertsRef.current = false;
+    }
+  }, []);
+
+  // 2. Festival Greetings Evaluation (Runs strictly ONCE per app launch session)
+  const evaluateFestivalGreetingOnce = useCallback(async (): Promise<void> => {
+    if (hasEvaluatedGreetingsThisSessionRef.current) return;
+    hasEvaluatedGreetingsThisSessionRef.current = true;
+
+    try {
+      // Step A: Fetch the currently active, published festival greeting from Supabase (configured in SSA)
+      const remoteGreeting = await getActiveFestivalGreeting();
+      if (!remoteGreeting) {
+        // No greeting is currently enabled and valid in SSA.
+        // Festival greetings do NOT automatically appear just because a festival date is detected.
         return;
       }
 
-      // 2. If no eligible alert, check for active festival greeting
-      const greeting = await getActiveFestivalGreeting();
-      if (greeting && !sessionDismissedGreetingsRef.current.has(greeting.id)) {
-        const seen = await AsyncStorage.getItem(`@ssc_festival_greeting_seen_${greeting.id}`);
-        if (!seen) {
-          setActiveAlert(null);
-          setShowAlertModal(false);
-          setActiveGreeting(greeting);
-          setShowGreetingModal(true);
-          recordPopupMetric("greeting", greeting.id, "view").catch(() => {});
-          return;
-        }
-      }
+      // Step B: Check if this specific greeting has already been seen or dismissed by the user
+      if (sessionDismissedGreetingsRef.current.has(remoteGreeting.id)) return;
+      const seenKey = `@ssc_festival_greeting_seen_${remoteGreeting.id}`;
+      const alreadySeen = await AsyncStorage.getItem(seenKey);
+      if (alreadySeen) return;
+
+      // Step C: Link with festival definition if matching active calendar for celebration artwork
+      const activeFestivalMatch = getActiveFestival(new Date());
+      const candidateGreeting: FestivalGreeting = {
+        ...remoteGreeting,
+        festivalId: activeFestivalMatch?.definition?.id || remoteGreeting.festivalName.toLowerCase().replace(/\s+/g, "_"),
+        year: activeFestivalMatch?.occurrenceYear || new Date().getFullYear()
+      };
+
+      // Step D: Prevent displaying if alert modal is active (alert priority queue precedence)
+      if (showAlertModal) return;
+
+      // Mark seen in session and persistent storage (first-entry-per-festival)
+      sessionDismissedGreetingsRef.current.add(remoteGreeting.id);
+      await AsyncStorage.setItem(seenKey, "true").catch(() => {});
+
+      setActiveGreeting(candidateGreeting);
+      setShowGreetingModal(true);
+      recordPopupMetric("greeting", remoteGreeting.id, "view").catch(() => {});
     } catch (err) {
-      console.warn("[MainTabs] evaluatePopupsAndGreetings error:", err);
-    } finally {
-      isEvaluatingRef.current = false;
+      console.warn("[MainTabs] evaluateFestivalGreetingOnce error:", err);
     }
-  }, []);
+  }, [showAlertModal]);
 
   const handleDismissAlert = useCallback(async () => {
     if (!activeAlert) return;
@@ -188,25 +229,43 @@ const MainTabs: React.FC = () => {
     const greetingId = activeGreeting.id;
     sessionDismissedGreetingsRef.current.add(greetingId);
     recordPopupMetric("greeting", greetingId, "dismiss").catch(() => {});
-    // First-entry-per-festival: mark as seen permanently
-    await AsyncStorage.setItem(`@ssc_festival_greeting_seen_${greetingId}`, "true").catch(() => {});
+    // First-entry-per-festival: mark as seen permanently in AsyncStorage
+    await markFestivalGreetingSeen(greetingId);
+    if (activeGreeting.festivalId && activeGreeting.year) {
+      await markFestivalGreetingSeen(activeGreeting.festivalId, activeGreeting.year);
+    }
     setShowGreetingModal(false);
     setActiveGreeting(null);
   }, [activeGreeting]);
 
   useEffect(() => {
-    // Initial evaluation when app tabs mount
-    evaluatePopupsAndGreetings();
+    let isMounted = true;
 
-    // Real-time listener: immediately reflect SSA publishes, toggles, schedules
+    async function initializePopups() {
+      if (!isMounted) return;
+      // 1. Evaluate alert popups first (higher priority)
+      const hasAlert = await evaluateAlertPopups();
+      // 2. If no alert popup, evaluate festival first-entry greeting once
+      if (!hasAlert && isMounted) {
+        await evaluateFestivalGreetingOnce();
+      }
+    }
+
+    initializePopups();
+
+    // Real-time listener: ONLY re-evaluate alert popups when admin pushes updates!
+    // NEVER re-evaluate festival greetings to prevent infinite render loops or flickering.
     const unsubscribe = subscribeToActivePopupsAndGreetings(() => {
-      evaluatePopupsAndGreetings();
+      if (isMounted) {
+        evaluateAlertPopups();
+      }
     });
 
     return () => {
+      isMounted = false;
       unsubscribe();
     };
-  }, [evaluatePopupsAndGreetings]);
+  }, [evaluateAlertPopups, evaluateFestivalGreetingOnce]);
 
   useEffect(() => {
     // Request system notification permission on app start (Android 13+ / iOS)
